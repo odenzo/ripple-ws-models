@@ -1,3 +1,15 @@
+
+[![Build Status](https://travis-ci.com/odenzo/ripple-local-signing.svg?branch=master)](https://travis-ci.com/odenzo/ripple-local-signing)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/64c5333412184e23a22590db35f72181)](https://www.codacy.com
+/app/odenzo/ripple-ws-models?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=odenzo/ripple
+-ws-models&amp;utm_campaign=Badge_Grade)
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+[ ![Download](https://api.bintray.com/packages/odenzooss/maven/ripple-ws-models/images/download.svg?version=0.0.10
+) ](https://bintray.com/odenzooss/maven/ripple-ws-models/0.1.0/link)
+
+
 # rippled-wsmodels
 
 Trimmed down model classes for rippled 1.x WebSocket messages.
@@ -5,7 +17,7 @@ Trimmed down model classes for rippled 1.x WebSocket messages.
 The goal of this project is provide an flexible strongly typed set of classes to build messages
 to communicate with the Ripple `rippled` following the WebSocket API and parse responses.
 
-See Developer Center athttps://xrpl.org/rippled-api.html for more information on documented API.
+See Developer Center at https://xrpl.org/rippled-api.html for more information on documented API.
 
 * Warning: This is really just a testbed, and not useful for production code.
 
@@ -15,8 +27,8 @@ See Developer Center athttps://xrpl.org/rippled-api.html for more information on
 # Versions
 * 0.1.0 -- Still considered as development status
 * Current build on Oracle JDK 8 u221
-* Cross Build on Scala 2.12.9 and 2.13.0  (and it works!)
-* Using Pre-Release Library Dependancies
+* Cross Build on Scala 2.12.9 and 2.13.0  
+* Using Pre-Release Library Dependencies
 
 - Implemented against Rippled v1.x
 
