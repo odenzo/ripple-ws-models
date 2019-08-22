@@ -1,0 +1,39 @@
+{
+  "meta": {
+    "AffectedNodes": [
+      {
+        "ModifiedNode": {
+          "FinalFields": {
+            "Account": "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh",
+            "Balance": "99979071222999940",
+            "Flags": 0,
+            "OwnerCount": 0,
+            "Sequence": 7
+          },
+          "LedgerEntryType": "AccountRoot",
+          "LedgerIndex": "2B6AC232AA4C4BE41BF49D2459FA4A0347E1B543A4C92FCEE0821C0201E2E9A8",
+          "PreviousFields": {
+            "Balance": "99979404555999950",
+            "Sequence": 6
+          },
+          "PreviousTxnID": "D17FB182804933CB23CB46E2275AA6F35AD8CBF0A812A34FA818BB24CC78E71A",
+          "PreviousTxnLgrSeq": 231
+        }
+      },
+      {
+        "CreatedNode": {
+          "LedgerEntryType": "AccountRoot",
+          "LedgerIndex": "BBCC93E49B4F4B8D93DF433F3B92562DEA988B09C5A32AE0D781829E5520DAE4",
+          "NewFields": {
+            "Account": "rsw1JGg7d9a7hJ9vkZDmWkD2g9edgS2wNK",
+            "Balance": "333333000000",
+            "Sequence": 1
+          }
+        }
+      }
+    ],
+    "TransactionIndex": 1,
+    "TransactionResult": "tesSUCCESS",
+    "delivered_amount": "333333000000"
+  }
+}
