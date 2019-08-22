@@ -13,7 +13,7 @@ See Developer Center athttps://xrpl.org/rippled-api.html for more information on
        https://github.com/odenzo/
 
 # Versions
-* 0.0.8 -- Still considered as development status
+* 0.1.0 -- Still considered as development status
 * Current build on Oracle JDK 8 u221
 * Cross Build on Scala 2.12.9 and 2.13.0  (and it works!)
 * Using Pre-Release Library Dependancies
