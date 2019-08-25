@@ -23,9 +23,9 @@ case class TxHistoryRs(
 ) extends RippleRs {}
 
 object TxHistoryRq {
-  val command: (String, Json) = "command" -> "tx_history".asJson
-  implicit val encoder: Encoder.AsObject[TxRq] = {
-    deriveEncoder[TxRq].mapJsonObject(o => command +: o)
+  val command: Json = "tx_history".asJson
+  implicit val encoder: Encoder.AsObject[TxHistoryRq] = {
+    deriveEncoder[TxHistoryRq].mapJsonObject(_.add("command", command))
   }
 }
 
@@ -33,6 +33,6 @@ object TxHistoryRs {
 
   import io.circe._
 
-  implicit val decoder: Decoder[TxRs] = deriveDecoder[TxRs]
+  implicit val decoder: Decoder[TxHistoryRs] = deriveDecoder[TxHistoryRs]
 
 }
