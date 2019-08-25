@@ -21,6 +21,8 @@ case class RippleTime(ticks: Long) extends AnyVal() {
 
 object RippleTime {
 
+  val empty: RippleTime = RippleTime(0)
+
   val rippleOffset: Long      = 946684800L
   def now(): RippleTime       = fromInstant(Instant.now())
   def fromInstant(i: Instant) = new RippleTime(i.getEpochSecond - RippleTime.rippleOffset)

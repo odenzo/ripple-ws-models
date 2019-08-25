@@ -1,7 +1,17 @@
 package com.odenzo.ripple.models.atoms
 
+import java.time.DateTimeException
+import scala.util.Try
+
+import cats._
+import cats.data._
 import cats.implicits._
+import cats.implicits._
+import io.circe.Decoder.Result
 import io.circe._
+import io.circe.syntax._
+
+import com.odenzo.ripple.models.utils.caterrors.{AppError, AppException}
 
 /**
   * TODO: Redo, and reference other Ledger type things, like LastLedgerIndex
@@ -39,13 +49,31 @@ case class LedgerSequence(v: Long) extends LedgerIndex {
 
 // FIXME: Abandonded LedgerIndexRange, might as well do though (with regex mapping to LedgerIndex for start,end
 // Putting "start"-"end" in Encoders,Decoders
-case class LedgerIndexRange(start: LedgerSequence, end: LedgerSequence) {}
+case class LedgerIndexRange(start: LedgerSequence, end: LedgerSequence)
+
+object LedgerIndexRange {
+
+  final implicit val decoder: Decoder[LedgerIndexRange] = Decoder.decodeString.emapTry { s: String =>
+    Try {
+      s.split('-').toList match {
+        case start :: end :: Nil =>
+          LedgerIndexRange(
+            LedgerSequence(java.lang.Long.parseLong(start)),
+            LedgerSequence(java.lang.Long.parseLong(end))
+          )
+
+        case invalid => throw AppError(s"$invalid was not in [start]-[end] format.")
+      }
+    }
+  }
+
+}
 
 /** When doing inquiry on a "Current" ledger (which I seldom do) it returns ledger_current_index
   * and NOT ledger_index or ledger_hash
   *  This is a specific ledger at time of call, and just a hack. The json its located in on a current ledger
   *  has an index but not a hash (and the field name is different)
-  * @param v
+  * @param v  Ledger index value (unsigned)
   */
 case class LedgerCurrentIndex(v: Long)
 

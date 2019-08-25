@@ -4,8 +4,7 @@ import io.circe.Decoder
 import io.circe.generic.semiauto._
 
 import com.odenzo.ripple.models.atoms._
-
-trait LedgerHeader
+import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.RippleTransaction
 
 /** You can look up ledger headers user ledger inquiry. Testing for this does that.
   * If current ledger then no ledger_hash is returned but ledger_index used not ledger_current_index
@@ -19,52 +18,64 @@ trait LedgerHeader
   * [[https://ripple.com/build/ledger-format/#tree-format]]
   * [[https://ripple.com/build/ledger-format/#header-format]]
   * */
-case class LedgerClosedHeader(
+case class LedgerHeader(
     ledger_index: LedgerSequence, // Noted as String Number or Number! FMe
     ledger_hash: Option[LedgerHash],
     account_hash: Option[AccountHash],
-    close_time: RippleTime,
-    closed: Boolean,
     parent_hash: LedgerHash,
     total_coins: Drops,
     transaction_hash: TxnHash,
-    close_time_resolution: Int,
-    close_flags: Int, // Actually their docs outdated.
-    accepted: Option[Boolean],
-    parent_close_time: RippleTime, // Not sure why this is missing on closed if we have a hash.
-    // I thought there is only even one open ledger. Once this ledger current (or closed) then its parent must have been
-    // closed. Maybe a race condition in code. TODO: Take a peek at ledger transitioning
+    parent_close_time: RippleTime,
+    closed_info: Option[LedgerClosedInfo],
     accountState: Option[List[LedgerNodeIndex]], // optional field and may be empty array
-    transactions: Option[List[LedgerNodeIndex]]  // optional field and may be empty array
-) extends LedgerHeader
-
-case class LedgerCurrentHeader(
-    ledger_index: LedgerSequence, // Noted as String Number or Number! FMe
-    ledger_hash: Option[LedgerHash],
-    account_hash: Option[AccountHash],
-    close_time: Option[RippleTime],
-    closed: Boolean,
-    parent_hash: LedgerHash,
-    total_coins: Drops,
-    transaction_hash: TxnHash,
-    close_time_resolution: Option[Int],
-    close_flags: Option[Int], // Actually their docs outdated.
-    accepted: Option[Boolean],
-    parent_close_time: Option[RippleTime], // Not sure why this is missing on closed if we have a hash.
-    // I thought there is only even one open ledger. Once this ledger open (or closed) then its parent must have been
-    // closed. Maybe a race condition in code. TODO: Take a peek at ledger transitioning
-    accountState: Option[List[LedgerNodeIndex]], // optional field and may be empty array
-    transactions: Option[List[LedgerNodeIndex]]  // optional field and may be empty array
-) extends LedgerHeader
+    transactions: Option[LedgerTransactions]     // optional field and may be empty array or array of hash or
+    // expanded json
+)
 
 object LedgerHeader {
 
-  implicit val decodeClosed: Decoder[LedgerClosedHeader]   = deriveDecoder[LedgerClosedHeader]
-  implicit val decodeCurrent: Decoder[LedgerCurrentHeader] = deriveDecoder[LedgerCurrentHeader]
+  val baseDecoder = deriveDecoder[LedgerHeader] // closed_info always None
   implicit val decoder: Decoder[LedgerHeader] = {
-    val closed: Decoder[LedgerHeader]  = decodeClosed.map(v => v: LedgerHeader)
-    val current: Decoder[LedgerHeader] = decodeCurrent.map(v => v: LedgerHeader)
-    closed.or(current)
+    deriveDecoder[LedgerHeader].product(Decoder[Option[LedgerClosedInfo]]).map {
+      case (header, info) => header.copy(closed_info = info)
+    }
   }
+}
+
+/** The header when information for a ledger that has not yet closed (or validated) */
+case class LedgerClosedInfo(
+    accepted: Boolean,
+    closed: Boolean,
+    close_time: RippleTime,
+    close_time_resolution: Int,
+    close_flags: Int // Actually their docs outdated becasue??
+)
+
+object LedgerClosedInfo {
+  implicit val decoder: Decoder[LedgerClosedInfo] = deriveDecoder[LedgerClosedInfo]
+}
+
+/** Represent an expanded transaction is a ledger (typically validated)
+  * The txn is at the top level and needs to be lifted, metaData is a top field. */
+case class LedgerTxn(txn: RippleTransaction, metaData: Meta)
+
+object LedgerTxn {
+  implicit val decoder: Decoder[LedgerTxn] = Decoder.instance { hcursor =>
+    for {
+      txn <- hcursor.as[RippleTransaction]
+      md  <- hcursor.get[Meta]("metaData")
+    } yield LedgerTxn(txn, md)
+  }
+}
+
+/** Represents a list of Ledger Tranasction that is either expanded or a */
+case class LedgerTransactions(either: Either[List[LedgerTxn], List[LedgerNodeIndex]])
+
+object LedgerTransactions {
+
+  // Our cursor is on the Array of transactions. Each transaction is a LedgerNodeIndex or LedgerTxn
+  implicit val decoder: Decoder[LedgerTransactions] = Decoder[List[LedgerTxn]]
+    .either(Decoder[List[LedgerNodeIndex]])
+    .map(LedgerTransactions.apply)
 
 }

@@ -26,17 +26,20 @@ import com.odenzo.ripple.models.support.{RippleRq, RippleRs}
   */
 case class LedgerRq(
     transactions: Boolean = true,
-    accounts: Boolean = true,
+    accounts: Boolean = false,
+    expand: Boolean = false,
+    owner_funds: Boolean = true,
     ledger: Ledger = LedgerName.VALIDATED_LEDGER,
     id: RippleMsgId = RippleMsgId.random
 ) extends RippleRq
 
 /**
   *
-  * @param ledger
-  * @param resultLedger Standard to level hash/index/validated
+  * @param ledger    Overview information
+  * @param ledger_hash  ledger_hash
+  * @param ledger_index ledger_index, usually not used on current
   */
-case class LedgerRs(ledger: LedgerHeader, resultLedger: Option[ResultLedger]) extends RippleRs
+case class LedgerRs(ledger: LedgerHeader, ledger_hash: LedgerHash, ledger_index: LedgerSequence) extends RippleRs
 
 object LedgerRq {
   val command: (String, Json) = "command" -> "ledger".asJson
@@ -48,8 +51,8 @@ object LedgerRq {
 
 object LedgerRs {
   implicit val decoder: Decoder[LedgerRs] = deriveDecoder[LedgerRs]
-    .product(Decoder[ResultLedger])
-    .map {
-      case (a, theResultLedger) => a.copy(resultLedger = Some(theResultLedger))
-    }
+//    .product(Decoder[ResultLedger])
+//    .map {
+//      case (a, theResultLedger) => a.copy(resultLedger = Some(theResultLedger))
+//    }
 }

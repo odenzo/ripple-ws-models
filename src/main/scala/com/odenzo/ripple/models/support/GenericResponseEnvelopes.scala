@@ -6,8 +6,6 @@ import io.circe.{Decoder, Json}
 
 import com.odenzo.ripple.models.atoms._
 
-// Well, this could be a RippleGenericSuccess or RippleGenericFailure as better model.
-// Always have id and status, and then either Result Json to be parsed or the error bits.
 
 sealed trait RippleGenericResponse {
   def id: RippleMsgId

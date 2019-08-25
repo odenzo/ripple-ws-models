@@ -4,6 +4,7 @@ import io.circe.{Decoder, Encoder}
 
 /**
   * Meh, Node Index is 64 char HEX eh? NodeID
+  *  It is more like a hash
   * @see LedgerRq for example in the accounts
   * @param v A UInt64 but encoded as String in Json,
   */

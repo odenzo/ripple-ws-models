@@ -13,12 +13,14 @@ import com.odenzo.ripple.models.support.{RippleRq, RippleRs}
   * @param id
   */
 case class ServerStateRq(id: RippleMsgId = RippleMsgId.random) extends RippleRq
-case class ServerStateRs(state: Json)                          extends RippleRs
+
+/** Lots of stuff, maybe we can break down internal atoms build_version, complete_ledgers amd validation_ledger most
+  * common */
+case class ServerStateRs(state: JsonObject) extends RippleRs
 
 object ServerStateRq {
-  val command: (String, Json) = "command" -> "server_state".asJson
   implicit val encoder: Encoder.AsObject[ServerStateRq] = {
-    deriveEncoder[ServerStateRq].mapJsonObject(o => command +: o)
+    deriveEncoder[ServerStateRq].mapJsonObject(_.add("command", "server_state".asJson))
   }
 }
 
