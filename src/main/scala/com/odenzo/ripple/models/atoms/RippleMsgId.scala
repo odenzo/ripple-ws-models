@@ -19,6 +19,8 @@ object RippleMsgId {
   def random = new RippleMsgId(UUID.randomUUID().toString)
 
   implicit val encoder: Encoder[RippleMsgId] = Encoder.encodeString.contramap[RippleMsgId](_.s)
+
+  /** Decoding the Ripple Message ID can be a number or a String  */
   implicit val decoder: Decoder[RippleMsgId] = {
     Decoder.decodeString
       .map(RippleMsgId.apply)

@@ -1,6 +1,7 @@
 package com.odenzo.ripple.models.support
 
 import com.odenzo.ripple.models.atoms._
+import com.odenzo.ripple.models.biz.{BalanceExtractors, AccountBalance}
 import com.odenzo.ripple.models.testkit.CodecTesting
 
 /**

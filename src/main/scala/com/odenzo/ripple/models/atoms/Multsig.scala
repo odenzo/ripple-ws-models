@@ -2,9 +2,14 @@ package com.odenzo.ripple.models.atoms
 
 import scala.collection.immutable
 
+import io.circe.generic.extras.Configuration
+import io.circe.generic.extras.semiauto.{deriveConfiguredEncoder, deriveConfiguredDecoder}
 import io.circe.generic.semiauto._
 import io.circe.syntax._
-import io.circe.{Decoder, Encoder, Json, JsonObject}
+import io.circe.{JsonObject, Encoder, Decoder, Codec, Json}
+
+import com.odenzo.ripple.models.utils.CirceCodecUtils
+import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.TrustSetTx
 
 /**
   * Used for the actual signing of a transaction.
@@ -17,11 +22,8 @@ case class Signer(account: AccountAddr, signingPubKey: RipplePublicKey, txnSigna
 
 object Signer {
 
-  implicit val encoder: Encoder[Signer] =
-    Encoder.forProduct3("Account", "SigningPubKey", "TxnSignature")(v => (v.account, v.signingPubKey, v.txnSignature))
-
-  implicit val decoder: Decoder[Signer] = Decoder.forProduct3("Account", "SigningPubKey", "TxnSignature")(Signer.apply)
-
+  implicit val config: Configuration         = CirceCodecUtils.capitalizeConfiguration
+  implicit val codec: Codec.AsObject[Signer] = deriveCodec[Signer]
 }
 
 /** The signers appear in tx_json elements (RippleTransaction in via CommonTx).
@@ -55,21 +57,15 @@ object Signers {
 
 /**
   * This is used in the SignerListSet to add signers/quorom to an account.
-  * @param account
-  * @param signerWeight
+  * @param account    The address of the signing account keys
+  * @param signerWeight The weight that this signer entry contributes to quorum
   */
 case class SignerEntry(account: AccountAddr, signerWeight: Int)
 
 /** The correct encoding and decoding within nested JsonObject is handled here */
 object SignerEntry {
-  implicit val decode: Decoder[SignerEntry] = {
-    Decoder.forProduct2("Account", "SignerWeight")(SignerEntry.apply).prepare(_.downField("SignerEntry"))
-  }
 
-  implicit val encoder: Encoder[SignerEntry] = {
-    val base: Encoder.AsObject[SignerEntry] =
-      Encoder.forProduct2("Account", "SignerWeight")(v => (v.account, v.signerWeight))
-    base.mapJsonObject(base => JsonObject.singleton("SignerEntry", base.asJson))
-  }
+  implicit val config: Configuration              = CirceCodecUtils.capitalizeConfiguration
+  implicit val codec: Codec.AsObject[SignerEntry] = deriveCodec[SignerEntry]
 
 }

@@ -1,7 +1,7 @@
 package com.odenzo.ripple.models.atoms
-
+import io.circe.generic.extras.semiauto._
 import cats.implicits._
-import io.circe.generic.semiauto._
+import io.circe.generic.extras.Configuration
 import io.circe.syntax._
 import io.circe.{Decoder, _}
 /*
@@ -45,7 +45,7 @@ object RippleSignature {
   * Both are repesented as this object for now, and must begin with "n"
   * Account Public Keys start with a
   * Note sure the sematics of this and the SigningPublicKey
-  * @param v e.g. "aBPUAJbNXvxP7uiTxmCcCpVgrGjsbJ8f7hQaYPRrdajXNWXuCNLX"
+  *  "aBPUAJbNXvxP7uiTxmCcCpVgrGjsbJ8f7hQaYPRrdajXNWXuCNLX"
   **/
 case class RipplePublicKey(v: Base58Checksum)
 
@@ -177,11 +177,13 @@ object TxSignature {
 }
 
 object AccountKeys {
-  implicit val encoder: Encoder.AsObject[AccountKeys] = deriveEncoder[AccountKeys]
-  implicit val decoder: Decoder[AccountKeys]          = deriveDecoder[AccountKeys]
+  implicit val config: Configuration                  = Configuration.default
+  implicit val encoder: Encoder.AsObject[AccountKeys] = deriveConfiguredEncoder[AccountKeys]
+  implicit val decoder: Decoder[AccountKeys]          = deriveConfiguredDecoder[AccountKeys]
 }
 
 object ValidationKeys {
-  lazy implicit val decoder: Decoder[ValidationKeys]          = deriveDecoder[ValidationKeys]
-  lazy implicit val encoder: Encoder.AsObject[ValidationKeys] = deriveEncoder[ValidationKeys]
+  implicit val config: Configuration                          = Configuration.default
+  lazy implicit val decoder: Decoder[ValidationKeys]          = deriveConfiguredDecoder[ValidationKeys]
+  lazy implicit val encoder: Encoder.AsObject[ValidationKeys] = deriveConfiguredEncoder[ValidationKeys]
 }

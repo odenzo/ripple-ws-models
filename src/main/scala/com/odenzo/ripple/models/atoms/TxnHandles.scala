@@ -1,6 +1,9 @@
 package com.odenzo.ripple.models.atoms
 
 import io.circe.{Decoder, Encoder}
+import io.circe._
+import io.circe.syntax._
+import io.circe.generic.extras.semiauto._
 
 /**
   * Re-organizig to put all the ways you can identify a transactions
@@ -19,8 +22,8 @@ trait TxnHandles
 case class TxnIndex(v: Long) extends AnyVal()
 
 object TxnIndex {
-  implicit val encoder: Encoder[TxnIndex] = Encoder.encodeLong.contramap[TxnIndex](_.v)
-  implicit val decoder: Decoder[TxnIndex] = Decoder.decodeLong.map(TxnIndex(_))
+  implicit val codec: Codec[TxnIndex] = deriveUnwrappedCodec[TxnIndex]
+
 }
 
 /**
@@ -36,15 +39,13 @@ case class TxnSequence(v: Long) {
 }
 
 object TxnSequence {
-  implicit val encoder: Encoder[TxnSequence] = Encoder.encodeLong.contramap[TxnSequence](_.v)
-  implicit val decoder: Decoder[TxnSequence] = Decoder.decodeLong.map(TxnSequence(_))
+  implicit val codec: Codec[TxnSequence] = deriveUnwrappedCodec[TxnSequence]
 
 }
 
 case class OfferSequence(v: Long)
 
 object OfferSequence {
-  implicit val encoder: Encoder[OfferSequence] = Encoder.encodeLong.contramap[OfferSequence](_.v)
-  implicit val decoder: Decoder[OfferSequence] = Decoder.decodeLong.map(OfferSequence(_))
+  implicit val codec: Codec[OfferSequence] = deriveUnwrappedCodec[OfferSequence]
 
 }

@@ -57,25 +57,3 @@ object AccountOne {
   override def toString: String = "ACCOUNT_ONE"
 
 }
-
-trait AdminParams
-
-/** Deprecate all these and use FullKeyPair, standardize on use master_seed_hex and explicit key_type on requests */
-trait RippleAccount {
-  def label: String
-  def address: AccountAddr
-}
-
-case class RippleAccountRO(label: String, address: AccountAddr) extends RippleAccount
-
-case class RippleAccountRW(label: String, address: AccountAddr, secret: RippleSignature) extends RippleAccount {
-  val sig: RippleSignature = secret
-}
-
-object RippleAccountRW {
-  def from(keys: AccountKeys, label: String = "No Name") = RippleAccountRW(label, keys.account_id, keys.master_seed)
-
-  // implicit val decoder: Decoder[RippleAccountRW] = deriveDecoder[RippleAccountRW]
-
-  val GENESIS = RippleAccountRW("GENESIS", GenesisAccount.address, GenesisAccount.masterSeed)
-}

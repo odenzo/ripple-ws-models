@@ -1,8 +1,13 @@
 package com.odenzo.ripple.models.atoms.ledgertree.nodes
 
+import io.circe._
+import io.circe.syntax._
+import io.circe.generic.extras.semiauto._
 import io.circe.Decoder
+import io.circe.generic.extras.Configuration
 
 import com.odenzo.ripple.models.atoms._
+import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 /**
   * See also docs for account root node. I am guessing this has delta too?
@@ -11,7 +16,7 @@ import com.odenzo.ripple.models.atoms._
   * @param sequence
   * @param balance
   * @param ownerCount
-  * @param prevTxnId
+  * @param prevTxnID
   * @param prevTxnLgrSeq
   * @param accountTxnId
   * @param regularKeyAddr
@@ -33,28 +38,12 @@ case class EscrowNode(
     desintationTag: Option[AccountTag],
     flags: Option[Long],
     ownerNode: Option[UInt64],
-    prevTxnId: Option[TxnHash],            // The 64 character hex index (key)  , proper name? LedgerNodeIndex?  Cannot
+    prevTxnID: Option[TxnHash],            // The 64 character hex index (key)  , proper name? LedgerNodeIndex?  Cannot
     prevTxnLgrSeq: Option[LedgerSequence], // LedgerSequence type...yeah should be called prevTxnLgrIndex then?
     index: Option[String]                  // Guessing this is a LedgerNodeIndex of this node.
 ) extends LedgerNode
 
 object EscrowNode {
-
-  implicit val decode: Decoder[EscrowNode] =
-    Decoder.forProduct13(
-      "Account",
-      "Desintation",
-      "Amount",
-      "Condition",
-      "CancelAfter",
-      "FinishAfter",
-      "SourceTag",
-      "DestinationTag",
-      "Flags",
-      "OwnerNode",
-      "PreviousTxnID",
-      "PreviousTxnLgrSeq",
-      "index"
-    )(EscrowNode.apply)
-
+  implicit val config: Configuration             = CirceCodecUtils.capitalizeExcept
+  implicit val codec: Codec.AsObject[EscrowNode] = deriveConfiguredCodec[EscrowNode]
 }

@@ -53,7 +53,10 @@ case class LedgerIndexRange(start: LedgerSequence, end: LedgerSequence)
 
 object LedgerIndexRange {
 
-  final implicit val decoder: Decoder[LedgerIndexRange] = Decoder.decodeString.emapTry { s: String =>
+  implicit val encoder: Encoder[LedgerIndexRange] =
+    Encoder.encodeString.contramap[LedgerIndexRange](v => s"${v.start.v}-${v.end.v}")
+
+  implicit val decoder: Decoder[LedgerIndexRange] = Decoder.decodeString.emapTry { s: String =>
     Try {
       s.split('-').toList match {
         case start :: end :: Nil =>
@@ -79,8 +82,9 @@ case class LedgerCurrentIndex(v: Long)
 
 object LedgerCurrentIndex {
 
-  implicit val encoder: Encoder[LedgerCurrentIndex] = Encoder.encodeLong.contramap[LedgerCurrentIndex](_.v)
-  implicit val decoder: Decoder[LedgerCurrentIndex] = Decoder.decodeLong.map(v => LedgerCurrentIndex(v))
+  import io.circe.generic.extras.semiauto._
+  implicit val codec: Codec[LedgerCurrentIndex] = deriveUnwrappedCodec[LedgerCurrentIndex]
+
 }
 
 /**
@@ -257,10 +261,13 @@ object LedgerName {
   implicit val decoder: Decoder[LedgerName] = Decoder.decodeString.map(v => LedgerName(v))
 }
 
+import io.circe._
+import io.circe.syntax._
+import io.circe.generic.extras.semiauto._
+
 /** This is really an unsigned in in Ripple */
 object LedgerSequence {
-  implicit val encoder: Encoder[LedgerSequence] = Encoder.encodeLong.contramap[LedgerSequence](_.v)
-  implicit val decoder: Decoder[LedgerSequence] = Decoder.decodeLong.map(LedgerSequence(_))
+  implicit val codec: Codec[LedgerSequence] = deriveUnwrappedCodec[LedgerSequence]
 
   /** This is used in Ripple API to let the Ripple service choose most appropriate ledger
     * e.g. account_tx as min or max will choose the earliest/latest validated ledgers.

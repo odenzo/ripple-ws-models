@@ -4,7 +4,10 @@ import cats._
 import cats.implicits._
 import io.circe._
 import io.circe.generic.semiauto._
-
+import io.circe._
+import io.circe.generic.extras.Configuration
+import io.circe.syntax._
+import io.circe.generic.extras.semiauto._
 case class Currency(symbol: String)
 
 object Currency {
@@ -27,17 +30,16 @@ object Currency {
 
   val ETH = Currency("ETH")
 
-  implicit val encoder: Encoder[Currency] = Encoder.encodeString.contramap[Currency](_.symbol)
-  implicit val decoder: Decoder[Currency] = Decoder.decodeString.map(Currency(_))
-  implicit val show: Show[Currency]       = Show.show[Currency](c => s"[${c.symbol}]")
+  implicit val codec: Codec[Currency] = deriveUnwrappedCodec[Currency]
+  implicit val show: Show[Currency]   = Show.show[Currency](c => s"[${c.symbol}]")
 }
 
 case class SourceCurrency(currency: Currency, issuer: Option[AccountAddr])
 
 object SourceCurrency {
-  implicit val encoder: Encoder[SourceCurrency] = deriveEncoder[SourceCurrency]
-  implicit val decoder: Decoder[SourceCurrency] = deriveDecoder[SourceCurrency]
-  implicit val show: Show[SourceCurrency]       = Show.show[SourceCurrency](c => s"[${c.currency.show} {c.issuer.show}]")
+  implicit val config: Configuration                 = Configuration.default
+  implicit val codec: Codec.AsObject[SourceCurrency] = deriveConfiguredCodec[SourceCurrency]
+  implicit val show: Show[SourceCurrency]            = Show.show[SourceCurrency](c => s"[${c.currency.show} {c.issuer.show}]")
 
 }
 
@@ -49,9 +51,7 @@ object SourceCurrency {
 case class Script(currency: Currency, issuer: AccountAddr)
 
 object Script {
-  implicit val show: Show[Script] = Show.show[Script](v => v.currency.show + s" Issuer: ${v.issuer.show}")
-
-  implicit val encode: Encoder[Script] = deriveEncoder[Script]
-
-  implicit val decode: Decoder[Script] = deriveDecoder[Script]
+  implicit val show: Show[Script]            = Show.show[Script](v => v.currency.show + s" Issuer: ${v.issuer.show}")
+  implicit val config: Configuration         = Configuration.default
+  implicit val codec: Codec.AsObject[Script] = deriveConfiguredCodec[Script]
 }

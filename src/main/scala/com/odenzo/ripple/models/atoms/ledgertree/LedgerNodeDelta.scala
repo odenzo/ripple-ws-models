@@ -3,10 +3,13 @@ package com.odenzo.ripple.models.atoms.ledgertree
 import scala.collection.immutable.Nil
 
 import io.circe._
+import io.circe.generic.extras._
+import io.circe.generic.semiauto._
 import io.circe.syntax._
 
 import com.odenzo.ripple.models.atoms.LedgerSequence
 import com.odenzo.ripple.models.atoms.ledgertree.nodes._
+import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 /**
   * There is really only one of these, modified, created -- no deleted?
@@ -19,6 +22,12 @@ object AffectedLedgerNode {
   implicit val decoder: Decoder[AffectedLedgerNode] = {
     Decoder.forProduct2("ModifiedNode", "CreatedNode")(AffectedLedgerNode.apply)
   }
+
+  import io.circe.generic.extras._
+  import io.circe.generic.extras.semiauto._
+  import io.circe.generic.extras.{semiauto => genextras}
+  implicit val circeConfig: String => String = CirceCodecUtils.capitalizeTransformation
+  // implicit val encoder: Encoder.AsObject[AffectedLedgerNode] = genextras.deriveConfiguredEncoder[AffectedLedgerNode]
 }
 
 /**
@@ -49,6 +58,12 @@ object LedgerNodeDelta {
       "NewFields"
     )(LedgerNodeDelta.apply)
   }
+
+  import io.circe.generic.extras._
+  import io.circe.generic.extras.semiauto._
+  import io.circe.generic.extras.{semiauto => genextras}
+  implicit val circeConfig: String => String = CirceCodecUtils.capitalizeTransformation
+  // implicit val encoder: Encoder.AsObject[LedgerNodeDelta] = genextras.deriveConfiguredEncoder[LedgerNodeDelta]
 
   def debugDump(v: LedgerNodeDelta): String = {
     val r = s"LedgerNodeDelta Dump of type ${v.ledgerEntryType}" ::

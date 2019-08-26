@@ -12,9 +12,12 @@ import com.odenzo.ripple.models.wireprotocol.serverinfo._
 import com.odenzo.ripple.models.wireprotocol.transactions._
 
 /** First cut at a dependant type with two type parameters, one for request and one for response.
-  *
-  *  @tparam F
+  * I see no good way to attempt to do this, other than just not do it.
+  *  T<: RippleRq U<:RippleRs and hard code the encoders and decoders in base object.
+  *  This is deprecated
+
   */
+@deprecated("Goung Away", "2019")
 trait CommandContext {
 
   /** Tyoe of the request,    subtype of RippleRq or RippleAdminRq */
@@ -40,6 +43,7 @@ trait CommandContext {
   *  @tparam A The type of the request object,
   *  @tparam B The type of the response object
   */
+@deprecated("Goung Away", "2019")
 case class Codec[A <: RippleRq, B <: RippleRs](
     encoder: Encoder.AsObject[A],
     decoder: Decoder[B]
@@ -75,11 +79,10 @@ case class Codec[A <: RippleRq, B <: RippleRs](
 
 }
 
-object Codec {}
-
 /**
   * Bit of a hack until Scala 3 conversion
   */
+@deprecated("Goung Away", "2019")
 object Commands {
 
   def isAdminCmd(rq: RippleRq): Boolean = rq.isInstanceOf[RippleAdminRq]

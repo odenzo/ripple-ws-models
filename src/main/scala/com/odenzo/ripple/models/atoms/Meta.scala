@@ -1,6 +1,6 @@
 package com.odenzo.ripple.models.atoms
 
-import io.circe.Decoder
+import io.circe.{Decoder, Encoder}
 
 import com.odenzo.ripple.models.atoms.ledgertree.AffectedLedgerNode
 import com.odenzo.ripple.models.support.TxnStatusCode
@@ -28,4 +28,8 @@ object Meta extends CirceCodecUtils {
     Decoder.forProduct4("AffectedNodes", "TransactionIndex", "TransactionResult", "delivered_amount")(Meta.apply)
   }
 
+//  implicit val encoder: Encoder[Meta] =
+//    Encoder.forProduct4("AffectedNodes", "TransactionIndex", "TransactionResult", "delivered_amount")(
+//      m => (m.affectedNodes, m.transactionIndex, m.transactionResult, m.delivered_amount)
+//    )
 }

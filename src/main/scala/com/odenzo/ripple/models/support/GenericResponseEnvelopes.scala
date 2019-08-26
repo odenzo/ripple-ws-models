@@ -6,14 +6,14 @@ import io.circe.{Decoder, Json}
 
 import com.odenzo.ripple.models.atoms._
 
-
 sealed trait RippleGenericResponse {
   def id: RippleMsgId
   def status: String
 }
 
 /**
-  *
+  *   We could try and parameterize this on result, which is usually T <: RippleRs
+  *   I choose not to because for some use cases I jsut do partial decoding to get what I need.
   * @param id
   * @param status
   * @param result The JSON in the result field that is specific to the type of response
@@ -36,7 +36,7 @@ object RippleGenericSuccess {
   * @param error
   * @param error_code
   * @param error_message
-  * @param rq  The raw JSON request which caused this response.
+  * @param request  The raw JSON request which caused this response.
   */
 case class RippleGenericError(
     id: RippleMsgId,

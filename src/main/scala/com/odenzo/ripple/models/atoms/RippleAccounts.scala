@@ -4,6 +4,10 @@ import cats.Show
 import io.circe._
 import io.circe.syntax._
 
+import io.circe._
+import io.circe.syntax._
+import io.circe.generic.extras.semiauto._
+
 sealed trait Account
 
 object Account {
@@ -34,9 +38,9 @@ final case class AccountAddr(address: String) extends Account {
 
 }
 object AccountAddr {
-  implicit val encoder: Encoder[AccountAddr] = Encoder.encodeString.contramap[AccountAddr](_.address.toString)
-  implicit val decoder: Decoder[AccountAddr] = Decoder.decodeString.map(AccountAddr(_))
-  implicit val show: Show[AccountAddr]       = Show.show[AccountAddr](v => v.address)
+
+  implicit val codec: Codec[AccountAddr] = deriveUnwrappedCodec[AccountAddr]
+  implicit val show: Show[AccountAddr]   = Show.show[AccountAddr](v => v.address)
 
 }
 
@@ -50,15 +54,19 @@ final case class AccountAlias(account: String) extends Account {
 
 }
 
+object AccountAlias {
+  implicit val codec: Codec[AccountAlias] = deriveUnwrappedCodec[AccountAlias]
+}
+
 /**
   * Use for dt:string addressing of an account mapped to a single ripple address (e.g. a gateway account)
   * @param tag
   */
 case class AccountTag(tag: UInt32)
 
-object AccountAlias {
-  implicit val encoder: Encoder[AccountAlias] = Encoder.encodeString.contramap[AccountAlias](_.account.toString)
-  implicit val decoder: Decoder[AccountAlias] = Decoder.decodeString.map(AccountAlias(_))
+object AccountTag {
+  def apply(dt: Long): AccountTag         = AccountTag(UInt32(dt))
+  implicit val decoder: Codec[AccountTag] = deriveUnwrappedCodec[AccountTag]
 }
 
 /** Note this is not valid for most of the WebSocket Requests
@@ -74,12 +82,4 @@ case class DTAccountAddr(address: AccountAddr, dt: AccountTag) {
 object DTAccountAddr {
   implicit val encoder: Encoder[DTAccountAddr] = Encoder[String].contramap[DTAccountAddr](v => s"${v.address}:${v.dt}")
 
-}
-
-object AccountTag {
-
-  def apply(dt: Long): AccountTag = AccountTag(UInt32(dt))
-
-  implicit val decoder: Decoder[AccountTag] = Decoder[UInt32].map(i => AccountTag(i))
-  implicit val encoder: Encoder[AccountTag] = Encoder[UInt32].contramap[AccountTag](_.tag)
 }

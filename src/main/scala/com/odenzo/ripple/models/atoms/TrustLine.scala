@@ -1,7 +1,10 @@
 package com.odenzo.ripple.models.atoms
 
+import io.circe.generic.extras.Configuration
 import io.circe.generic.semiauto._
-import io.circe.{Decoder, Encoder}
+import io.circe.{Encoder, Decoder, Codec}
+
+import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 /** Atom that is found in account_lines result   */
 case class TrustLine(
@@ -12,10 +15,10 @@ case class TrustLine(
     limit_peer: BigDecimal,
     quality_in: Long,
     quality_out: Long,
-    no_ripple: Option[Boolean] = Some(false),
+    no_ripple: Option[Boolean]      = Some(false),
     no_ripple_peer: Option[Boolean] = Some(false),
-    freeze: Option[Boolean] = Some(false),
-    freeze_peer: Option[Boolean] = Some(false)
+    freeze: Option[Boolean]         = Some(false),
+    freeze_peer: Option[Boolean]    = Some(false)
 ) {
 
   def toFiatAmount: FiatAmount = FiatAmount(balance, Script(currency, account))
@@ -23,6 +26,6 @@ case class TrustLine(
 
 object TrustLine {
 
-  implicit val encoder: Encoder.AsObject[TrustLine] = deriveEncoder[TrustLine]
-  implicit val decoder: Decoder[TrustLine]          = deriveDecoder[TrustLine]
+  implicit val config: Configuration            = Configuration.default
+  implicit val codec: Codec.AsObject[TrustLine] = deriveCodec[TrustLine]
 }

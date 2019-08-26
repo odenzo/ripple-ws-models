@@ -1,6 +1,9 @@
 import sbt.Keys.resolvers
 import MyCompileOptions._
 
+//resolvers += Resolver.sonatypeRepo("releases")
+//addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full)
+
 ThisBuild / organization := "com.odenzo"
 ThisBuild / name         := "ripple-ws-models"
 
@@ -60,12 +63,13 @@ val libs = Seq(
 /** JSON Libs == Circe and Associated Support Libs */
 val lib_circe =
   Seq(
-    "io.circe"     %% "circe-core"           % circeVersion,
-    "io.circe"     %% "circe-generic"        % circeVersion,
-    "io.circe"     %% "circe-parser"         % circeVersion,
-    "io.circe"     %% "circe-generic-extras" % circeVersion,
-    "com.beachape" %% "enumeratum"           % enumeratumVersion,
-    "com.beachape" %% "enumeratum-circe"     % enumeratumCirceVersion
+    "io.circe" %% "circe-core"           % circeVersion,
+    "io.circe" %% "circe-generic"        % circeVersion,
+    "io.circe" %% "circe-parser"         % circeVersion,
+    "io.circe" %% "circe-generic-extras" % circeVersion,
+    //"io.circe"     %% "circe-derivation"     % circeVersion,
+    "com.beachape" %% "enumeratum"       % enumeratumVersion,
+    "com.beachape" %% "enumeratum-circe" % enumeratumCirceVersion
   )
 
 val lib_monocle = Seq(

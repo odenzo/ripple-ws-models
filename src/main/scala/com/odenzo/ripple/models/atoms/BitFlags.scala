@@ -30,7 +30,7 @@ sealed trait BitMaskFlagEnum[A <: BitFlag] {
 
   def asFlags(mask: BitMask[A]): IndexedSeq[A] = values.filter(mask.isSet)
 
-  def extraBits(mask: BitMask[A]) = {
+  def extraBits(mask: BitMask[A]): UInt = {
     val allBits: UInt = values.map(_.toUInt).fold(UInt.MinValue)(_ | _)
     mask.v ^ allBits
   }
@@ -44,19 +44,16 @@ sealed trait BitMaskFlagEnum[A <: BitFlag] {
   */
 case class BitMask[A <: BitFlag](v: UInt) {
 
-  // I would like to summon the object here, or even the BitMaskFlagEnum[A]
-  // Of course, there is no nice way to do since there may be mutiple.
-  // But, given A is resolving and if inside A I can access object A maybe a way?
-  // Good enough as is for now I guess, even though a nasty hack
-  def set(v: A): BitMask[A] = this.copy(v = UInt(v.value))
+  def replace(v: A): BitMask[A] = this.copy(v = UInt(v.value))
+  def clear(): BitMask[A]       = this.copy(UInt.MinValue)
 
-  /** Set bits */
-  def or(b: A): BitMask[A] = this.copy(v = v | UInt(b.value))
-
-  /** Unset bits */
+  def or(b: A): BitMask[A]  = this.copy(v = v | UInt(b.value))
   def xor(b: A): BitMask[A] = this.copy(v = v ^ UInt(b.value))
   def and(b: A): BitMask[A] = this.copy(v = v & UInt(b.value))
-  def clear(): BitMask[A]   = this.copy(UInt.MinValue)
+
+  def or(mask: BitMask[A]): BitMask[A]  = this.copy(v = mask.v | this.v)
+  def xor(mask: BitMask[A]): BitMask[A] = this.copy(v = mask.v ^ this.v)
+  def and(mask: BitMask[A]): BitMask[A] = this.copy(v = mask.v & this.v)
 
   def isSet(b: A) = (v & b.toUInt) =!= UInt.MinValue
 }

@@ -59,8 +59,9 @@ object MyCompileOptions {
 
   val warningsV13: Seq[String] =
     Seq(
-      "-Ywarn-dead-code",     // Warn when dead code is identified.
-      "-Ywarn-extra-implicit" // Warn when more than one implicit parameter section is defined.
+      "-Ywarn-dead-code",      // Warn when dead code is identified.
+      "-Ywarn-extra-implicit", // Warn when more than one implicit parameter section is defined.
+      "-Ymacro-annotations"    // For 2.13 we need the plugin.
       //"-Ywarn-inaccessible", // Warn about inaccessible types in method signatures. (Gone in 2.13)
       // "-Ywarn-infer-any", // Warn when a type argument is inferred to be `Any`. (Gone in 2.13)
       // "-Ywarn-nullary-override", // Warn when non-nullary `def f()' overrides nullary `def f'.
@@ -70,7 +71,7 @@ object MyCompileOptions {
       //  "-Ywarn-unused:imports", // Warn if an import selector is not referenced.
       //  "-Ywarn-unused:locals", // Warn if a local definition is unused.
       //  "-Ywarn-unused:params", // Warn if a value parameter is unused.
-      //  "-Ywarn-unused:patvars", // Warn if a variable bound in a pattern is unused.
+      //"-Ywarn-unused:patvars"  // Warn if a variable bound in a pattern is unused.
       //  "-Ywarn-unused:privates", // Warn if a private member is unused.
       //  "-Ywarn-value-discard" // Warn when non-Unit expression results are unused.
     )

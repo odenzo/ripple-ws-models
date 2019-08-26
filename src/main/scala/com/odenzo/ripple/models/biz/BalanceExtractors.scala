@@ -1,4 +1,4 @@
-package com.odenzo.ripple.models.support
+package com.odenzo.ripple.models.biz
 
 import cats.implicits._
 import io.circe.JsonObject
@@ -10,8 +10,6 @@ import com.odenzo.ripple.models.utils.caterrors.OError
 import com.odenzo.ripple.models.wireprotocol.accountinfo.AccountTxRs
 import com.odenzo.ripple.models.wireprotocol.transactions.TxRs
 import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.PaymentTx
-
-case class AccountBalance(addr: AccountAddr, balance: CurrencyAmount)
 
 /**
   * Some utility functions for extracting the current balance of accounts in a payment transaction.

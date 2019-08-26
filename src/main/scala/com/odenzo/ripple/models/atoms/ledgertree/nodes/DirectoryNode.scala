@@ -2,9 +2,14 @@ package com.odenzo.ripple.models.atoms.ledgertree.nodes
 
 import cats.Show
 import io.circe.Decoder
+import io.circe.generic.extras.Configuration
+import io.circe._
+import io.circe.syntax._
+import io.circe.generic.extras.semiauto._
 
 import com.odenzo.ripple.models.atoms.ledgertree.LedgerNodeIndex
-import com.odenzo.ripple.models.atoms.{AccountAddr, RippleHash, UInt64}
+import com.odenzo.ripple.models.atoms.{AccountAddr, UInt64, RippleHash}
+import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 /**
   * Directory Node, this doesn't show up in delta records
@@ -31,18 +36,7 @@ case class DirectoryNode(
 ) extends LedgerNode
 
 object DirectoryNode {
-
-  implicit val decoder: Decoder[DirectoryNode] = Decoder.forProduct9(
-    "RootIndex",
-    "Indexes",
-    "IndexNext",
-    "IndexPrevious",
-    "Owner",
-    "TakerPaysCurrency",
-    "TakerPaysIssuer",
-    "TakerGetsCurrency",
-    "TakerGetsIssuer"
-  )(DirectoryNode.apply)
-
-  implicit val show: Show[DirectoryNode] = Show.fromToString[DirectoryNode]
+  implicit val config: Configuration                  = CirceCodecUtils.capitalizeConfiguration
+  implicit val decoder: Codec.AsObject[DirectoryNode] = deriveConfiguredCodec[DirectoryNode]
+  implicit val show: Show[DirectoryNode]              = Show.fromToString[DirectoryNode]
 }

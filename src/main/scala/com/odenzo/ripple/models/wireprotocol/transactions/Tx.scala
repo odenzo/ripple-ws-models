@@ -15,11 +15,11 @@ import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.{
 case class TxRq(transaction: TxnHash, binary: Boolean = false, id: RippleMsgId = RippleMsgId.EMPTY) extends RippleRq
 
 /**
-  * This is for the tx transaction inquiry .
+  * This is for the tx transaction inquiry, compare with TxNode and refactor.
   * We reuse TxNode but if it isn't validated then None because missing some mandatory items.
   * THIS should probably be fixed up to deal with TxRs when transaction is not in validated ledger!
   * Either[TxNodePending,TxNode] ?
-  * TODO: //Hmmm, I think always TxNode is there though? Revisit this.
+
   * @param tx    The transaction node, This should always be present on non-error cases?
   * @param meta  Present when? Only when validated I think.
   * @param validated None or false is not in validated ledger (e.g. failed or pending). Only true is true.

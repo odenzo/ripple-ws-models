@@ -1,6 +1,9 @@
 package com.odenzo.ripple.models.atoms.ledgertree
 
 import io.circe.{Decoder, Encoder}
+import io.circe._
+import io.circe.syntax._
+import io.circe.generic.extras.semiauto._
 
 /**
   * Meh, Node Index is 64 char HEX eh? NodeID
@@ -12,6 +15,6 @@ case class LedgerNodeIndex(v: String)
 
 object LedgerNodeIndex {
 
-  implicit val decoder: Decoder[LedgerNodeIndex] = Decoder.decodeString.map(LedgerNodeIndex.this(_))
-  implicit val encoder: Encoder[LedgerNodeIndex] = Encoder.encodeString.contramap[LedgerNodeIndex](_.v)
+  implicit val codec: Codec[LedgerNodeIndex] = deriveUnwrappedCodec[LedgerNodeIndex]
+
 }
