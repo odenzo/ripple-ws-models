@@ -1,7 +1,8 @@
 package com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes
 
+import io.circe.generic.extras.Configuration
 import io.circe.syntax._
-import io.circe.{Encoder, Decoder, JsonObject}
+import io.circe.{Codec, Encoder, JsonObject, Decoder}
 import monocle.Lens
 import monocle.macros.GenLens
 
@@ -76,12 +77,12 @@ object RippleTransaction {
   */
 //@Lenses
 case class TxOptions(
-    fee: Drops = Drops.stdFee, // Rq / Rs
-    sequence: Option[TxnSequence] = None,
-    accountTxnID: Option[Hash256] = None,
+    fee: Drops                         = Drops.stdFee, // Rq / Rs
+    sequence: Option[TxnSequence]      = None,
+    accountTxnID: Option[TxnHash]      = None, // ??
     lastLedgerSequence: LedgerSequence = LedgerSequence.MAX, // Instead of option. Should always be set reasonably.
-    memos: Option[Memos] = None,                             // Rq / Rs
-    sourceTag: Option[UInt32] = None
+    memos: Option[Memos]               = None, // Rq / Rs
+    sourceTag: Option[UInt32]          = None
 )
 
 object TxOptions {
@@ -126,9 +127,9 @@ case class PendingTxData(
     signers: Option[Signers], // Can be empty? Can be null?
     hash: TxnHash,
     txnType: RippleTxnType,
-    fee: Option[Drops] = None,   // Rq / Rs
-    memos: Option[Memos] = None, // Rq / Rs
-    sequence: Option[TxnSequence] = None,
+    fee: Option[Drops]                         = None, // Rq / Rs
+    memos: Option[Memos]                       = None, // Rq / Rs
+    sequence: Option[TxnSequence]              = None,
     lastLedgerSequence: Option[LedgerSequence] = None // Multiple ways of setting, use Ledger instead!
 )
 
@@ -155,6 +156,8 @@ case class ValidatedTxData(ledgerIndex: LedgerSequence, date: RippleTime)
 
 object ValidatedTxData {
 
-  implicit val decoder: Decoder[ValidatedTxData] = Decoder.forProduct2("ledger_index", "date")(ValidatedTxData.apply)
+  implicit val coonfiguration: Configuration = Configuration.default.withSnakeCaseMemberNames
+  import io.circe.generic.extras.semiauto._
+  implicit val codec: Codec.AsObject[ValidatedTxData] = deriveConfiguredCodec[ValidatedTxData]
 
 }

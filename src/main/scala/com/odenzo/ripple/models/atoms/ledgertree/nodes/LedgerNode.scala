@@ -1,7 +1,11 @@
 package com.odenzo.ripple.models.atoms.ledgertree.nodes
 
 import cats._
-import io.circe.{Decoder, Encoder, HCursor, JsonObject}
+import io.circe.generic.extras.Configuration
+import io.circe.generic.extras.semiauto.deriveConfiguredCodec
+import io.circe.{JsonObject, Encoder, HCursor, Decoder, Codec}
+
+import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 trait LedgerNode
 
@@ -43,8 +47,7 @@ case class LedgerFields(fields: JsonObject)
 
 object LedgerFields {
   import io.circe.syntax._
-  implicit val encoder: Encoder[LedgerFields] = Encoder.encodeJsonObject.contramap[LedgerFields](n => n.fields)
-  implicit val decoder: Decoder[LedgerFields] = Decoder.decodeJsonObject.map(LedgerFields.apply)
-
-  implicit val show: Show[LedgerFields] = Show.show[LedgerFields](v => v.fields.asJson.spaces2)
+  implicit val config: Configuration               = CirceCodecUtils.capitalizeExcept
+  implicit val codec: Codec.AsObject[LedgerFields] = deriveConfiguredCodec[LedgerFields]
+  implicit val show: Show[LedgerFields]            = Show.show[LedgerFields](v => v.fields.asJson.spaces2)
 }

@@ -19,6 +19,37 @@ final case class FiatAmount(amount: BigDecimal, script: Script) extends Currency
 }
 
 /**
+  * Monetary amount with a given script. Script has to be an issuer, not XRP.
+  * So there is no empty to define a monoid but can define a semigroup
+  *
+  */
+object FiatAmount {
+
+  /* Note this doesn't show the issuer */
+  implicit val show: Show[FiatAmount] = Show.show[FiatAmount] { v =>
+    format(v.amount) + " " + v.script.show
+  }
+
+  /** Could derive and then merge, not sure other ways in latest circe. Encode Script and add field? */
+  implicit val encoder: Encoder.AsObject[FiatAmount] = Encoder.AsObject.instance { fa: FiatAmount =>
+    JsonObject(
+      "value"    -> fa.amount.toString().asJson, // Need to avoid funny formatting
+      "currency" -> fa.script.currency.asJson,
+      "issuer"   -> fa.script.issuer.asJson
+    )
+  }
+
+  implicit val decode: Decoder[FiatAmount] = new Decoder[FiatAmount] {
+    final def apply(c: HCursor): Decoder.Result[FiatAmount] = {
+      (c.get[BigDecimal]("value"), c.as[Script]).mapN(FiatAmount.apply)
+    }
+  }
+
+  /** Creates a formatter and applied, multithread safe */
+  def format(bigDecimal: BigDecimal): String = new DecimalFormat("#,##0.00").format(bigDecimal)
+}
+
+/**
   *
   * Maximum number of drops is bigger than long. This allows negative values, but rarely used
   *  e.g. ripple_path_find
@@ -46,39 +77,6 @@ object CurrencyAmount {
     case v: FiatAmount => v.show
     case v: Drops      => v.show
   }
-}
-
-/**
-  * Monetary amount with a given script. Script has to be an issuer, not XRP.
-  * So there is no empty to define a monoid but can define a semigroup
-  *
-  */
-object FiatAmount {
-
-  /* Note this doesn't show the issuer */
-  implicit val show: Show[FiatAmount] = Show.show[FiatAmount] { v =>
-    format(v.amount) + " " + v.script.show
-  }
-
-  /** Could derive and then merge, not sure other ways in latest circe. Encode Script and add field? */
-  implicit val encoder: Encoder[FiatAmount] = Encoder.instance { fa: FiatAmount =>
-    Json.fromFields(
-      Seq(
-        "value"    -> fa.amount.toString().asJson, // Need to avoid funny formatting
-        "currency" -> fa.script.currency.asJson,
-        "issuer"   -> fa.script.issuer.asJson
-      )
-    )
-  }
-
-  implicit val decode: Decoder[FiatAmount] = new Decoder[FiatAmount] {
-    final def apply(c: HCursor): Decoder.Result[FiatAmount] = {
-      (c.get[BigDecimal]("value"), c.as[Script]).mapN(FiatAmount.apply)
-    }
-  }
-
-  /** Creates a formatter and applied, multithread safe */
-  def format(bigDecimal: BigDecimal): String = new DecimalFormat("#,##0.00").format(bigDecimal)
 }
 
 /**
@@ -113,6 +111,7 @@ object Drops {
 
     override def combine(x: Drops, y: Drops): Drops = Drops(x.amount + y.amount)
   }
+
   private val dropsPerXRP = BigDecimal(1000000L)
 
   def apply(amount: Long): Drops = Drops(BigInt(amount))
@@ -130,10 +129,4 @@ object Drops {
     val xrpAmt: BigDecimal = BigDecimal.exact(drops.amount) / dropsPerXRP
     new DecimalFormat("#,##0").format(xrpAmt)
   }
-}
-
-trait CurrencyAmountOps {
-  // Should add operators for XRP, FiatAmount, Drops, RippleAmount here
-  // a.plus(b) etc for different types.  Now it is in objects.
-
 }

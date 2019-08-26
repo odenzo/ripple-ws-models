@@ -1,6 +1,8 @@
 package com.odenzo.ripple.models.atoms
 
-import io.circe.Decoder
+import io.circe.{Decoder, Codec}
+import io.circe.generic.extras.Configuration
+import io.circe.generic.extras.semiauto.deriveConfiguredCodec
 import io.circe.generic.semiauto.deriveDecoder
 
 /**
@@ -22,6 +24,7 @@ case class RippleChannel(
 )
 
 object RippleChannel {
+  implicit val config: Configuration                = Configuration.default
+  implicit val codec: Codec.AsObject[RippleChannel] = deriveConfiguredCodec[RippleChannel]
 
-  lazy implicit val decoder: Decoder[RippleChannel] = deriveDecoder[RippleChannel]
 }

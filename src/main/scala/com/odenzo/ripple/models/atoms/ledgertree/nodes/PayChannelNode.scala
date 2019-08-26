@@ -1,8 +1,11 @@
 package com.odenzo.ripple.models.atoms.ledgertree.nodes
 
-import io.circe.Decoder
+import io.circe.{Decoder, Codec}
+import io.circe.generic.extras.Configuration
+import io.circe.generic.extras.semiauto.deriveConfiguredCodec
 
 import com.odenzo.ripple.models.atoms._
+import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 /**
   * See also docs for account root node. I am guessing this has delta too?
@@ -24,21 +27,7 @@ case class PayChannelNode(
 ) extends LedgerNode
 
 object PayChannelNode {
-
-  implicit val decode: Decoder[PayChannelNode] =
-    Decoder.forProduct12(
-      "Flags",
-      "Account",
-      "Sequence",
-      "TakerPays",
-      "TakerGets",
-      "BookDirectory",
-      "BookNode",
-      "Expiration",
-      "OwnerNode",
-      "PreviousTxnID",
-      "PreviousTxnLgrSeq",
-      "index"
-    )(PayChannelNode.apply)
+  implicit val config: Configuration                 = CirceCodecUtils.capitalizeExcept
+  implicit val codec: Codec.AsObject[PayChannelNode] = deriveConfiguredCodec[PayChannelNode]
 
 }

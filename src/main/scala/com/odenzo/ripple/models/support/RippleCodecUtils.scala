@@ -7,6 +7,7 @@ import com.odenzo.ripple.models.utils.CirceUtils
 import com.odenzo.ripple.models.utils.caterrors.CatsTransformers.ErrorOr
 import com.odenzo.ripple.models.utils.caterrors.{AppJsonDecodingError, OError}
 
+/** Going to start using Ripple generic extras now */
 trait RippleCodecUtils {
 
   /**

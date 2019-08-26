@@ -6,7 +6,9 @@ import enumeratum._
 
 sealed trait RippleTxnType extends EnumEntry
 
-/** Out of Date for SUre! */
+/** Out of Date for SUre and not used even except for encoders which is kind of useless..
+  * keep around in case there is a need for exhaustive checks and the RippleRq are not sealed.
+  */
 case object RippleTxnType extends Enum[RippleTxnType] with CirceEnum[RippleTxnType] {
 
   val values: immutable.IndexedSeq[RippleTxnType] = findValues

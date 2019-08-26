@@ -1,8 +1,11 @@
 package com.odenzo.ripple.models.atoms.ledgertree.nodes
 
-import io.circe.Decoder
+import io.circe.{Decoder, Codec}
+import io.circe.generic.extras.Configuration
+import io.circe.generic.extras.semiauto.deriveConfiguredCodec
 
 import com.odenzo.ripple.models.atoms._
+import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 /**
   * See also docs for account root node. I am guessing this has delta too?
@@ -22,34 +25,14 @@ case class OfferNode(
     ownerNode: Option[String], // LedgerNodeIndex type? "0000000000000000" So, its a LedgerId?
     previousTxnId: Option[TxnHash],
     previousTxnLgrSeq: Option[LedgerSequence],
-    index: Option[String],       // Guessing this is a LedgerNodeIndex of this node.
-    owner_funds: Option[String], // Not documented but present. Value field for GETS? Replaces
-    // taker_get/pays_funded
+    index: Option[String], // Guessing this is a LedgerNodeIndex of this node.
+    owner_funds: Option[String],
     quality: BigDecimal,
     taker_gets_funded: Option[CurrencyAmount],
     taker_pays_funded: Option[CurrencyAmount]
 ) extends LedgerNode
 
 object OfferNode {
-
-  implicit val decode: Decoder[OfferNode] =
-    Decoder.forProduct16(
-      "Flags",
-      "Account",
-      "Sequence",
-      "TakerPays",
-      "TakerGets",
-      "BookDirectory",
-      "BookNode",
-      "Expiration",
-      "OwnerNode",
-      "PreviousTxnID",
-      "PreviousTxnLgrSeq",
-      "index",
-      "owner_funds",
-      "quality",
-      "taker_gets_funded",
-      "taker_pays_funded"
-    )(OfferNode.apply)
-
+  implicit val config: Configuration            = CirceCodecUtils.capitalizeExcept
+  implicit val codec: Codec.AsObject[OfferNode] = deriveConfiguredCodec[OfferNode]
 }

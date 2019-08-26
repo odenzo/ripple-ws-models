@@ -1,8 +1,8 @@
 package com.odenzo.ripple.models.atoms
 
-import io.circe.Json
-
-import io.circe._
+import io.circe.generic.extras.Configuration
+import io.circe.{Json, _}
+import io.circe.generic.extras.semiauto._
 
 /**
   *  Limit for paging through results.
@@ -12,17 +12,16 @@ case class Limit(max: Int) {}
 
 object Limit {
 
-  val default = Limit(50)
-
-  implicit val encode: Encoder[Limit]  = Encoder.encodeInt.contramap[Limit](_.max)
-  implicit val decoder: Decoder[Limit] = Decoder.decodeInt.map(Limit(_))
+  val default                        = Limit(50)
+  implicit val config: Configuration = Configuration.default
+  implicit val codec: Codec[Limit]   = deriveUnwrappedCodec[Limit]
 }
 
 /** Scrolling requests and responses have an Optional opaque marker to track where scrolling position is.s */
 case class Marker(mark: Json)
 
 object Marker {
-
-  implicit val encode: Encoder[Marker]  = Encoder.encodeJson.contramap[Marker](_.mark)
-  implicit val decoder: Decoder[Marker] = Decoder.decodeJson.map(Marker(_))
+  // Is this unwrapped, I think so.
+  implicit val config: Configuration = Configuration.default
+  implicit val codec: Codec[Marker]  = deriveUnwrappedCodec[Marker]
 }

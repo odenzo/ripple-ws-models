@@ -1,13 +1,13 @@
 package com.odenzo.ripple.models.atoms
 
 import io.circe.generic.semiauto._
-import io.circe.{Decoder, Encoder, Json}
+import io.circe.{Json, Encoder, Decoder}
+import io.circe._
+import io.circe.generic.extras.Configuration
+import io.circe.syntax._
+import io.circe.generic.extras.semiauto._
 
-/**
-  * Note: Current use cases use auto-path finding so these are not well tested.
-  * TODO: Details TxnPath integration testing with Scenarios
-  */
-trait TxnPaths {}
+trait TxnPaths
 
 /**
   * Corresponds to one account trust line info in the response message of account_lines
@@ -32,34 +32,31 @@ case class PaymentPath(hops: List[PaymentPathStep])
 /**
   * Several different types of nodes. type = 1 is just account , type 48 is currency and issuer
   *     https://xrpl.org/paths.html
-  * @param currency
-  * @param issuer
-  * @param zType Deprecated
-  * @param type_hex        Deprectate
   */
 case class PaymentPathStep(
     currency: Option[Currency],
     issuer: Option[AccountAddr],
-    `type`: Option[Int] = None,
+    `type`: Option[Int]      = None,
     type_hex: Option[String] = None
 )
 
 object PaymentPath {
-  implicit val encoder: Encoder.AsObject[PaymentPath] = deriveEncoder[PaymentPath]
-  implicit val decoder: Decoder[PaymentPath]          = deriveDecoder[PaymentPath]
+  implicit val config: Configuration              = Configuration.default
+  implicit val codec: Codec.AsObject[PaymentPath] = deriveConfiguredCodec[PaymentPath]
+
 }
 
 object PaymentPathStep {
-  implicit val encoder: Encoder.AsObject[PaymentPathStep] = deriveEncoder[PaymentPathStep]
-  implicit val decoder: Decoder[PaymentPathStep]          = deriveDecoder[PaymentPathStep]
+  implicit val config: Configuration                  = Configuration.default
+  implicit val codec: Codec.AsObject[PaymentPathStep] = deriveConfiguredCodec[PaymentPathStep]
 }
 
 object RipplePathFindResult {
-  implicit val encoder: Encoder.AsObject[RipplePathFindResult] = deriveEncoder[RipplePathFindResult]
-  implicit val decoder: Decoder[RipplePathFindResult]          = deriveDecoder[RipplePathFindResult]
+  implicit val config: Configuration                       = Configuration.default
+  implicit val codec: Codec.AsObject[RipplePathFindResult] = deriveConfiguredCodec[RipplePathFindResult]
 }
 
 object AlternativePaths {
-  implicit val encoder: Encoder.AsObject[AlternativePaths] = deriveEncoder[AlternativePaths]
-  implicit val decoder: Decoder[AlternativePaths]          = deriveDecoder[AlternativePaths]
+  implicit val config: Configuration                   = Configuration.default
+  implicit val codec: Codec.AsObject[AlternativePaths] = deriveConfiguredCodec[AlternativePaths]
 }

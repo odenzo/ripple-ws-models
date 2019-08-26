@@ -82,7 +82,7 @@ object TxPayment {
         tx_sign            <- c.get[TxnSignature]("TxnSignature")
         date               <- c.get[RippleTime]("date")
         hash               <- c.get[TxnHash]("hash")
-        ledger_index       <- c.get[LedgerSequence]("ledger_index")
+        ledger_index       <- c.get[LedgerSequence]("ledger_index") // LedgerResultIndex
       } yield TxPayment(
         sender,
         amount,
@@ -268,11 +268,11 @@ case class TxEscrowCreate(
     account: AccountAddr,
     amount: Drops, // Only Drops can be escrowed
     destination: AccountAddr,
-    cancelAfter: Option[RippleTime] = None,
-    finishAfter: Option[RippleTime] = None, // as above, need a new type for this.
-    condition: Option[String] = None,       // preimage-sha-256 crypto-condition.
+    cancelAfter: Option[RippleTime]    = None,
+    finishAfter: Option[RippleTime]    = None, // as above, need a new type for this.
+    condition: Option[String]          = None, // preimage-sha-256 crypto-condition.
     destinationTag: Option[AccountTag] = None,
-    sourceTag: Option[AccountTag] = None,
+    sourceTag: Option[AccountTag]      = None,
     fee: Drops,
     lastLedgerSequence: Option[LedgerSequence],
     memos: Option[Memos],

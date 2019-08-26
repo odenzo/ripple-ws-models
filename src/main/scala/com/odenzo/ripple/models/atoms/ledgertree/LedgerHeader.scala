@@ -1,6 +1,6 @@
 package com.odenzo.ripple.models.atoms.ledgertree
 
-import io.circe.Decoder
+import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto._
 
 import com.odenzo.ripple.models.atoms._
@@ -66,6 +66,7 @@ object LedgerTxn {
       md  <- hcursor.get[Meta]("metaData")
     } yield LedgerTxn(txn, md)
   }
+  //implicit val encoder: Encoder.AsObject[LedgerTxn] = deriveEncoder[LedgerTxn]
 }
 
 /** Represents a list of Ledger Tranasction that is either expanded or a */

@@ -1,6 +1,8 @@
 package com.odenzo.ripple.models.atoms
 
-import io.circe.{Decoder, Encoder}
+import io.circe.generic.extras.Configuration
+import io.circe.generic.extras.semiauto.deriveConfiguredCodec
+import io.circe.{Encoder, Decoder, Codec}
 
 import com.odenzo.ripple.models.utils.CirceCodecUtils
 
@@ -12,20 +14,14 @@ case class Offer(
     expiration: Option[RippleTime],
     flags: BitMask[OfferCreateFlag],
     quality: BigDecimal, // Redundant
-    sequence: Option[TxnSequence],
+    seq: Option[TxnSequence],
     taker_gets: CurrencyAmount,
     taker_pays: CurrencyAmount
 )
 
 object Offer extends CirceCodecUtils {
-  implicit val encoder: Encoder.AsObject[Offer] = {
-    Encoder.forProduct6("expiration", "flags", "quality", "seq", "taker_gets", "taker_pays")(
-      v => (v.expiration, v.flags, v.quality, v.sequence, v.taker_gets, v.taker_pays)
-    )
-  }
 
-  implicit val decoder: Decoder[Offer] = {
-    Decoder.forProduct6("expiration", "flags", "quality", "seq", "taker_gets", "taker_pays")(Offer.apply)
-  }
+  implicit val config: Configuration        = Configuration.default
+  implicit val codec: Codec.AsObject[Offer] = deriveConfiguredCodec[Offer]
 
 }

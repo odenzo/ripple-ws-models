@@ -1,13 +1,15 @@
 package com.odenzo.ripple.models.utils
 
 import cats.implicits._
-import io.circe.{ACursor, Json, JsonObject}
+import io.circe.generic.extras.Configuration
+import io.circe.{Json, JsonObject, ACursor}
 
 import com.odenzo.ripple.models.atoms.Hash256
 import com.odenzo.ripple.models.utils.caterrors.CatsTransformers.ErrorOr
 import com.odenzo.ripple.models.utils.caterrors.{AppError, OError}
 
-trait CirceEncoderUtils {
+/** Going to start using Ripple Generic Extras. */
+trait CirceCodecUtils {
 
   /**
     * Utility to rename a field in a JsonObject, typically used in encoders .mapJsonObject
@@ -68,9 +70,6 @@ trait CirceEncoderUtils {
     // TODO: Refactor (getOrElse {...} on top matches human description more
     replaced.getOrElse(withLedger)
   }
-}
-
-trait CirceDecoderUtils {
 
   //  /**
   //    * Used as a prepare() function to convert case class fields to uppercase first letter.
@@ -89,9 +88,6 @@ trait CirceDecoderUtils {
   //    ac
   //
   //  }
-}
-
-trait CirceCodecUtils extends CirceEncoderUtils with CirceDecoderUtils {
 
   type KeyTransformer = String => String
 
@@ -100,12 +96,30 @@ trait CirceCodecUtils extends CirceEncoderUtils with CirceDecoderUtils {
     _.replaceAll("([A-Z]+)([A-Z][a-z])", "$1_$2").replaceAll("([a-z\\d])([A-Z])", "$1_$2").toLowerCase
 
   /** Capitalize a somewhat normal word */
-  val capitalize: KeyTransformer = _.capitalize
+  def capitalize(s: String): String = s.capitalize
 
-  val unCapitalize: KeyTransformer = { toString: String =>
+  /** Transformation to capitalize the first letter only of a field name */
+  val capitalizeTransformation: String => String = capitalize
+
+  val decapitalizeTransformation: String => String = unCapitalize
+
+  val capitalizeConfiguration: Configuration =
+    Configuration.default.copy(transformMemberNames = capitalizeTransformation)
+
+  val capitalizeExcept: Configuration = Configuration.default.copy(transformMemberNames = capitalizeExceptFn)
+
+  def capitalizeExceptFn(s: String): String = {
+    s match {
+      case "hash"  => "hash"
+      case "index" => "index"
+      case other   => capitalize(other)
+    }
+  }
+
+  def unCapitalize(s: String): String = {
     if (toString == null) null
-    else if (toString.length == 0) toString
-    else if (toString.charAt(0).isLower) toString
+    else if (toString.length == 0) s
+    else if (toString.charAt(0).isLower) s
     else {
       val chars = toString.toCharArray
       chars(0) = chars(0).toLower

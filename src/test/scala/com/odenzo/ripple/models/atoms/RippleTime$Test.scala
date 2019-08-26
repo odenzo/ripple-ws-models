@@ -1,7 +1,9 @@
 package com.odenzo.ripple.models.atoms
 
 import com.odenzo.ripple.models.testkit.CodecTesting
-
+import io.circe._
+import io.circe.syntax._
+import io.circe.generic.extras.semiauto._
 class RippleTime$Test extends CodecTesting {
 
   test("Round Tripping RippleTime") {
@@ -12,5 +14,12 @@ class RippleTime$Test extends CodecTesting {
     logger.debug(s"Now: $now \nAgain: $again")
     now shouldEqual again
 
+  }
+
+  test("Codec Annotation") {
+    val t    = RippleTime(123123)
+    val json = t.asJson
+    logger.debug(s"JSON for $t is \n ${json.spaces4}")
+    val t2 = json.as[RippleTime]
   }
 }

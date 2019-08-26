@@ -1,6 +1,8 @@
 package com.odenzo.ripple.models.wireprotocol.accountinfo
 
 import io.circe._
+import io.circe.generic.extras.Configuration
+import io.circe.generic.extras.semiauto.deriveConfiguredCodec
 import io.circe.generic.semiauto._
 
 import com.odenzo.ripple.models.atoms._
@@ -18,9 +20,9 @@ import com.odenzo.ripple.models.support.{RippleScrollingRq, RippleScrollingRs}
 case class AccountChannelsRq(
     account: AccountAddr,
     destination_account: Option[AccountAddr],
-    ledger: Ledger = LedgerName.CURRENT_LEDGER,
-    id: RippleMsgId = RippleMsgId.random,
-    limit: Limit = Limit(50),
+    ledger: Ledger         = LedgerName.CURRENT_LEDGER,
+    id: RippleMsgId        = RippleMsgId.random,
+    limit: Limit           = Limit(50),
     marker: Option[Marker] = None
 ) extends RippleScrollingRq {
   def scrollWith(marker: Marker): AccountChannelsRq = this.copy(marker = Option(marker))
@@ -46,6 +48,6 @@ object AccountChannelsRq {
 }
 
 object AccountChannelsRs {
-  implicit val decoder: Decoder[AccountChannelsRs] = deriveDecoder[AccountChannelsRs]
-
+  implicit val config: Configuration                    = Configuration.default
+  implicit val codec: Codec.AsObject[AccountChannelsRs] = deriveConfiguredCodec[AccountChannelsRs]
 }

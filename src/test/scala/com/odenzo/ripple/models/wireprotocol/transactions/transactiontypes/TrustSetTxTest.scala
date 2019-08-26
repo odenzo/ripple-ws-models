@@ -3,7 +3,9 @@ package com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes
 import io.circe.Decoder
 
 import com.odenzo.ripple.models.testkit.CodecTesting
-
+import io.circe._
+import io.circe.syntax._
+import io.circe.generic.extras.semiauto._
 class TrustSetTxTest extends CodecTesting {
 
   val json =
@@ -25,8 +27,10 @@ class TrustSetTxTest extends CodecTesting {
 
       |}""".stripMargin
 
-  test("Decoding") {
+  test("Codec") {
+
     val obj = getOrLog(parseAndDecode(json, Decoder[TrustSetTx]))
+    obj.asJson
     logger.debug(s"$obj")
   }
 }

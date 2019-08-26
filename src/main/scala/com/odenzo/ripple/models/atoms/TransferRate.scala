@@ -1,5 +1,8 @@
 package com.odenzo.ripple.models.atoms
 
+import io.circe.Codec
+import io.circe.generic.extras.semiauto.deriveUnwrappedCodec
+
 import com.odenzo.ripple.models.utils.caterrors.OError
 
 /**
@@ -17,6 +20,8 @@ import com.odenzo.ripple.models.utils.caterrors.OError
 case class TransferRate(rate: Long)
 
 object TransferRate {
+
+  implicit val codec: Codec[TransferRate] = deriveUnwrappedCodec[TransferRate]
 
   val billion      = 1000000000L
   private val base = billion / 100L
@@ -36,14 +41,13 @@ object TransferRate {
       calc(percentage),
       OError(s"Transfer Rate % $percentage not between 0 and 100")
     )
-
   }
 
   /**
     * Calculates percentage by on 20% == 20 style and truncates down to Long value
     * @param p
     */
-  private def calc(p: Double) = {
+  private def calc(p: Double): TransferRate = {
     val z: Long = (base * p).toLong + billion
     TransferRate(z)
   }

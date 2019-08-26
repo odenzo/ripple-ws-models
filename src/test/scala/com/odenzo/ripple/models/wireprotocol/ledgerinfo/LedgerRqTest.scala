@@ -18,7 +18,7 @@ class LedgerRqTest extends CodecTesting {
   }
 
   test("Encoding with hash") {
-    val rq = LedgerRq(transactions = true, ledger = LedgerHash(RippleHash.dummy))
+    val rq = LedgerRq(transactions = true, ledger = LedgerHash(RippleHash("fweoijfweoifjwe")))
     testEncoding(rq, Encoder[LedgerRq])
   }
 }

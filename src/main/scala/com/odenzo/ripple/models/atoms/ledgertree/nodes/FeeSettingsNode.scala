@@ -1,9 +1,12 @@
 package com.odenzo.ripple.models.atoms.ledgertree.nodes
 
-import io.circe.Decoder
+import io.circe.generic.extras.Configuration
+import io.circe.generic.extras.semiauto.deriveConfiguredCodec
+import io.circe.{Decoder, Codec}
 
 import com.odenzo.ripple.models.atoms.Drops
 import com.odenzo.ripple.models.atoms.ledgertree.LedgerNodeIndex
+import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 /**
   * This one is not in docs, but appears sporadically. Like amendments, validators adverstise over intervals I guess.
@@ -28,15 +31,6 @@ case class FeeSettingsNode(
 }
 
 object FeeSettingsNode {
-
-  implicit val decode: Decoder[FeeSettingsNode] =
-    Decoder.forProduct6(
-      "BaseFee",
-      "Flags",
-      "ReferenceFeeUnits",
-      "ReserveBase",
-      "ReserveIncrement",
-      "index"
-    )(FeeSettingsNode.apply)
-
+  implicit val config: Configuration                  = CirceCodecUtils.capitalizeExcept
+  implicit val codec: Codec.AsObject[FeeSettingsNode] = deriveConfiguredCodec[FeeSettingsNode]
 }

@@ -1,10 +1,12 @@
 package com.odenzo.ripple.models.atoms
 
 import scala.util.Try
-
+import io.circe._
+import io.circe.syntax._
+import io.circe.generic.extras.semiauto._
 import cats.implicits._
-import io.circe.{Decoder, Encoder}
-
+import io.circe.{Encoder, Decoder, Codec}
+import io.circe.generic.extras.semiauto._
 /*
  * Note: There are also Hash160 and Hash128.
  * Haven't modelled those correctly ?
@@ -38,14 +40,16 @@ object Hash256 {
 
   type AccountTxID = TxnHash
 
-  implicit val encoder: Encoder[Hash256] = Encoder.encodeString.contramap[Hash256](_.v)
-  implicit val decoder: Decoder[Hash256] = Decoder.decodeString.map(RippleHash(_))
+  // implicit val codec: Codec[Hash256] = deriveUnwrappedCodec[Hash256]
+  // implicit val encoder: Encoder[Hash256] = Encoder.encodeString.contramap[Hash256](_.v)
+  // implicit val decoder: Decoder[Hash256] = Decoder.decodeString.map(RippleHash(_))
 }
 
 case class PaymentChannelHash(v: String) extends Hash256
 object PaymentChannelHash {
-  implicit val encoder: Encoder[PaymentChannelHash] = Encoder.encodeString.contramap[PaymentChannelHash](_.v)
-  implicit val decoder: Decoder[PaymentChannelHash] = Decoder.decodeString.map(PaymentChannelHash(_))
+  implicit val codec: Codec[PaymentChannelHash] = deriveUnwrappedCodec[PaymentChannelHash]
+  //implicit val encoder: Encoder[PaymentChannelHash] = Encoder.encodeString.contramap[PaymentChannelHash](_.v)
+  //implicit val decoder: Decoder[PaymentChannelHash] = Decoder.decodeString.map(PaymentChannelHash(_))
 }
 
 // LedgerHash over in Ledger file :-)
@@ -82,33 +86,25 @@ case class ChannelIndex(v: String) extends Hash256
 case class AccountHash(v: String) extends Hash256
 
 object RippleHash {
-  implicit val encoder: Encoder[RippleHash] = Encoder.encodeString.contramap[RippleHash](_.v)
-  implicit val decoder: Decoder[RippleHash] = Decoder.decodeString.map(RippleHash(_))
-
-  /** For testing ^_^ */
-  lazy val dummy = RippleHash("HashTest" * 8)
-
+  implicit val codec: Codec[RippleHash] = deriveUnwrappedCodec[RippleHash]
 }
 
 object TxnHash {
-  implicit val encoder: Encoder[TxnHash] = Encoder.encodeString.contramap[TxnHash](_.v)
-  implicit val decoder: Decoder[TxnHash] = Decoder.decodeString.map(TxnHash(_))
+  implicit val codec: Codec[TxnHash] = deriveUnwrappedCodec[TxnHash]
 
 }
 
 object ChannelIndex {
-  implicit val encoder: Encoder[ChannelIndex] = Encoder.encodeString.contramap[ChannelIndex](_.v)
-  implicit val decoder: Decoder[ChannelIndex] = Decoder.decodeString.map(ChannelIndex(_))
+  implicit val codec: Codec[ChannelIndex] = deriveUnwrappedCodec[ChannelIndex]
 }
 
 object AccountHash {
-  implicit val encoder: Encoder[AccountHash] = Encoder.encodeString.contramap[AccountHash](_.v)
-  implicit val decoder: Decoder[AccountHash] = Decoder.decodeString.map(v => AccountHash(v))
+  implicit val codec: Codec[AccountHash] = deriveUnwrappedCodec[AccountHash]
+
 }
 
 object InvoiceHash {
-  implicit val encoder: Encoder[InvoiceHash] = Encoder.encodeString.contramap[InvoiceHash](_.v)
-  implicit val decoder: Decoder[InvoiceHash] = Decoder.decodeString.map(InvoiceHash(_))
+  implicit val codec: Codec[InvoiceHash] = deriveUnwrappedCodec[InvoiceHash]
 
   val empty: InvoiceHash = InvoiceHash("0" * 64) // Correct number, define on Hash256 FIXME
 }

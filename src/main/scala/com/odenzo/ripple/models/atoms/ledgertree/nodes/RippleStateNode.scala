@@ -1,13 +1,17 @@
 package com.odenzo.ripple.models.atoms.ledgertree.nodes
 
 import io.circe.Decoder
+import io.circe.generic.extras.Configuration
+import io.circe._
+import io.circe.syntax._
+import io.circe.generic.extras.semiauto._
 
 import com.odenzo.ripple.models.atoms.ledgertree.LedgerNodeIndex
-import com.odenzo.ripple.models.atoms.{FiatAmount, LedgerSequence, RippleQuality, TxnHash}
+import com.odenzo.ripple.models.atoms.{LedgerSequence, RippleQuality, FiatAmount, TxnHash}
+import com.odenzo.ripple.models.support.RippleCodecUtils
+import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 // TODO: Need a RippleStateFlag
-// Does this appear in delta or not?  I think so.
-// In Progress
 case class RippleStateNode(
     balance: Option[FiatAmount],
     lowLimit: Option[FiatAmount],
@@ -23,38 +27,7 @@ case class RippleStateNode(
 ) extends LedgerNode
 
 object RippleStateNode {
-  // Quick hack
-  // Yet again there must be some way to do this!
-  // In this particular case COnfigure a fieldMapper maybe
-//  private val fields = "Balance" ::
-//               "LowLimit" ::
-//               "HighLimit" ::
-//               "PreviousTxnID" ::
-//               "PreviousTxnLgrSeq" ::
-//               "LowNode" ::
-//               "HighNode" ::
-//               "LowQualityIn" ::
-//               "LowQualityOut" ::
-//               "HighQualityIn" ::
-//               "HighQualityOut" ::
-//               HNil
-//  private val tupledFields: (String, String, String, String, String, String, String, String, String, String, String) =
-//    fields.tupled
-
-  // val listFields: immutable.Seq[String] = fields.toList
-
-  implicit val decoder: Decoder[RippleStateNode] = Decoder.forProduct11(
-    "Balance",
-    "LowLimit",
-    "HighLimit",
-    "PreviousTxnID",
-    "PreviousTxnLgrSeq",
-    "LowNode",
-    "HighNode",
-    "LowQualityIn",
-    "LowQualityOut",
-    "HighQualityIn",
-    "HighQualityOut"
-  )(RippleStateNode.apply)
+  implicit val config: Configuration                  = CirceCodecUtils.capitalizeConfiguration
+  implicit val codec: Codec.AsObject[RippleStateNode] = deriveConfiguredCodec[RippleStateNode]
 
 }

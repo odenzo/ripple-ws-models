@@ -1,6 +1,11 @@
 package com.odenzo.ripple.models.atoms
 
-import io.circe.{Decoder, Encoder}
+import io.circe._
+import io.circe.syntax._
+import io.circe.generic.extras.semiauto._
+import io.circe.generic.JsonCodec
+import io.circe.generic.extras.ConfiguredJsonCodec
+import io.circe.{Encoder, Decoder}
 
 /**
   *
@@ -10,6 +15,6 @@ import io.circe.{Decoder, Encoder}
 case class TxBlob(v: String) extends AnyVal
 
 object TxBlob {
-  implicit val encoder: Encoder[TxBlob] = Encoder.encodeString.contramap[TxBlob](_.v)
-  implicit val decoder: Decoder[TxBlob] = Decoder.decodeString.map(TxBlob(_))
+  implicit val codec: Codec[TxBlob] = deriveUnwrappedCodec[TxBlob]
+
 }
