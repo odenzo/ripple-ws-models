@@ -1,5 +1,8 @@
 package com.odenzo.ripple.models.testkit
 
+import java.nio.file.Path
+import java.util
+
 import cats.implicits._
 import io.circe.Decoder.Result
 import io.circe.{Json, Encoder, Decoder}
@@ -8,7 +11,8 @@ import org.scalatest.{Assertion, EitherValues, Matchers}
 import scribe.{Logging, Logger}
 
 import com.odenzo.ripple.models.utils.{CirceUtils, ScribeConfig}
-import com.odenzo.ripple.models.utils.caterrors.AppError
+import com.odenzo.ripple.models.utils.caterrors.{AppError, AppException}
+import io.circe.syntax
 
 /**
   * Slowly rebuilding a suite of unit tests for the models, which don't require calling Ripple.
@@ -28,6 +32,16 @@ trait CodecTesting extends AnyFunSuite with Matchers with EitherValues with Logg
       case Left(err)   => fail(s"Could not parse json $err from String:\n$s")
       case Right(json) => json
     }
+  }
+
+  def jsonRoundTrip[A](jsonStr: String, encoder: Encoder[A], decoder: Decoder[A]) = {
+    for {
+      json <- parseAsJson(jsonStr)
+      obj  <- decode(json, decoder)
+      jsonBack = encoder(obj)
+      _        = logger.debug(s"Object ${pprint.apply(obj)}")
+      _        = if (jsonBack != json) logger.warn(s"JSON Mistmatch:\n ${json.spaces4} \n =!= \n ${jsonBack.spaces4}")
+    } yield (json, obj)
   }
 
   /** For the things that have both encoders and decoders (not rq encoder , rs decoder) */
@@ -64,15 +78,47 @@ trait CodecTesting extends AnyFunSuite with Matchers with EitherValues with Logg
     }
   }
 
-  def getOrLog[T](ee: Either[Throwable, T], msg: String = "Error: ", myLog: Logger = logger): T = {
-    ee.leftMap {
-      case e: AppError  => myLog.error(s"Errors ${e.show}")
-      case e: Throwable => myLog.error(s"Throwable $msg\t=> $e ")
-    }
-
+  def getOrFailLogging[T](ee: Either[Throwable, T], msg: String = "Error: ", myLog: Logger = logger): T = {
+    logIfError(ee, msg, myLog)
     ee match {
       case Right(v) => v
       case Left(e)  => fail(s"getOrLog error ${e.getMessage}")
     }
   }
+
+  def logIfError[A <: Throwable, T](ee: Either[A, T], msg: String = "Error: ", myLog: Logger = logger): Either[A, T] = {
+    ee.leftMap {
+      case e: AppError  => myLog.error(s"Errors ${(e: AppError).show}")
+      case e: Throwable => myLog.error(s"Throwable $msg\t=> $e ")
+    }
+    ee
+  }
+
+  def findFixtureFiles(dir: String, startingWith: String): Either[AppError, List[Path]] = {
+    import collection.JavaConverters._ // Trying to keep scala 12 compatability with 13 now
+    AppException.wrapPure("Finding Files") {
+      // The Fixtures are now in the resource directory so load via resource
+      // But non trivial to do in general case (from Jar and from IDE)
+      import java.net.URL
+      import java.nio.file.Files
+      import java.nio.file.Path
+      import java.nio.file.Paths
+      val url                      = this.getClass.getResource(s"/$dir")
+      val path                     = Paths.get(url.toURI)
+      val all: util.Iterator[Path] = Files.newDirectoryStream(path).iterator()
+      val list: List[Path]         = all.asScala.toList
+      // list.foreach((p: Path) => logger.info(s"[${p.getFileName()}] $p"))
+      list
+        .filterNot(p => p.getFileName.startsWith(startingWith))
+        .sortBy(_.getFileName)
+
+    }
+  }
+
+  def shouldSkipPath(p: Path, withNameContaining: Set[String]): Boolean = {
+    val name: String = p.getFileName.toString
+    val shouldSkip   = withNameContaining.exists(s => name.contains(s))
+    shouldSkip
+  }
+
 }

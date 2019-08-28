@@ -52,7 +52,7 @@ trait BalanceExtractors {
 
   /** Top level response with have a list of Transaction records, we get old balances for each tx/tx record */
   def extractBalance(rs: AccountTxRs): List[List[AccountBalance]] = {
-    val sorted = rs.transactions.sortBy(_.tx.sequence.v)
+    val sorted = rs.transactions //.sortBy(_.tx.sequence.v)
 
     val trimmed = sorted //.slice(0, 1)
     // Note: Not all of these transactions will be Payment Transactions.

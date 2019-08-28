@@ -26,7 +26,7 @@ case class SignerListSetTx(
 
 object SignerListSetTx {
 
-  implicit val config: Configuration             = CirceCodecUtils.capitalizeExcept
+  implicit val config: Configuration             = CirceCodecUtils.capitalizeExcept()
   implicit val decoder: Decoder[SignerListSetTx] = deriveConfiguredDecoder[SignerListSetTx]
   implicit val encoder: Encoder.AsObject[SignerListSetTx] =
     deriveConfiguredEncoder[SignerListSetTx].mapJsonObject(_.add("TransactionType", "TrustSet".asJson))

@@ -1,4 +1,4 @@
-package com.odenzo.ripple.models.atoms.ledgertree.nodes
+package com.odenzo.ripple.models.atoms.ledgertree.statenodes
 
 import cats.Show
 import io.circe.{Decoder, Codec}
@@ -25,6 +25,6 @@ case class LedgerHashesNode(
 ) extends LedgerNode
 
 object LedgerHashesNode {
-  implicit val config: Configuration                   = CirceCodecUtils.capitalizeExcept
+  implicit val config: Configuration                   = CirceCodecUtils.capitalizeExcept()
   implicit val codec: Codec.AsObject[LedgerHashesNode] = deriveConfiguredCodec[LedgerHashesNode]
 }

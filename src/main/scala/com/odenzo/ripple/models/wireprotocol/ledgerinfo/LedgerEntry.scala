@@ -5,7 +5,7 @@ import io.circe.generic.semiauto._
 import io.circe.syntax._
 
 import com.odenzo.ripple.models.atoms._
-import com.odenzo.ripple.models.atoms.ledgertree.nodes.AccountRootNode
+import com.odenzo.ripple.models.atoms.ledgertree.statenodes.AccountRootNode
 import com.odenzo.ripple.models.support.{RippleScrollingRq, RippleScrollingRs}
 
 /**
@@ -18,14 +18,14 @@ import com.odenzo.ripple.models.support.{RippleScrollingRq, RippleScrollingRs}
   *
   */
 case class LedgerEntryRq(
-    mtype: String = "account_root",
+    mtype: String                     = "account_root",
     account_root: Option[AccountAddr] = None,
-    ledger: Ledger = LedgerName.VALIDATED_LEDGER,
-    index: Option[String] = None, // Not a LedgerIndex, a LedgerNodeIndex
-    binary: Boolean = false,
-    limit: Limit = Limit.default,
-    marker: Option[Marker] = None,
-    id: RippleMsgId = RippleMsgId.random
+    ledger: Ledger                    = LedgerName.VALIDATED_LEDGER,
+    index: Option[String]             = None, // Not a LedgerIndex, a LedgerNodeIndex
+    binary: Boolean                   = false,
+    limit: Limit                      = Limit.default,
+    marker: Option[Marker]            = None,
+    id: RippleMsgId                   = RippleMsgId.random
 ) extends RippleScrollingRq
 
 case class LedgerEntryRs(

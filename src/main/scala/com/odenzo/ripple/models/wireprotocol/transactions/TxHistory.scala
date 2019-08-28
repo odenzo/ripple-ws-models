@@ -4,13 +4,9 @@ import io.circe._
 import io.circe.generic.semiauto._
 import io.circe.syntax._
 
-import com.odenzo.ripple.models.atoms.{Meta, _}
-import com.odenzo.ripple.models.support.{RippleRs, TxnStatusCode, RippleRq}
-import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.{
-  PendingTxData,
-  RippleTransaction,
-  ValidatedTxData
-}
+import com.odenzo.ripple.models.atoms.ledgertree.transactions.LedgerTransaction
+import com.odenzo.ripple.models.atoms._
+import com.odenzo.ripple.models.support.{RippleRs, RippleRq}
 
 /**
   * Decprecated command to get the last few transactions, where start is the number to skip over
@@ -19,8 +15,8 @@ case class TxHistoryRq(start: Int, id: RippleMsgId = RippleMsgId.EMPTY) extends 
 
 case class TxHistoryRs(
     index: Int,
-    txs: List[RippleTransaction]
-) extends RippleRs {}
+    txs: List[LedgerTransaction]
+) extends RippleRs
 
 object TxHistoryRq {
   val command: Json = "tx_history".asJson

@@ -3,8 +3,8 @@ package com.odenzo.ripple.models.atoms
 import scala.collection.immutable
 
 import io.circe.generic.extras.Configuration
-import io.circe.generic.extras.semiauto.{deriveConfiguredEncoder, deriveConfiguredDecoder}
-import io.circe.generic.semiauto._
+import io.circe.generic.extras.semiauto._
+
 import io.circe.syntax._
 import io.circe.{JsonObject, Encoder, Decoder, Codec, Json}
 
@@ -21,9 +21,8 @@ import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.Trust
 case class Signer(account: AccountAddr, signingPubKey: RipplePublicKey, txnSignature: TxnSignature)
 
 object Signer {
-
   implicit val config: Configuration         = CirceCodecUtils.capitalizeConfiguration
-  implicit val codec: Codec.AsObject[Signer] = deriveCodec[Signer]
+  implicit val codec: Codec.AsObject[Signer] = deriveConfiguredCodec[Signer]
 }
 
 /** The signers appear in tx_json elements (RippleTransaction in via CommonTx).
@@ -34,7 +33,7 @@ object Signer {
 case class Signers(signers: List[Signer])
 
 object Signers {
-
+  import io.circe.generic.semiauto._
   implicit val encoder: Encoder[Signers] = Encoder.instance[Signers] { v =>
     val objects: immutable.Seq[JsonObject] = v.signers.map(s => JsonObject.singleton("Signer", s.asJson))
     val json: Json                         = objects.asJson
@@ -66,6 +65,6 @@ case class SignerEntry(account: AccountAddr, signerWeight: Int)
 object SignerEntry {
 
   implicit val config: Configuration              = CirceCodecUtils.capitalizeConfiguration
-  implicit val codec: Codec.AsObject[SignerEntry] = deriveCodec[SignerEntry]
+  implicit val codec: Codec.AsObject[SignerEntry] = deriveConfiguredCodec[SignerEntry]
 
 }

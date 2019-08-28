@@ -14,15 +14,15 @@ class BalanceExtractorsTest extends CodecTesting {
     logger.debug(s"Balances: $balances")
     balances
   }
-  def isXrpPaymentSent(rec: TransactionRecord): Boolean = {
-    logger.debug(s"Tx Type ${rec.tx.txType}")
-    if (rec.tx.txType != RippleTxnType.Payment) false
-    else {
-      val txp = rec.tx.asInstanceOf[TxPayment]
-      txp.amount match {
-        case Drops(_)         => true
-        case FiatAmount(_, _) => false
-      }
-    }
-  }
+//  def isXrpPaymentSent(rec: TransactionRecord): Boolean = {
+//    logger.debug(s"Tx Type ${rec.tx.transactionType}")
+//    if (rec.tx.transactionType != RippleTxnType.Payment) false
+//    else {
+//      val txp = rec.tx.asInstanceOf[TxPayment]
+//      txp.amount match {
+//        case Drops(_)         => true
+//        case FiatAmount(_, _) => false
+//      }
+//    }
+//  }
 }

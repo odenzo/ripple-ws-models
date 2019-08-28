@@ -17,7 +17,7 @@ class BitMaskTest extends CodecTesting {
     val uint = BitMask.uIntDecoder.decodeJson(json)
 
     logger.debug(s"UINT: $uint")
-    val res: BitMask[BitFlag] = getOrLog(json.as[BitMask[BitFlag]])
+    val res: BitMask[BitFlag] = getOrFailLogging(json.as[BitMask[BitFlag]])
   }
 
   test("Bits2Flags") {

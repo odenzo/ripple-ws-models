@@ -11,6 +11,15 @@ import com.odenzo.ripple.models.utils.caterrors.{AppError, OError}
 /** Going to start using Ripple Generic Extras. */
 trait CirceCodecUtils {
 
+  def withCommand(cmd: String): JsonObject => JsonObject = withField("command", cmd)
+
+  def withTxnType()
+
+  def withField(name: String, v: String)(in: JsonObject): JsonObject = {
+    import io.circe.syntax._
+    (name := v) +: in
+  }
+
   /**
     * Utility to rename a field in a JsonObject, typically used in encoders .mapJsonObject
     *
@@ -106,14 +115,14 @@ trait CirceCodecUtils {
   val capitalizeConfiguration: Configuration =
     Configuration.default.copy(transformMemberNames = capitalizeTransformation)
 
-  val capitalizeExcept: Configuration = Configuration.default.copy(transformMemberNames = capitalizeExceptFn)
-
-  def capitalizeExceptFn(s: String): String = {
-    s match {
-      case "hash"  => "hash"
-      case "index" => "index"
-      case other   => capitalize(other)
+  def capitalizeExcept(skip: Set[String] = Set("hash", "index")): Configuration = {
+    def fn(s: String): String = {
+      s match {
+        case skip if skip.contains("hash") => skip
+        case other                         => capitalize(other)
+      }
     }
+    Configuration.default.copy(transformMemberNames = fn)
   }
 
   def unCapitalize(s: String): String = {

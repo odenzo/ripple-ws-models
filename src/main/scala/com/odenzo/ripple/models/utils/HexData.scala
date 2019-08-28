@@ -4,7 +4,9 @@ import cats.Show
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.deriveConfiguredCodec
 import io.circe.{Encoder, Decoder, Codec}
-
+import io.circe._
+import io.circe.syntax._
+import io.circe.generic.extras.semiauto._
 import com.odenzo.ripple.models.atoms.Limit
 
 /**
@@ -41,6 +43,6 @@ object HexData {
         .map((v: Seq[Char]) => Integer.parseInt(v.toString(), 16).toByte)
     new String(bytes.toArray, "UTF-8")
   }
-  implicit val config: Configuration          = Configuration.default
-  implicit val codec: Codec.AsObject[HexData] = deriveConfiguredCodec[HexData]
+  implicit val config: Configuration = Configuration.default
+  implicit val codec: Codec[HexData] = deriveUnwrappedCodec[HexData]
 }

@@ -13,6 +13,27 @@ import io.circe.syntax._
   */
 sealed trait CurrencyAmount
 
+object CurrencyAmount {
+
+  // Compiler warns this would fail on FiatAmount ? WTF, with partial or full match style.
+  // Maybe this is the FiatAmount object
+  implicit val encoder: Encoder[CurrencyAmount] = Encoder.instance[CurrencyAmount] {
+    case v: FiatAmount => v.asJson
+    case v: Drops      => v.asJson
+  }
+
+  implicit val decoder: Decoder[CurrencyAmount] = {
+    val wideDrops: Decoder[CurrencyAmount] = Decoder[Drops].map(v => v: CurrencyAmount)
+    val wideFiat: Decoder[CurrencyAmount]  = Decoder[FiatAmount].map(v => v: CurrencyAmount)
+    wideDrops.or(wideFiat)
+  }
+
+  implicit val show: Show[CurrencyAmount] = Show.show {
+    case v: FiatAmount => v.show
+    case v: Drops      => v.show
+  }
+}
+
 final case class FiatAmount(amount: BigDecimal, script: Script) extends CurrencyAmount {
   def abs: FiatAmount    = this.copy(amount = amount.abs)
   def negate: FiatAmount = this.copy(amount = -amount)
@@ -33,9 +54,9 @@ object FiatAmount {
   /** Could derive and then merge, not sure other ways in latest circe. Encode Script and add field? */
   implicit val encoder: Encoder.AsObject[FiatAmount] = Encoder.AsObject.instance { fa: FiatAmount =>
     JsonObject(
-      "value"    -> fa.amount.toString().asJson, // Need to avoid funny formatting
-      "currency" -> fa.script.currency.asJson,
-      "issuer"   -> fa.script.issuer.asJson
+      "value"    := fa.amount.bigDecimal.toPlainString, // Need to avoid funny formatting
+      "currency" := fa.script.currency,
+      "issuer"   := fa.script.issuer
     )
   }
 
@@ -56,27 +77,6 @@ object FiatAmount {
   */
 final case class Drops(amount: BigInt) extends CurrencyAmount {
   def mult(m: BigInt) = Drops(amount * m)
-}
-
-object CurrencyAmount {
-
-  // Compiler warns this would fail on FiatAmount ? WTF, with partial or full match style.
-  // Maybe this is the FiatAmount object
-  implicit val encoder: Encoder[CurrencyAmount] = Encoder.instance[CurrencyAmount] {
-    case v: FiatAmount => v.asJson
-    case v: Drops      => v.asJson
-  }
-
-  implicit val decoder: Decoder[CurrencyAmount] = {
-    val wideDrops: Decoder[CurrencyAmount] = Decoder[Drops].map(v => v: CurrencyAmount)
-    val wideFiat: Decoder[CurrencyAmount]  = Decoder[FiatAmount].map(v => v: CurrencyAmount)
-    wideDrops.or(wideFiat)
-  }
-
-  implicit val show: Show[CurrencyAmount] = Show.show {
-    case v: FiatAmount => v.show
-    case v: Drops      => v.show
-  }
 }
 
 /**

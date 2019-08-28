@@ -1,4 +1,4 @@
-package com.odenzo.ripple.models.atoms.ledgertree.nodes
+package com.odenzo.ripple.models.atoms.ledgertree.statenodes
 
 import io.circe.Decoder
 import io.circe.generic.extras.Configuration
@@ -12,6 +12,22 @@ import com.odenzo.ripple.models.support.RippleCodecUtils
 import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 // TODO: Need a RippleStateFlag
+/**
+  *   This is an important ledger node that can be used to check the trustline between two accounts.
+  *  It aggregates both sides of the trust line
+  *  .
+  * @param balance
+  * @param lowLimit
+  * @param highLimit
+  * @param prevTxnId
+  * @param prevTxnLgrSeq
+  * @param lowNode
+  * @param highNode
+  * @param lowQualityIn
+  * @param lowQualityOut
+  * @param highQualityIn
+  * @param highQualityOut
+  */
 case class RippleStateNode(
     balance: Option[FiatAmount],
     lowLimit: Option[FiatAmount],

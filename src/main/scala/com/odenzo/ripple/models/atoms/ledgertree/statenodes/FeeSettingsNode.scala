@@ -1,4 +1,4 @@
-package com.odenzo.ripple.models.atoms.ledgertree.nodes
+package com.odenzo.ripple.models.atoms.ledgertree.statenodes
 
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.deriveConfiguredCodec
@@ -31,6 +31,6 @@ case class FeeSettingsNode(
 }
 
 object FeeSettingsNode {
-  implicit val config: Configuration                  = CirceCodecUtils.capitalizeExcept
+  implicit val config: Configuration                  = CirceCodecUtils.capitalizeExcept(Set("index"))
   implicit val codec: Codec.AsObject[FeeSettingsNode] = deriveConfiguredCodec[FeeSettingsNode]
 }

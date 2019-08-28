@@ -3,9 +3,11 @@ package com.odenzo.ripple.models.atoms
 import cats.Show
 import cats.implicits._
 import io.circe._
+import io.circe.generic.extras.Configuration
+import io.circe.generic.extras.semiauto.{deriveConfiguredCodec, deriveUnwrappedCodec}
 import io.circe.syntax._
 
-import com.odenzo.ripple.models.utils.HexData
+import com.odenzo.ripple.models.utils.{HexData, CirceCodecUtils}
 import com.odenzo.ripple.models.utils.caterrors.OError
 
 /**
@@ -26,9 +28,16 @@ object Memos {
 
   def empty: Memos = Memos(List.empty[Memo])
 
-  // TODO: If memos list is empty then encode has Json.Null which will be filtered on write
-  // implicit val encoder: Encoder[Memos] = Encoder.encodeList[Memo].contramap[Memos](_.memos)
-  implicit val decoder: Decoder[Memos] = Decoder.decodeList[Memo].map(x => Memos(x))
+  // Each Memo is really a field in an anonymous JsonObject
+
+  case class MemoWrapper(Memo: Memo)
+  implicit val config: Configuration                               = Configuration.default
+  private implicit val privateDecoder: Codec.AsObject[MemoWrapper] = deriveConfiguredCodec[MemoWrapper]
+
+  implicit val decoder: Decoder[Memos] = Decoder[List[MemoWrapper]].map { buried: List[MemoWrapper] =>
+    val lom: List[Memo] = buried.map(_.Memo)
+    Memos(lom)
+  }
 
   implicit val encoder: Encoder[Memos] = Encoder.instance[Memos] { memos =>
     if (memos.memos.isEmpty) Json.Null
@@ -43,90 +52,35 @@ object Memos {
   implicit val show: Show[Memos] = Show.show[Memos](_.memos.map(_.show).mkString("Memos\n\t", "\n\t", "\n========"))
 }
 
-trait MemoUtils {
-
-  /**
-    * Valid characters for the MemoType and MemoFormat fields
-    *
-    */
-  def validMemoTypeContent(s: String): Boolean = {
-    s.forall(c => memoDomain.contains(c))
-  }
-
-  // Applies to MemoType and MemoFormat only. No Spaces?
-  private val memoDomain =
-    """ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%"""
-
-}
-
-object MemoUtils extends MemoUtils
-
 /**
   * One of the three fields is technically needed. This is the Ripple formatted memo.
   *
   * MemoUtils has some unpacking, but leave it to business layer to handle application specific memos
   * in general.
-  *
-  * @param data
-  * @param format
-  * @param mtype
-  */
-case class Memo(data: MemoData, format: Option[MemoFormat] = None, mtype: Option[MemoType] = None) {
 
-  def withType(t: MemoType): Memo     = copy(mtype = Some(t))
-  def withFormat(f: MemoFormat): Memo = copy(format = Some(f))
-  def withContent(d: MemoData): Memo  = copy(data = d)
+  */
+case class Memo(memoData: Option[MemoData], memoFormat: Option[MemoFormat] = None, memoType: Option[MemoType] = None) {
+
+  def withType(t: MemoType): Memo     = copy(memoType   = Some(t))
+  def withFormat(f: MemoFormat): Memo = copy(memoFormat = Some(f))
+  def withContent(d: MemoData): Memo  = copy(memoData   = d.some)
 
 }
 
 object Memo extends MemoUtils {
 
   /** Creates a RippleMemo with No MemoType and MemoFormat testUTF8 */
-  def fromText(s: String): Memo  = Memo(MemoData.fromText(s), Some(MemoFormat.textUTF8))
-  def fromJson(json: Json): Memo = Memo(MemoData.fromJson(json), Some(MemoFormat.json))
+  def fromText(s: String): Memo  = Memo(MemoData.fromText(s).some, Some(MemoFormat.textUTF8))
+  def fromJson(json: Json): Memo = Memo(MemoData.fromJson(json).some, Some(MemoFormat.json))
 
   implicit val show: Show[Memo] = Show.show[Memo] { m =>
     // Depending on the type we want to interpret and show data
-    val formattedData = m.format match {
-      case Some(MemoFormat.textUTF8) => m.data.hex.asText
-      case Some(MemoFormat.json)     => io.circe.parser.parse(m.data.hex.asText).fold(e => "Invalid JSON", j => j.spaces2)
-      case other                     => m.data.hex.show
-    }
-
-    s"Memo ${m.format.show}  ${m.mtype.show}:: \n$formattedData"
+    s"Memo ${m.memoFormat.show}  ${m.memoType.show}"
 
   }
 
-  /**
-    * Memos is an array of JsonObjects, each object has a single Memo subobject. Odd.
-    * Think I will add in here.
-    */
-  implicit val encoder: Encoder[Memo] = new Encoder[Memo] {
-    final def apply(v: Memo): Json = {
-      val fields = Seq(
-        Some(("MemoData", v.data.hex.asJson)),
-        v.format.map(f => ("MemoFormat", f.format.asJson)),
-        v.mtype.map(t => ("MemoType", t.mtype.asJson))
-      ).flatten
-
-      val theMemo = JsonObject.fromIterable(fields).asJson
-      JsonObject.singleton("Memo", theMemo).asJson
-    }
-  }
-
-  implicit val decoder: Decoder[Memo] = new Decoder[Memo] {
-
-    final def apply(c: HCursor): Decoder.Result[Memo] = {
-      val cursor = c.downField("Memo")
-      cursor.get[HexData]("MemoData").map(hex => MemoData(hex)).map { data =>
-        Memo(
-          data,
-          cursor.get[HexData]("MemoFormat").toOption.map(hex => MemoFormat(hex)),
-          cursor.get[HexData]("MemoType").toOption.map(hex => MemoType(hex))
-        )
-      }
-    }
-  }
+  implicit val config: Configuration       = CirceCodecUtils.capitalizeExcept(Set("delivered_amount"))
+  implicit val codec: Codec.AsObject[Memo] = deriveConfiguredCodec[Memo]
 }
 
 /**
@@ -142,6 +96,9 @@ case class MemoData(hex: HexData) {
 object MemoData {
   def fromJson(j: Json): MemoData   = fromText(j.noSpaces)
   def fromText(s: String): MemoData = MemoData(HexData.fromString(s))
+
+  implicit val config: Configuration  = CirceCodecUtils.capitalizeExcept(Set("delivered_amount"))
+  implicit val codec: Codec[MemoData] = deriveUnwrappedCodec[MemoData]
 }
 
 case class MemoFormat(format: HexData) {
@@ -154,7 +111,9 @@ case class MemoFormat(format: HexData) {
   */
 object MemoFormat extends MemoUtils {
 
-  implicit val show: Show[MemoFormat] = Show.show[MemoFormat](mf => s"MemoFormat ${mf.format.asText}")
+  implicit val config: Configuration    = CirceCodecUtils.capitalizeExcept(Set("delivered_amount"))
+  implicit val codec: Codec[MemoFormat] = deriveConfiguredCodec[MemoFormat]
+  implicit val show: Show[MemoFormat]   = Show.show[MemoFormat](mf => s"MemoFormat ${mf.format.asText}")
 
   val textUTF8: MemoFormat = unsafeFromText("""text/plain;charset=UTF-8""")
   val json: MemoFormat     = unsafeFromText("application/json")
@@ -190,6 +149,8 @@ case class MemoType(mtype: HexData) {
   */
 object MemoType {
 
+  implicit val codec: Codec[MemoType] = deriveUnwrappedCodec[MemoType]
+
   implicit val show: Show[MemoType] = Show.show[MemoType](mt => s"MemoType ${mt.mtype.asText}")
 
   val DefaultMemo: MemoType  = unsafeFromText("Default")
@@ -211,3 +172,21 @@ object MemoType {
     MemoType(HexData.fromString(s))
   }
 }
+
+trait MemoUtils {
+
+  /**
+    * Valid characters for the MemoType and MemoFormat fields
+    *
+    */
+  def validMemoTypeContent(s: String): Boolean = {
+    s.forall(c => memoDomain.contains(c))
+  }
+
+  // Applies to MemoType and MemoFormat only. No Spaces?
+  private val memoDomain =
+    """ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%"""
+
+}
+
+object MemoUtils extends MemoUtils

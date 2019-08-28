@@ -1,4 +1,4 @@
-package com.odenzo.ripple.models.atoms.ledgertree.nodes
+package com.odenzo.ripple.models.atoms.ledgertree.statenodes
 
 import io.circe._
 import io.circe.syntax._
@@ -9,24 +9,6 @@ import io.circe.generic.extras.Configuration
 import com.odenzo.ripple.models.atoms._
 import com.odenzo.ripple.models.utils.CirceCodecUtils
 
-/**
-  * See also docs for account root node. I am guessing this has delta too?
-  * @param account
-  * @param flags
-  * @param sequence
-  * @param balance
-  * @param ownerCount
-  * @param prevTxnID
-  * @param prevTxnLgrSeq
-  * @param accountTxnId
-  * @param regularKeyAddr
-  * @param emailHash
-  * @param messagePubKey
-  * @param tickSize
-  * @param transferRate
-  * @param domain
-  * @param index
-  */
 case class EscrowNode(
     account: Option[AccountAddr],     // Think not optional
     destination: Option[AccountAddr], // Think not optional
@@ -34,8 +16,8 @@ case class EscrowNode(
     condition: Option[String], // SHA256?
     cancelAfter: Option[RippleTime],
     finishAfter: Option[RippleTime],
-    sourceTag: Option[AccountTag],
-    desintationTag: Option[AccountTag],
+    sourceTag: Option[DestinationTag],
+    destinationTag: Option[DestinationTag],
     flags: Option[Long],
     ownerNode: Option[UInt64],
     prevTxnID: Option[TxnHash],            // The 64 character hex index (key)  , proper name? LedgerNodeIndex?  Cannot
@@ -44,6 +26,6 @@ case class EscrowNode(
 ) extends LedgerNode
 
 object EscrowNode {
-  implicit val config: Configuration             = CirceCodecUtils.capitalizeExcept
+  implicit val config: Configuration             = CirceCodecUtils.capitalizeExcept()
   implicit val codec: Codec.AsObject[EscrowNode] = deriveConfiguredCodec[EscrowNode]
 }

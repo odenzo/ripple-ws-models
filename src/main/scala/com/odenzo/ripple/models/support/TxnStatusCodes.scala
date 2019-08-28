@@ -25,7 +25,7 @@ sealed trait TxnStatusCode extends EnumEntry
   */
 case object TxnStatusCode extends Enum[TxnStatusCode] with CirceEnum[TxnStatusCode] {
 
-  val values: immutable.IndexedSeq[TxnStatusCode] = findValues
+  override val values = findValues
 
   // Note: Range is stable.  Exact numbers are currently unstable.  Use tokens.
 

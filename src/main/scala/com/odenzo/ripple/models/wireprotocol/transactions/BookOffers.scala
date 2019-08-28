@@ -4,7 +4,7 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder, Json, JsonObject}
 
-import com.odenzo.ripple.models.atoms.ledgertree.nodes.OfferNode
+import com.odenzo.ripple.models.atoms.ledgertree.statenodes.OfferNode
 import com.odenzo.ripple.models.atoms._
 import com.odenzo.ripple.models.support.{RippleRq, RippleRs}
 
@@ -18,9 +18,9 @@ case class BookOffersRq(
     taker: Option[AccountAddr] = None,
     taker_gets: Option[Script],
     taker_pays: Option[Script],
-    ledger: Ledger = LedgerName.VALIDATED_LEDGER,
+    ledger: Ledger      = LedgerName.VALIDATED_LEDGER,
     limit: Option[Long] = None,
-    id: RippleMsgId = RippleMsgId.random
+    id: RippleMsgId     = RippleMsgId.random
 ) extends RippleRq
 
 case class BookOffersRs(offers: List[OfferNode], ledger_index: Option[LedgerSequence], ledger_hash: Option[LedgerHash])

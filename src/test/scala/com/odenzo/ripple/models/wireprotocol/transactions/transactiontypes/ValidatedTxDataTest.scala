@@ -23,7 +23,7 @@ class ValidatedTxDataTest extends CodecTesting {
       j2 = o.asJsonObject
       _  = logger.debug(s"Back to Json:\n${j2.asJson.spaces4}")
     } yield j2
-    getOrLog(res)
+    getOrFailLogging(res)
   }
 
 }

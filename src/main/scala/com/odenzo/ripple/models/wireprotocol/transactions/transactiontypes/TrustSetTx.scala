@@ -6,7 +6,7 @@ import io.circe.syntax._
 import io.circe.generic.extras.semiauto._
 
 import com.odenzo.ripple.models.atoms._
-import com.odenzo.ripple.models.atoms.ledgertree.nodes.EscrowNode
+import com.odenzo.ripple.models.atoms.ledgertree.statenodes.EscrowNode
 import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 case class TrustSetTx(
@@ -19,7 +19,7 @@ case class TrustSetTx(
 
 object TrustSetTx {
 
-  implicit val config: Configuration        = CirceCodecUtils.capitalizeExcept
+  implicit val config: Configuration        = CirceCodecUtils.capitalizeExcept()
   implicit val decoder: Decoder[TrustSetTx] = deriveConfiguredDecoder[TrustSetTx]
   implicit val encoder: Encoder.AsObject[TrustSetTx] =
     deriveConfiguredEncoder[TrustSetTx].mapJsonObject(_.add("TransactionType", "TrustSet".asJson))

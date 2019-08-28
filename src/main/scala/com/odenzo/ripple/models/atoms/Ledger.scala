@@ -31,11 +31,11 @@ import com.odenzo.ripple.models.utils.caterrors.{AppError, AppException}
   */
 sealed trait Ledger
 
-/** Ledger Hash is encoded as leger_hash field in API */
-case class LedgerHash(v: RippleHash) extends Ledger
-
 /** Represents a value that identifies a ledger. Encoded as ledger_index fields, long or string */
 sealed trait LedgerIndex extends Ledger
+
+/** Ledger Hash is encoded as leger_hash field in API */
+case class LedgerHash(v: RippleHash) extends Ledger
 
 /** Name of a ledger, e.g. "validated"  Could be an enumeration almost. The ledger specified
   * over time changes. So -- this should be changed to extend Ledger not LedgerId */
@@ -45,31 +45,6 @@ case class LedgerName(v: String) extends LedgerIndex
 case class LedgerSequence(v: Long) extends LedgerIndex {
   def plus(deltaIndex: Long): LedgerSequence  = this.copy(v = v + deltaIndex)
   def isAfter(other: LedgerSequence): Boolean = this.v > other.v
-}
-
-// FIXME: Abandonded LedgerIndexRange, might as well do though (with regex mapping to LedgerIndex for start,end
-// Putting "start"-"end" in Encoders,Decoders
-case class LedgerIndexRange(start: LedgerSequence, end: LedgerSequence)
-
-object LedgerIndexRange {
-
-  implicit val encoder: Encoder[LedgerIndexRange] =
-    Encoder.encodeString.contramap[LedgerIndexRange](v => s"${v.start.v}-${v.end.v}")
-
-  implicit val decoder: Decoder[LedgerIndexRange] = Decoder.decodeString.emapTry { s: String =>
-    Try {
-      s.split('-').toList match {
-        case start :: end :: Nil =>
-          LedgerIndexRange(
-            LedgerSequence(java.lang.Long.parseLong(start)),
-            LedgerSequence(java.lang.Long.parseLong(end))
-          )
-
-        case invalid => throw AppError(s"$invalid was not in [start]-[end] format.")
-      }
-    }
-  }
-
 }
 
 /** When doing inquiry on a "Current" ledger (which I seldom do) it returns ledger_current_index
@@ -87,61 +62,6 @@ object LedgerCurrentIndex {
 
 }
 
-/**
-  * Many inquiry responses 'result' return ledger_index and ledger_hash and validated.
-  * Except, if we are inquiring on 'current' ledger (that is mutable still) then
-  * only ledger_current_index is returned.
-  * All results have an optional validated inside the result in addition to the generic response.
-  * If its there and true its a validated ledger. If not there, then its not a validated ledger.
-  * (from which the information is source). A validated ledger will always have a LedgerIndex and LedgerHash.
-  * Oddly, things like AccountChannelsRq don't return ledger at all.
-  *
-  * Miunging.... circe.derivation allow default values now?
-  * @param ledger
-  */
-case class ResultLedger(ledger: Either[LedgerCurrentIndex, (LedgerSequence, LedgerHash)], validated: Boolean = false) {
-
-  def ledgerHash: Option[LedgerHash] = ledger.toOption.map(v => v._2)
-  def isCurrentLedger: Boolean       = ledger.isLeft
-  def ledgerIndex: LedgerSequence    = ledger.fold(lci => LedgerSequence(lci.v), _._1)
-}
-
-object ResultLedger {
-
-  /**
-    * Not this is applied to the result field of an inquiry typically. A helper for the
-    * [InquiryName]Rs decoder.
-    * It looks for (ledger_current_index) OR (ledger_hash AND ledger_index) fields.
-    * These are found directly beneath the result object in responses
-    *  See   AccountInfoRs for actual usage in decoding a response
-    */
-  implicit val decoder: Decoder[ResultLedger] = Decoder.instance[ResultLedger] { hcursor =>
-    for {
-      validated <- hcursor.getOrElse[Boolean]("validated")(false)
-      ledgerDescer <- hcursor.get[LedgerCurrentIndex]("ledger_current_index") match {
-        case Right(lci) => (lci.asLeft).asRight
-        case Left(_) => // Could not find ledger_current_inde
-          for {
-            hash  <- hcursor.get[LedgerHash]("ledger_hash")
-            index <- hcursor.get[LedgerSequence]("ledger_index")
-            validated = ((index, hash).asRight)
-          } yield validated
-      }
-    } yield ResultLedger(ledgerDescer, validated)
-  }
-
-}
-
-/**
-  * This is mainly used for encoding, when a message needs either a ledger_hash or ledger_index or ledger_name
-  * Decoding a bit suspect, because it will take EITHER the ledger_hash or ledgerIndex
-  * So, this is biased to ledger_hash since I think that is generally quicker to work with.
-  * TODO: The LedgerIndex and LedgerHash for on field value level, as normal for Circe. Want ledger to give fields
-  * that can then be added into containing object.  WIll be a big change to API to make options
-  * But need to prototype, as usual the decoders are applied on values no in context of field
-  * so need some gobbly gook.
-  *
-  */
 object Ledger {
 
   /** FIXME: Dodgy unsafe hack that relies on unvalidated Hash being a valid hash to discern what type
