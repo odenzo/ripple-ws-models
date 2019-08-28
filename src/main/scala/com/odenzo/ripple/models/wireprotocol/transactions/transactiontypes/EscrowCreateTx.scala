@@ -23,8 +23,8 @@ case class EscrowCreateTx(
     cancelAfter: Option[RippleTime] = None,
     finishAfter: Option[RippleTime] = None, // as above, need a new type for this.
     condition: Option[String] = None,       // preimage-sha-256 crypto-condition.
-    destinationTag: Option[AccountTag] = None,
-    sourceTag: Option[AccountTag] = None
+    destinationTag: Option[DestinationTag] = None,
+    sourceTag: Option[DestinationTag] = None
 ) extends RippleTransaction {
 
   //val txnType: RippleTxnType = RippleTxnType.PaymentTxn
@@ -51,8 +51,8 @@ object EscrowCreateTx {
       cancel <- cursor.get[Option[RippleTime]]("CancelAfter")
       finish <- cursor.get[Option[RippleTime]]("finishAfer")
       cond   <- cursor.get[Option[String]]("Condition")
-      dt     <- cursor.get[Option[AccountTag]]("DestinationTag")
-      st     <- cursor.get[Option[AccountTag]]("SourceTag")
+      dt     <- cursor.get[Option[DestinationTag]]("DestinationTag")
+      st     <- cursor.get[Option[DestinationTag]]("SourceTag")
     } yield EscrowCreateTx(acct, owner, dest, cancel, finish, cond, dt, st)
 
   }

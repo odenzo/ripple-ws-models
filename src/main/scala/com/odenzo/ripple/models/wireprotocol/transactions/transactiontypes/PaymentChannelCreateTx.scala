@@ -18,8 +18,8 @@ case class PaymentChannelCreateTx(
     settleDelay: UInt32, // ? Duration in what? seconds I assume.  Ex 1 day in seconds
     publicKey: RipplePublicKey,
     cancelAfter: Option[RippleTime],
-    destinationTag: Option[AccountTag],
-    sourceTag: Option[AccountTag]
+    destinationTag: Option[DestinationTag],
+    sourceTag: Option[DestinationTag]
 ) extends RippleTransaction {}
 
 object PaymentChannelCreateTx {
@@ -48,8 +48,8 @@ object PaymentChannelCreateTx {
       settle <- cursor.get[UInt32]("SettleDelay")
       pubkey <- cursor.get[RipplePublicKey]("PublicKey")
       cancel <- cursor.get[Option[RippleTime]]("CancelAfter")
-      dtag   <- cursor.get[Option[AccountTag]]("DestinationTag")
-      stag   <- cursor.get[Option[AccountTag]]("SourceTag")
+      dtag   <- cursor.get[Option[DestinationTag]]("DestinationTag")
+      stag   <- cursor.get[Option[DestinationTag]]("SourceTag")
     } yield PaymentChannelCreateTx(acct, amount, dest, settle, pubkey, cancel, dtag, stag)
   }
 }

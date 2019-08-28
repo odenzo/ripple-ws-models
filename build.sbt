@@ -44,19 +44,20 @@ lazy val commonSettings = Seq(
   )
 )
 
-val circeVersion           = "0.12.0-RC3"
-val catsVersion            = "2.0.0-RC1"
-val catsEffectVersion      = "2.0.0-RC1"
+val circeVersion           = "0.12.0-RC4"
+val catsVersion            = "2.0.0-RC2"
+val catsEffectVersion      = "2.0.0-RC2"
 val spireVersion           = "0.17.0-M1"
 val scribeVersion          = "2.7.9"
 val scalaTestVersion       = "3.0.8"
 val scalaCheckVersion      = "1.14.0"
 val enumeratumVersion      = "1.5.13"
 val enumeratumCirceVersion = "1.5.21"
-val monocleVersion         = "1.6.0" // 1.5.0-cats based on cats 1.0.x
+val monocleVersion         = "2.0.0-RC1" // 1.5.0-cats based on cats 1.0.x
 
 val libs = Seq(
-  "org.scalatest"  %% "scalatest"  % scalaTestVersion  % Test,
+  "com.lihaoyi"    %% "pprint"     % "0.5.5",
+  "org.scalatest"  %% "scalatest"  % scalaTestVersion % Test,
   "org.scalacheck" %% "scalacheck" % scalaCheckVersion % Test
 )
 
@@ -67,6 +68,7 @@ val lib_circe =
     "io.circe" %% "circe-generic"        % circeVersion,
     "io.circe" %% "circe-parser"         % circeVersion,
     "io.circe" %% "circe-generic-extras" % circeVersion,
+    "io.circe" %% "circe-optics"         % "0.12.0-RC2",
     //"io.circe"     %% "circe-derivation"     % circeVersion,
     "com.beachape" %% "enumeratum"       % enumeratumVersion,
     "com.beachape" %% "enumeratum-circe" % enumeratumCirceVersion

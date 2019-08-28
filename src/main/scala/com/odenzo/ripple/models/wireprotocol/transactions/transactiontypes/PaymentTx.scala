@@ -5,42 +5,27 @@ import io.circe.generic.semiauto._
 
 import com.odenzo.ripple.models.atoms._
 import com.odenzo.ripple.models.utils.CirceCodecUtils
-
+import io.circe._
+import io.circe.generic.extras.Configuration
+import io.circe.syntax._
+import io.circe.generic.extras.semiauto._
 case class PaymentTx(
     account: AccountAddr,
     amount: CurrencyAmount,
     destination: AccountAddr,
+    destinationTag: Option[DestinationTag] = None,
     invoiceID: Option[InvoiceHash] = None,
     paths: Option[PaymentPath] = None,
     sendMax: Option[CurrencyAmount] = None,
     deliverMin: Option[CurrencyAmount] = None,
     flags: BitMask[PaymentFlag] = BitMask.empty[PaymentFlag]
-) extends RippleTransaction {
-
-  //val txnType: RippleTxnType = RippleTxnType.PaymentTxn
-
-}
+) extends RippleTransaction
 
 object PaymentTx {
-  private val tx: (String, Json) = "TransactionType" -> Json.fromString("Payment")
+  private val tx: (String, Json)     = "TransactionType" -> Json.fromString("Payment")
+  implicit val config: Configuration = CirceCodecUtils.capitalizeConfiguration.withDefaults
 
-  // Better to use mapJsonObject and derive encoder?
-  implicit val derivedEncoder: Encoder.AsObject[PaymentTx] = {
-    deriveEncoder[PaymentTx]
-      .mapJsonObject(o => tx +: o)
-      .mapJsonObject(o => CirceCodecUtils.upcaseFields(o))
-  }
-  implicit val decoder: Decoder[PaymentTx] = Decoder.instance[PaymentTx] { cursor =>
-    for {
-      acct       <- cursor.get[AccountAddr]("Account")
-      owner      <- cursor.get[CurrencyAmount]("Amount")
-      dest       <- cursor.get[AccountAddr]("Destination")
-      invoice    <- cursor.get[Option[InvoiceHash]]("InvoiceID")
-      paths      <- cursor.get[Option[PaymentPath]]("Paths")
-      sendMax    <- cursor.get[Option[CurrencyAmount]]("SendMax")
-      deliverMin <- cursor.get[Option[CurrencyAmount]]("DeliverMin")
-      flags      <- cursor.get[BitMask[PaymentFlag]]("Flags")
-    } yield PaymentTx(acct, owner, dest, invoice, paths, sendMax, deliverMin, flags)
-  }
+  implicit val encoder: Encoder.AsObject[PaymentTx] = deriveConfiguredEncoder[PaymentTx].mapJsonObject(tx +: _)
+  implicit val decoder: Decoder[PaymentTx]          = deriveConfiguredDecoder[PaymentTx]
 
 }

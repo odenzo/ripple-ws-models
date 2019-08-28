@@ -1,8 +1,8 @@
 package com.odenzo.ripple.models.wireprotocol.accountinfo
 
 import io.circe._
+import io.circe.generic.extras.Configuration
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import sun.net.dns.ResolverConfiguration.Options
 
 import com.odenzo.ripple.models.atoms._
 import com.odenzo.ripple.models.atoms.ledgertree.AccountData
@@ -42,16 +42,15 @@ object AccountInfoRq {
       .mapJsonObject(o => command +: o)
       .mapJsonObject(o => Ledger.renameLedgerField(o))
   }
+
 }
 
 object AccountInfoRs {
 
-  /** This approach is succinct but requires field to be optional to pass the derived Decoder[ */
-  val decoder1: Decoder[AccountInfoRs] = {
-    deriveDecoder[AccountInfoRs].product(Decoder[ResultLedger]).map {
-      case (a, theResultLedger) => a.copy(resultLedger = theResultLedger)
-    }
-  }
+  import io.circe._
+  import io.circe.generic.extras.semiauto._
+  implicit val config: Configuration                    = Configuration.default
+  implicit val encoder: Encoder.AsObject[AccountInfoRs] = deriveConfiguredEncoder[AccountInfoRs]
 
   /** This is somewhat manual, but responses have several standard fields and then only 1-3 specific subobjects
     * normally, so maybe building a utlity lib from this?, e.g. queue_data, mark for scrolling etc. */
@@ -64,5 +63,6 @@ object AccountInfoRs {
       validated    <- hc.get[Option[Boolean]]("validated")
     } yield AccountInfoRs(accountdata, signers, queuedata, validated, resultLedger)
   }
-
+//    Encoder.encodeEither("leftName", "rightName")
+//  val d2 = Decoder.decodeEither("leftname", "rightname")
 }

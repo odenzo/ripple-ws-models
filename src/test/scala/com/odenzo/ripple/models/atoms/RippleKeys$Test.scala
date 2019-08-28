@@ -27,15 +27,15 @@ class RippleKeys$Test extends CodecTesting {
 }
        """.stripMargin
 
-  val json = getOrLog(io.circe.parser.parse(realJson))
+  val json = getOrFailLogging(io.circe.parser.parse(realJson))
 
   test("Roundtrip Sample") {
     val keys: ErrorOr[AccountKeys] = RippleCodecUtils.decodeFullyOnSuccess(json, AccountKeys.decoder)
     logger.info(s"Keys: $keys")
-    val bjson = getOrLog(keys).asJson
+    val bjson = getOrFailLogging(keys).asJson
     logger.info(s"Back to JSON:\n" + bjson.spaces2)
     val exp = CirceUtils.json2jsonobject(json).flatMap(CirceUtils.findObjectField("result", _).map(_.asJson))
-    bjson shouldEqual getOrLog(exp)
+    bjson shouldEqual getOrFailLogging(exp)
   }
 
 }

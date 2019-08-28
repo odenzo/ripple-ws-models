@@ -1,7 +1,7 @@
 package com.odenzo.ripple.models.wireprotocol.ledgerinfo
 
 import io.circe._
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.generic.semiauto.{deriveCodec, deriveEncoder}
 import io.circe.syntax._
 
 import com.odenzo.ripple.models.atoms._
@@ -26,5 +26,5 @@ object LedgerAcceptRq {
 }
 
 object LedgerAcceptRs {
-  implicit val decoder: Decoder[LedgerAcceptRs] = deriveDecoder[LedgerAcceptRs]
+  implicit val decoder: Decoder[LedgerAcceptRs] = deriveCodec[LedgerAcceptRs]
 }

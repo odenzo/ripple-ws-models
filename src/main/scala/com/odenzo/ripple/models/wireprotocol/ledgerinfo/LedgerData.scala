@@ -5,7 +5,7 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax._
 
 import com.odenzo.ripple.models.atoms._
-import com.odenzo.ripple.models.atoms.ledgertree.nodes.LedgerNode
+import com.odenzo.ripple.models.atoms.ledgertree.statenodes.LedgerNode
 import com.odenzo.ripple.models.support.{RippleScrollingRq, RippleScrollingRs}
 
 /** https://ripple.com/build/rippled-apis/#ledger-data
@@ -31,11 +31,6 @@ case class LedgerDataRq(
     id: RippleMsgId = RippleMsgId.random
 ) extends RippleScrollingRq
 
-/** TODO: Elaborate
-  *  ledger is really Leader Header and is deprecated so removed.
-  *
-  * State, List of JsonObjects, but actually all are LedgerNodes
-  **/
 case class LedgerDataRs(
     ledger_hash: LedgerHash,
     ledger_index: LedgerSequence,

@@ -35,7 +35,7 @@ case class AccountData(
 // TODO: Convert to deriveDecoder with name mapping (upcase and align abbreviations)
 object AccountData {
 
-  implicit val config: Configuration              = CirceCodecUtils.capitalizeExcept
+  implicit val config: Configuration              = CirceCodecUtils.capitalizeExcept()
   implicit val codec: Codec.AsObject[AccountData] = deriveConfiguredCodec[AccountData]
   implicit val show: Show[AccountData]            = Show.fromToString[AccountData]
 

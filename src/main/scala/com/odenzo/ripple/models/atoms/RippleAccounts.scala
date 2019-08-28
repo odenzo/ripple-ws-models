@@ -62,11 +62,11 @@ object AccountAlias {
   * Use for dt:string addressing of an account mapped to a single ripple address (e.g. a gateway account)
   * @param tag
   */
-case class AccountTag(tag: UInt32)
+case class DestinationTag(tag: UInt32)
 
-object AccountTag {
-  def apply(dt: Long): AccountTag         = AccountTag(UInt32(dt))
-  implicit val decoder: Codec[AccountTag] = deriveUnwrappedCodec[AccountTag]
+object DestinationTag {
+  def apply(dt: Long): DestinationTag       = DestinationTag(UInt32(dt))
+  implicit val codec: Codec[DestinationTag] = deriveUnwrappedCodec[DestinationTag]
 }
 
 /** Note this is not valid for most of the WebSocket Requests
@@ -75,7 +75,7 @@ object AccountTag {
   * JSON Formats quite different normally.
   * FIXME: Broken migrate to AccountTag product encoding/decoding
   * */
-case class DTAccountAddr(address: AccountAddr, dt: AccountTag) {
+case class DTAccountAddr(address: AccountAddr, dt: DestinationTag) {
   def toValue = s"$address:$dt" // FIXME: Confirm Use-Case
 }
 

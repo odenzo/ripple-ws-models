@@ -9,7 +9,7 @@ class AffectedLedgerNodeTest extends CodecTesting {
   test("Modified Node") {
     val res = Samples.json_1.as[LedgerNodeDelta]
     logger.info(s"Result: $res")
-    getOrLog(res)
+    getOrFailLogging(res)
   }
 
   test("Another") {

@@ -1,9 +1,11 @@
 package com.odenzo.ripple.models.atoms.ledgertree
 
-import io.circe.{Decoder, Encoder}
+import io.circe.{Json, Encoder, Decoder}
 import io.circe.generic.semiauto._
+import io.circe.syntax._
 
 import com.odenzo.ripple.models.atoms._
+import com.odenzo.ripple.models.atoms.ledgertree.transactions.LedgerTransaction
 import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.RippleTransaction
 
 /** You can look up ledger headers user ledger inquiry. Testing for this does that.
@@ -14,6 +16,7 @@ import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.Rippl
   * Either LedgerHeader.or[LedgerClosedHeader] appraoch or LedgerHeader (w/ options) then LedgerHeader =>
   * LedgerCloseInfo
   *
+  * More like LedgerRoot or LedgetContents
   * Trtying LedgerClose and LedgerCurrent appraoch, where Closed can be Accepted or Validated. Anything but current.
   * [[https://ripple.com/build/ledger-format/#tree-format]]
   * [[https://ripple.com/build/ledger-format/#header-format]]
@@ -28,8 +31,7 @@ case class LedgerHeader(
     parent_close_time: RippleTime,
     closed_info: Option[LedgerClosedInfo],
     accountState: Option[List[LedgerNodeIndex]], // optional field and may be empty array
-    transactions: Option[LedgerTransactions]     // optional field and may be empty array or array of hash or
-    // expanded json
+    transactions: Option[LedgerTransactions]     // optfield, array or array of hash or expanded json
 )
 
 object LedgerHeader {
@@ -57,16 +59,17 @@ object LedgerClosedInfo {
 
 /** Represent an expanded transaction is a ledger (typically validated)
   * The txn is at the top level and needs to be lifted, metaData is a top field. */
-case class LedgerTxn(txn: RippleTransaction, metaData: Meta)
+case class LedgerTxn(txn: LedgerTransaction, metaData: Meta)
 
 object LedgerTxn {
   implicit val decoder: Decoder[LedgerTxn] = Decoder.instance { hcursor =>
     for {
-      txn <- hcursor.as[RippleTransaction]
+      txn <- hcursor.as[LedgerTransaction]
       md  <- hcursor.get[Meta]("metaData")
     } yield LedgerTxn(txn, md)
   }
-  //implicit val encoder: Encoder.AsObject[LedgerTxn] = deriveEncoder[LedgerTxn]
+
+  implicit val encoder: Encoder.AsObject[LedgerTxn] = deriveEncoder[LedgerTxn]
 }
 
 /** Represents a list of Ledger Tranasction that is either expanded or a */
@@ -78,5 +81,12 @@ object LedgerTransactions {
   implicit val decoder: Decoder[LedgerTransactions] = Decoder[List[LedgerTxn]]
     .either(Decoder[List[LedgerNodeIndex]])
     .map(LedgerTransactions.apply)
+
+  implicit val encoder: Encoder[LedgerTransactions] = new Encoder[LedgerTransactions] {
+    override final def apply(a: LedgerTransactions): Json = a.either match {
+      case Left(l)  => l.asJson
+      case Right(l) => l.asJson
+    }
+  }
 
 }

@@ -1,6 +1,6 @@
 package com.odenzo.ripple.models.wireprotocol.accountinfo
 
-import io.circe.Decoder
+import io.circe.{Decoder, Encoder}
 
 import com.odenzo.ripple.models.testkit.CodecTesting
 
@@ -24,7 +24,7 @@ class AccountInfoRqTest extends CodecTesting {
                  | """.stripMargin
 
   test("Decoding") {
-    val obj = getOrLog(parseAndDecode(rsJson, Decoder[AccountInfoRs]))
+    val obj = jsonRoundTrip(rsJson, Encoder[AccountInfoRs], Decoder[AccountInfoRs])
     logger.debug(s"Object: $obj")
   }
 }
