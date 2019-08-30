@@ -5,6 +5,7 @@ import io.circe.generic.semiauto._
 
 import com.odenzo.ripple.models.atoms._
 import com.odenzo.ripple.models.utils.CirceCodecUtils
+import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.support.RippleTransaction
 
 /** Owner ids account , account field is who to deliver it to
   *  No txn specific flags

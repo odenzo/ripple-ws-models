@@ -11,12 +11,11 @@ import org.scalatest.{Assertion, EitherValues, Matchers}
 import scribe.{Logging, Logger}
 
 import com.odenzo.ripple.models.utils.{CirceUtils, ScribeConfig}
-import com.odenzo.ripple.models.utils.caterrors.{AppError, AppException}
+import com.odenzo.ripple.models.utils.caterrors.{AppError, AppException, AppJsonDecodingError}
 import io.circe.syntax
 
 /**
-  * Slowly rebuilding a suite of unit tests for the models, which don't require calling Ripple.
-  * Not sure this is really worth the effort but the AnyVal classes fight with import optimization
+  * test* methods have assertions the others are just helpers.
   */
 trait CodecTesting extends AnyFunSuite with Matchers with EitherValues with Logging with CirceUtils {
 
@@ -34,14 +33,23 @@ trait CodecTesting extends AnyFunSuite with Matchers with EitherValues with Logg
     }
   }
 
-  def jsonRoundTrip[A](jsonStr: String, encoder: Encoder[A], decoder: Decoder[A]) = {
+  /** Parses Json to object and pack to json, returns  last two */
+  def jsonRoundTrip[A](jsonStr: String)(implicit enc: Encoder[A], dec: Decoder[A]): Either[AppError, (A, Json, A)] = {
     for {
       json <- parseAsJson(jsonStr)
-      obj  <- decode(json, decoder)
-      jsonBack = encoder(obj)
+      obj  <- decode(json)
+      jsonBack = encode(obj)
       _        = logger.debug(s"Object ${pprint.apply(obj)}")
       _        = if (jsonBack != json) logger.warn(s"JSON Mistmatch:\n ${json.spaces4} \n =!= \n ${jsonBack.spaces4}")
-    } yield (json, obj)
+    } yield (obj, jsonBack, obj)
+  }
+
+  def objRoundTrip[A](a: A)(implicit enc: Encoder[A], dec: Decoder[A]): Either[AppJsonDecodingError, (A, Json)] = {
+    for {
+      json <- encode(a).asRight
+      obj  <- decode(json)
+      _ = logger.debug(s"Object ${pprint.apply(obj)}")
+    } yield (obj, json)
   }
 
   /** For the things that have both encoders and decoders (not rq encoder , rs decoder) */
@@ -78,7 +86,7 @@ trait CodecTesting extends AnyFunSuite with Matchers with EitherValues with Logg
     }
   }
 
-  def getOrFailLogging[T](ee: Either[Throwable, T], msg: String = "Error: ", myLog: Logger = logger): T = {
+  def testCompleted[T](ee: Either[Throwable, T], msg: String = "Error: ", myLog: Logger = logger): T = {
     logIfError(ee, msg, myLog)
     ee match {
       case Right(v) => v

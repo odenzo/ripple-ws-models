@@ -24,7 +24,7 @@ class AccountInfoRqTest extends CodecTesting {
                  | """.stripMargin
 
   test("Decoding") {
-    val obj = jsonRoundTrip(rsJson, Encoder[AccountInfoRs], Decoder[AccountInfoRs])
+    val obj = jsonRoundTrip[AccountInfoRs](rsJson)
     logger.debug(s"Object: $obj")
   }
 }

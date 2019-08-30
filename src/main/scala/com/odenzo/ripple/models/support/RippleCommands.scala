@@ -44,7 +44,7 @@ trait CommandContext {
   *  @tparam B The type of the response object
   */
 @deprecated("Goung Away", "2019")
-case class Codec[A <: RippleRq, B <: RippleRs](
+case class RqRsCodec[A <: RippleRq, B <: RippleRs](
     encoder: Encoder.AsObject[A],
     decoder: Decoder[B]
 ) extends Logging {
@@ -93,58 +93,58 @@ object Commands {
 
   // Account Info Section Commands
 
-  val accountOffersCmd     = Codec(Encoder.AsObject[AccountOffersRq], Decoder[AccountOffersRs])
-  val accountTxCmd         = Codec(Encoder.AsObject[AccountTxRq], Decoder[AccountTxRs])
-  val gatewayBalancesCmd   = Codec(Encoder.AsObject[GatewayBalancesRq], Decoder[GatewayBalancesRs])
-  val noRippleCheckCmd     = Codec(Encoder.AsObject[NoRippleCheckRq], Decoder[NoRippleCheckRs])
-  val walletProposeCmd     = Codec(Encoder.AsObject[WalletProposeRq], Decoder[WalletProposeRs])
-  val feeCmd               = Codec(Encoder.AsObject[FeeRq], Decoder[FeeRs])
-  val accountChannels      = Codec(Encoder.AsObject[AccountChannelsRq], Decoder[AccountChannelsRs])
-  val accountInfoCmd       = Codec(Encoder.AsObject[AccountInfoRq], Decoder[AccountInfoRs])
-  val accountCurrenciesCmd = Codec(Encoder.AsObject[AccountCurrenciesRq], Decoder[AccountCurrenciesRs])
-  val accountLinesCmd      = Codec(Encoder.AsObject[AccountLinesRq], Decoder[AccountLinesRs])
-  val accountObjectsCmd    = Codec(Encoder.AsObject[AccountObjectsRq], Decoder[AccountObjectsRs])
+  val accountOffersCmd     = RqRsCodec(Encoder.AsObject[AccountOffersRq], Decoder[AccountOffersRs])
+  val accountTxCmd         = RqRsCodec(Encoder.AsObject[AccountTxRq], Decoder[AccountTxRs])
+  val gatewayBalancesCmd   = RqRsCodec(Encoder.AsObject[GatewayBalancesRq], Decoder[GatewayBalancesRs])
+  val noRippleCheckCmd     = RqRsCodec(Encoder.AsObject[NoRippleCheckRq], Decoder[NoRippleCheckRs])
+  val walletProposeCmd     = RqRsCodec(Encoder.AsObject[WalletProposeRq], Decoder[WalletProposeRs])
+  val feeCmd               = RqRsCodec(Encoder.AsObject[FeeRq], Decoder[FeeRs])
+  val accountChannels      = RqRsCodec(Encoder.AsObject[AccountChannelsRq], Decoder[AccountChannelsRs])
+  val accountInfoCmd       = RqRsCodec(Encoder.AsObject[AccountInfoRq], Decoder[AccountInfoRs])
+  val accountCurrenciesCmd = RqRsCodec(Encoder.AsObject[AccountCurrenciesRq], Decoder[AccountCurrenciesRs])
+  val accountLinesCmd      = RqRsCodec(Encoder.AsObject[AccountLinesRq], Decoder[AccountLinesRs])
+  val accountObjectsCmd    = RqRsCodec(Encoder.AsObject[AccountObjectsRq], Decoder[AccountObjectsRs])
 
   // Convenience Commands
-  val connectCmd = Codec(Encoder.AsObject[ConnectRq], Decoder[ConnectRs])
-  val pingCmd    = Codec(Encoder.AsObject[PingRq], Decoder[PingRs])
-  val stopCmd    = Codec(Encoder.AsObject[StopRq], Decoder[StopRs])
+  val connectCmd = RqRsCodec(Encoder.AsObject[ConnectRq], Decoder[ConnectRs])
+  val pingCmd    = RqRsCodec(Encoder.AsObject[PingRq], Decoder[PingRs])
+  val stopCmd    = RqRsCodec(Encoder.AsObject[StopRq], Decoder[StopRs])
 
   // object LedgerInfo {
-  val ledgerCmd        = Codec(Encoder.AsObject[LedgerRq], Decoder[LedgerRs])
-  val ledgerAcceptCmd  = Codec(Encoder.AsObject[LedgerAcceptRq], Decoder[LedgerAcceptRs])
-  val ledgerCleanerCmd = Codec(Encoder.AsObject[LedgerCleanerRq], Decoder[LedgerCleanerRs])
-  val ledgerClosedCmd  = Codec(Encoder.AsObject[LedgerClosedRq], Decoder[LedgerClosedRs])
-  val ledgerCurrentCmd = Codec(Encoder.AsObject[LedgerCurrentRq], Decoder[LedgerCurrentRs])
-  val ledgerDataCmd    = Codec(Encoder.AsObject[LedgerDataRq], Decoder[LedgerDataRs])
-  val ledgerEntryCmd   = Codec(Encoder.AsObject[LedgerEntryRq], Decoder[LedgerEntryRs])
-  val ledgerRequestCmd = Codec(Encoder.AsObject[LedgerRequestRq], Decoder[LedgerRequestRs])
+  val ledgerCmd        = RqRsCodec(Encoder.AsObject[LedgerRq], Decoder[LedgerRs])
+  val ledgerAcceptCmd  = RqRsCodec(Encoder.AsObject[LedgerAcceptRq], Decoder[LedgerAcceptRs])
+  val ledgerCleanerCmd = RqRsCodec(Encoder.AsObject[LedgerCleanerRq], Decoder[LedgerCleanerRs])
+  val ledgerClosedCmd  = RqRsCodec(Encoder.AsObject[LedgerClosedRq], Decoder[LedgerClosedRs])
+  val ledgerCurrentCmd = RqRsCodec(Encoder.AsObject[LedgerCurrentRq], Decoder[LedgerCurrentRs])
+  val ledgerDataCmd    = RqRsCodec(Encoder.AsObject[LedgerDataRq], Decoder[LedgerDataRs])
+  val ledgerEntryCmd   = RqRsCodec(Encoder.AsObject[LedgerEntryRq], Decoder[LedgerEntryRs])
+  val ledgerRequestCmd = RqRsCodec(Encoder.AsObject[LedgerRequestRq], Decoder[LedgerRequestRs])
 
   //object serverinfo {
 
-  val canDeleteCmd = Codec(Encoder.AsObject[CanDeleteRq], Decoder[CanDeleteRs])
+  val canDeleteCmd = RqRsCodec(Encoder.AsObject[CanDeleteRq], Decoder[CanDeleteRs])
 
-  val consensusInfoCmd = Codec(Encoder.AsObject[ConsensusInfoRq], Decoder[ConsensusInfoRs])
+  val consensusInfoCmd = RqRsCodec(Encoder.AsObject[ConsensusInfoRq], Decoder[ConsensusInfoRs])
 
-  val featureCmd = Codec(Encoder.AsObject[FeatureRq], Decoder[FeatureRs])
+  val featureCmd = RqRsCodec(Encoder.AsObject[FeatureRq], Decoder[FeatureRs])
 
   //val feeCmd = Codec(Encoder[FeeRq], Decoder[FeeRs])
 
-  val fetchInfoCmd = Codec(Encoder.AsObject[FetchInfoRq], Decoder[FetchInfoRs])
+  val fetchInfoCmd = RqRsCodec(Encoder.AsObject[FetchInfoRq], Decoder[FetchInfoRs])
 
-  val getCountsCmd = Codec(Encoder.AsObject[GetCountsRq], Decoder[GetCountsRs])
+  val getCountsCmd = RqRsCodec(Encoder.AsObject[GetCountsRq], Decoder[GetCountsRs])
 
-  val logLevelCmd = Codec(Encoder.AsObject[LogLevelRq], Decoder[LogLevelRs])
+  val logLevelCmd = RqRsCodec(Encoder.AsObject[LogLevelRq], Decoder[LogLevelRs])
 
-  val logRotateCmd = Codec(Encoder.AsObject[LogRotateRq], Decoder[LogRotateRs])
+  val logRotateCmd = RqRsCodec(Encoder.AsObject[LogRotateRq], Decoder[LogRotateRs])
 
-  val serverInfoCmd = Codec(Encoder.AsObject[ServerInfoRq], Decoder[ServerInfoRs])
+  val serverInfoCmd = RqRsCodec(Encoder.AsObject[ServerInfoRq], Decoder[ServerInfoRs])
 
-  val serverStateCmd = Codec(Encoder.AsObject[ServerStateRq], Decoder[ServerStateRs])
+  val serverStateCmd = RqRsCodec(Encoder.AsObject[ServerStateRq], Decoder[ServerStateRs])
 
-  val validationCreateCmd = Codec(Encoder.AsObject[ValidationCreateRq], Decoder[ValidationCreateRs])
+  val validationCreateCmd = RqRsCodec(Encoder.AsObject[ValidationCreateRq], Decoder[ValidationCreateRs])
 
-  val validationSeedCmd = Codec(Encoder.AsObject[ValidationSeedRq], Decoder[ValidationSeedRs])
+  val validationSeedCmd = RqRsCodec(Encoder.AsObject[ValidationSeedRq], Decoder[ValidationSeedRs])
 
   // object subscription {
 
@@ -153,16 +153,16 @@ object Commands {
   /** Commands under transactions except Sign and Submit. Not the actual txjson payloads are modelled differently. */
   // object transactions {
 
-  val bookOffersCmd = Codec(Encoder.AsObject[BookOffersRq], Decoder[BookOffersRs])
+  val bookOffersCmd = RqRsCodec(Encoder.AsObject[BookOffersRq], Decoder[BookOffersRs])
 
-  val ripplePathFindCmd = Codec(Encoder.AsObject[RipplePathFindRq], Decoder[RipplePathFindRs])
+  val ripplePathFindCmd = RqRsCodec(Encoder.AsObject[RipplePathFindRq], Decoder[RipplePathFindRs])
 
-  val txCmd = Codec(Encoder.AsObject[TxRq], Decoder[TxRs])
+  val txCmd = RqRsCodec(Encoder.AsObject[TxRq], Decoder[TxRs])
 
-  val submitCmd = Codec(Encoder.AsObject[SubmitRq], Decoder[SubmitRs])
+  val submitCmd = RqRsCodec(Encoder.AsObject[SubmitRq], Decoder[SubmitRs])
 
-  val signCmd = Codec(Encoder.AsObject[SignRq], Decoder[SignRs])
+  val signCmd = RqRsCodec(Encoder.AsObject[SignRq], Decoder[SignRs])
 
-  val signForCmd = Codec(Encoder.AsObject[SignForRq], Decoder[SignForRs])
+  val signForCmd = RqRsCodec(Encoder.AsObject[SignForRq], Decoder[SignForRs])
 
 }

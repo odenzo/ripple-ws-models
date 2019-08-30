@@ -1,12 +1,14 @@
 package com.odenzo.ripple.models.wireprotocol.ledgerinfo
 
 import io.circe._
+import io.circe.generic.extras.Configuration
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax._
 
 import com.odenzo.ripple.models.atoms._
 import com.odenzo.ripple.models.atoms.ledgertree.statenodes.LedgerNode
 import com.odenzo.ripple.models.support.{RippleScrollingRq, RippleScrollingRs}
+import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 /** https://ripple.com/build/rippled-apis/#ledger-data
   *  TODO: 0.70 or thereabouts added ability to filter:
@@ -24,7 +26,7 @@ import com.odenzo.ripple.models.support.{RippleScrollingRq, RippleScrollingRs}
   * "ticket"
   **/
 case class LedgerDataRq(
-    ledger: Ledger = LedgerName.VALIDATED_LEDGER,
+    ledger: LedgerID = LedgerName.VALIDATED_LEDGER,
     limit: Limit = Limit.default,
     binary: Boolean = false,
     marker: Option[Marker] = None,
@@ -36,19 +38,20 @@ case class LedgerDataRs(
     ledger_index: LedgerSequence,
     marker: Option[Marker],
     state: List[LedgerNode],
-    validated: Option[Boolean]
+    validated: Boolean = false
 ) extends RippleScrollingRs
 
-object LedgerDataRq {
-  val command: (String, Json) = "command" -> "ledger_data".asJson
+object LedgerDataRq extends CirceCodecUtils {
   implicit val encoder: Encoder.AsObject[LedgerDataRq] = {
-    deriveEncoder[LedgerDataRq]
-      .mapJsonObject(o => command +: o)
-      .mapJsonObject(o => Ledger.renameLedgerField(o))
+    deriveEncoder[LedgerDataRq].mapJsonObject(withCommandAndLedgerID("ledger_data"))
   }
 }
 
 object LedgerDataRs {
-  implicit val decoder: Decoder[LedgerDataRs] = deriveDecoder[LedgerDataRs]
+  import io.circe._
+  import io.circe.syntax._
+  import io.circe.generic.extras.semiauto._
+  implicit val config: Configuration                 = Configuration.default.withDefaults
+  implicit val decoder: Codec.AsObject[LedgerDataRs] = deriveConfiguredCodec[LedgerDataRs]
 
 }

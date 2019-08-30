@@ -36,11 +36,11 @@ class CurrencyAmount$Test extends CodecTesting {
   test("Decoding Drops") {
     val drops: Result[Drops] = Json.fromString("66").as[Drops]
     logger.info(s"Simple Drops $drops")
-    getOrFailLogging(drops) shouldEqual Drops(66)
+    testCompleted(drops) shouldEqual Drops(66)
 
     val dropsCA: Result[CurrencyAmount] = Json.fromString("66").as[CurrencyAmount]
     logger.info(s"Drops CAmount $dropsCA")
-    getOrFailLogging(dropsCA) shouldEqual Drops(66)
+    testCompleted(dropsCA) shouldEqual Drops(66)
 
   }
 
@@ -54,9 +54,9 @@ class CurrencyAmount$Test extends CodecTesting {
 
     val json: Json = parse(sample)
     val fiat       = json.as[FiatAmount]
-    getOrFailLogging(fiat) shouldEqual fiatObj
+    testCompleted(fiat) shouldEqual fiatObj
     val currencyAmount: Result[CurrencyAmount] = json.as[CurrencyAmount]
-    getOrFailLogging(currencyAmount) shouldEqual fiatObj
+    testCompleted(currencyAmount) shouldEqual fiatObj
 
   }
 }

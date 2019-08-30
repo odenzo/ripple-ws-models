@@ -2,10 +2,11 @@ package com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes
 
 import io.circe.generic.semiauto._
 import io.circe.syntax._
-import io.circe.{Decoder, Encoder, Json}
+import io.circe.{Json, Encoder, Decoder}
 
 import com.odenzo.ripple.models.atoms._
 import com.odenzo.ripple.models.utils.CirceCodecUtils
+import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.support.RippleTransaction
 
 /**
   * Cancels an existing book order offer.

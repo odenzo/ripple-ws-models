@@ -7,4 +7,7 @@ class RippleTxnType$Test extends CodecTesting {
   test("Product Stuff") {
     logger.info("Product Prefix: " + RippleTxnType.Payment.productPrefix)
   }
+  test("ToString") {
+    logger.debug(s"${RippleTxnType.PaymentChannelClaim}")
+  }
 }

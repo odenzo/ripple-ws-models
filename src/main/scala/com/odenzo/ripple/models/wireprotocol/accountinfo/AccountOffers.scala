@@ -5,6 +5,7 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 import com.odenzo.ripple.models.atoms._
 import com.odenzo.ripple.models.support._
+import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 /**
   * Get a list of outstanding offers created by an account.
@@ -13,7 +14,7 @@ case class AccountOffersRq(
     account: AccountAddr,
     limit: Limit = Limit.default,
     marker: Option[Marker] = None,
-    ledger: Ledger = LedgerName.VALIDATED_LEDGER,
+    ledger: LedgerID = LedgerName.VALIDATED_LEDGER,
     id: RippleMsgId = RippleMsgId.random
 ) extends RippleScrollingRq
 
@@ -29,13 +30,10 @@ case class AccountOffersRs(
     resultLedger: Option[ResultLedger]
 ) extends RippleScrollingRs
 
-object AccountOffersRq {
+object AccountOffersRq extends CirceCodecUtils {
 
-  val command: (String, Json) = "command" -> Json.fromString("account_offers")
   implicit val encoder: Encoder.AsObject[AccountOffersRq] = {
-    deriveEncoder[AccountOffersRq]
-      .mapJsonObject(o => command +: o)
-      .mapJsonObject(o => Ledger.renameLedgerField(o))
+    deriveEncoder[AccountOffersRq].mapJsonObject(withCommandAndLedgerID("account_offers"))
   }
 
 }

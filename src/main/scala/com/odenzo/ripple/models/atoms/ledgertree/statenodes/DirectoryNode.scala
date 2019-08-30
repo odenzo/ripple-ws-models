@@ -39,7 +39,7 @@ case class OfferDirectoryNode(
 ) extends DirectoryNode
 
 object OfferDirectoryNode {
-  implicit val config: Configuration                       = CirceCodecUtils.capitalizeConfiguration
+  implicit val config: Configuration                       = CirceCodecUtils.capitalizeConfig
   implicit val decoder: Codec.AsObject[OfferDirectoryNode] = deriveConfiguredCodec[OfferDirectoryNode]
   implicit val show: Show[OfferDirectoryNode]              = Show.fromToString[OfferDirectoryNode]
 }
@@ -64,7 +64,7 @@ case class OwnerDirectoryNode(
 ) extends DirectoryNode
 
 object OwnerDirectoryNode {
-  implicit val config: Configuration                       = CirceCodecUtils.capitalizeConfiguration
+  implicit val config: Configuration                       = CirceCodecUtils.capitalizeConfig
   implicit val decoder: Codec.AsObject[OwnerDirectoryNode] = deriveConfiguredCodec[OwnerDirectoryNode]
   implicit val show: Show[OwnerDirectoryNode]              = Show.fromToString[OwnerDirectoryNode]
 }

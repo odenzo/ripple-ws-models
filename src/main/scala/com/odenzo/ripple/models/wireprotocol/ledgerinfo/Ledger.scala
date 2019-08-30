@@ -6,7 +6,8 @@ import io.circe.syntax._
 
 import com.odenzo.ripple.models.atoms._
 import com.odenzo.ripple.models.atoms.ledgertree.LedgerHeader
-import com.odenzo.ripple.models.support.{RippleRq, RippleRs}
+import com.odenzo.ripple.models.support.{RippleRs, RippleRq}
+import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 /**
   * https://ripple.com/build/rippled-apis/#ledger
@@ -29,7 +30,7 @@ case class LedgerRq(
     accounts: Boolean = false,
     expand: Boolean = false,
     owner_funds: Boolean = true,
-    ledger: Ledger = LedgerName.VALIDATED_LEDGER,
+    ledger: LedgerID = LedgerName.VALIDATED_LEDGER,
     id: RippleMsgId = RippleMsgId.random
 ) extends RippleRq
 
@@ -41,18 +42,12 @@ case class LedgerRq(
   */
 case class LedgerRs(ledger: LedgerHeader, ledger_hash: LedgerHash, ledger_index: LedgerSequence) extends RippleRs
 
-object LedgerRq {
-  val command: (String, Json) = "command" -> "ledger".asJson
+object LedgerRq extends CirceCodecUtils {
   implicit val encoder: Encoder.AsObject[LedgerRq] = deriveEncoder[LedgerRq]
-    .mapJsonObject(o => command +: o)
-    .mapJsonObject(o => Ledger.renameLedgerField(o))
+    .mapJsonObject(withCommandAndLedgerID("ledger"))
 
 }
 
 object LedgerRs {
   implicit val decoder: Decoder[LedgerRs] = deriveDecoder[LedgerRs]
-//    .product(Decoder[ResultLedger])
-//    .map {
-//      case (a, theResultLedger) => a.copy(resultLedger = Some(theResultLedger))
-//    }
 }

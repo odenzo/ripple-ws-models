@@ -4,6 +4,9 @@ import cats.implicits._
 import io.circe.generic.extras.Configuration
 import io.circe.syntax._
 import io.circe.{Decoder, _}
+import io.circe._
+import io.circe.syntax._
+import io.circe.generic.extras.semiauto._
 /*
   "account_id" : "ra8iBMyU6JrEVLxBBG98sWnmai3fKdTZvd",       AKA: AccountAddress
   "key_type" : "secp256k1",
@@ -32,6 +35,7 @@ sealed trait RippleSignature
 
 object RippleSignature {
 
+  /** This was a snippet to maske a signature, should be in the show really (mask string for logging etc) */
   def mask(s: String): String = s.zipWithIndex.map(c => if (c._2 > 4 & c._2 % 2 === 1) '*' else c._1).mkString
 
   implicit val encoder: Encoder[RippleSignature] = Encoder.instance[RippleSignature] {
@@ -39,6 +43,12 @@ object RippleSignature {
     case d: RippleKey     => d.asJson
     case d: RippleSeedHex => d.asJson
   }
+
+//  implicit val decoder: Decoder[RippleSignature] = Decoder.instance[RippleSignature] {
+//    case d: RippleSeed    => d.asJson
+//    case d: RippleKey     => d.asJson
+//    case d: RippleSeedHex => d.asJson
+//  }
 }
 
 /** Represent a ripple public key. There are ones for accounts, and also ones for validation.
@@ -50,8 +60,7 @@ object RippleSignature {
 case class RipplePublicKey(v: Base58Checksum)
 
 object RipplePublicKey {
-  implicit val decode: Decoder[RipplePublicKey] = Decoder.decodeString.map(v => RipplePublicKey(Base58Checksum(v)))
-  implicit val encode: Encoder[RipplePublicKey] = Encoder.encodeString.contramap(_.v.v)
+  implicit val codec: Codec[RipplePublicKey] = deriveUnwrappedCodec[RipplePublicKey]
 }
 
 /**
@@ -61,8 +70,7 @@ object RipplePublicKey {
 case class RippleSeed(v: Base58Checksum) extends RippleSignature
 
 object RippleSeed {
-  implicit val decode: Decoder[RippleSeed] = Decoder.decodeString.map(v => RippleSeed(Base58Checksum(v)))
-  implicit val encode: Encoder[RippleSeed] = Encoder.encodeString.contramap(_.v.v)
+  implicit val codec: Codec[RippleSeed] = deriveUnwrappedCodec[RippleSeed]
 
 }
 
@@ -74,8 +82,7 @@ object RippleSeed {
 case class RippleSeedHex(v: String) extends RippleSignature
 
 object RippleSeedHex {
-  implicit val decode: Decoder[RippleSeedHex] = Decoder.decodeString.map(v => RippleSeedHex(v))
-  implicit val encode: Encoder[RippleSeedHex] = Encoder.encodeString.contramap(_.v)
+  implicit val codec: Codec[RippleSeedHex] = deriveUnwrappedCodec[RippleSeedHex]
 
 }
 
@@ -86,20 +93,16 @@ object RippleSeedHex {
 case class RippleKey(v: RFC1751) extends RippleSignature
 
 object RippleKey {
-  implicit val decode: Decoder[RippleKey] = Decoder.decodeString.map(s => RippleKey(RFC1751(s)))
-  implicit val encode: Encoder[RippleKey] = Encoder.encodeString.contramap(_.v.v)
+  implicit val codec: Codec[RippleKey] = deriveUnwrappedCodec[RippleKey]
 }
 
 /** Not used much now, as default KeyType is only non-experimental key */
 case class RippleKeyType(v: String) extends AnyVal
 
 object RippleKeyType {
-
-  val ED25519   = RippleKeyType("ed25519")
-  val SECP256K1 = RippleKeyType("secp256k1")
-
-  implicit val decode: Decoder[RippleKeyType] = Decoder.decodeString.map(RippleKeyType(_))
-  implicit val encode: Encoder[RippleKeyType] = Encoder.encodeString.contramap(_.v)
+  val ED25519                              = RippleKeyType("ed25519")
+  val SECP256K1                            = RippleKeyType("secp256k1")
+  implicit val codec: Codec[RippleKeyType] = deriveUnwrappedCodec[RippleKeyType]
 }
 
 /**
@@ -108,23 +111,8 @@ object RippleKeyType {
 case class SigningPublicKey(v: String)
 
 object SigningPublicKey {
-
-  implicit val decoder: Decoder[SigningPublicKey] = Decoder.decodeString.map(SigningPublicKey(_))
-  implicit val encoder: Encoder[SigningPublicKey] = Encoder.encodeString.contramap[SigningPublicKey](_.v)
-
+  implicit val codec: Codec[SigningPublicKey] = deriveUnwrappedCodec[SigningPublicKey]
 }
-
-/**
-  *
-  * @param validation_key
-  * @param validation_public_key
-  * @param validation_seed
-  */
-case class ValidationKeys(
-    validation_key: RippleKey,
-    validation_public_key: RipplePublicKey,
-    validation_seed: RippleSeed
-)
 
 /**
   * Account Keys created by propose_wallet, removing redundant HEX   but keeping masterKey and masterseed
@@ -139,13 +127,13 @@ case class ValidationKeys(
   * "public_key_hex" : "036F89F2B2E5DC47E4F72B7C33169F071E9F476DAD3D20EF39CA3778BC4508F102"
   * }
   *
-  * This just gets a subset of the keys -- forget why.
+
   *
   * @param account_id The id of the account, always in account address format.
   * @param key_type
   * @param master_key    RFC1751
   * @param master_seed   Base58Check
-  * @param master_seed_hex
+  * @param master_seed_hex     Hex
   * @param public_key
   * @param public_key_hex
   */
@@ -164,26 +152,18 @@ case class AccountKeys(
 
 }
 
-/**
-  * Once a tx_json is signed there is a TxnSignature which is what this represents. Not used much so far.
-  *
-  * @param v
-  */
-case class TxSignature(v: String) extends AnyVal
-
-object TxSignature {
-  implicit val decoder: Decoder[TxSignature] = Decoder.decodeString.map(TxSignature(_))
-  implicit val encoder: Encoder[TxSignature] = Encoder.encodeString.contramap[TxSignature](_.v)
-}
-
 object AccountKeys {
-  implicit val config: Configuration                  = Configuration.default
-  implicit val encoder: Encoder.AsObject[AccountKeys] = deriveConfiguredEncoder[AccountKeys]
-  implicit val decoder: Decoder[AccountKeys]          = deriveConfiguredDecoder[AccountKeys]
+  implicit val config: Configuration              = Configuration.default
+  implicit val codec: Codec.AsObject[AccountKeys] = deriveConfiguredCodec[AccountKeys]
 }
+
+case class ValidationKeys(
+    validation_key: RippleKey,
+    validation_public_key: RipplePublicKey,
+    validation_seed: RippleSeed
+)
 
 object ValidationKeys {
-  implicit val config: Configuration                          = Configuration.default
-  lazy implicit val decoder: Decoder[ValidationKeys]          = deriveConfiguredDecoder[ValidationKeys]
-  lazy implicit val encoder: Encoder.AsObject[ValidationKeys] = deriveConfiguredEncoder[ValidationKeys]
+  implicit val config: Configuration                      = Configuration.default
+  lazy implicit val codec: Codec.AsObject[ValidationKeys] = deriveConfiguredCodec[ValidationKeys]
 }

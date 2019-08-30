@@ -1,15 +1,17 @@
 package com.odenzo.ripple.models.wireprotocol.accountinfo
 
 import io.circe._
+import io.circe.generic.extras.Configuration
 import io.circe.generic.semiauto._
 
 import com.odenzo.ripple.models.atoms._
-import com.odenzo.ripple.models.support.{RippleRq, RippleRs}
+import com.odenzo.ripple.models.support.{RippleRs, RippleRq}
+import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 case class AccountCurrenciesRq(
     account: AccountAddr,
     strict: Boolean = true,
-    ledger: Ledger = LedgerName.CURRENT_LEDGER,
+    ledger: LedgerID = LedgerName.CURRENT_LEDGER,
     id: RippleMsgId = RippleMsgId.random
 ) extends RippleRq {}
 
@@ -20,19 +22,20 @@ case class AccountCurrenciesRs(
     validated: Boolean = false
 ) extends RippleRs
 
-object AccountCurrenciesRq {
-  val command: (String, Json) = "command" -> Json.fromString("account_currencies")
+object AccountCurrenciesRq extends CirceCodecUtils {
   implicit val encoder: Encoder.AsObject[AccountCurrenciesRq] = {
-    deriveEncoder[AccountCurrenciesRq]
-      .mapJsonObject(o => command +: o)
-      .mapJsonObject(o => Ledger.renameLedgerField(o))
+    deriveEncoder[AccountCurrenciesRq].mapJsonObject(withCommandAndLedgerID("account_currencies"))
   }
 
 }
 
 object AccountCurrenciesRs {
+
+  import io.circe._
+  import io.circe.generic.extras.semiauto._
+  implicit val config: Configuration = Configuration.default.withDefaults
   implicit val decoder: Decoder[AccountCurrenciesRs] = {
-    deriveDecoder[AccountCurrenciesRs].product(Decoder[ResultLedger]).map {
+    deriveConfiguredDecoder[AccountCurrenciesRs].product(Decoder[ResultLedger]).map {
       case (a, theResultLedger) => a.copy(resultLedger = Some(theResultLedger))
     }
   }

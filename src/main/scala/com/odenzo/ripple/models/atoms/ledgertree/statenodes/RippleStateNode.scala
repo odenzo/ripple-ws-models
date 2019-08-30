@@ -43,7 +43,7 @@ case class RippleStateNode(
 ) extends LedgerNode
 
 object RippleStateNode {
-  implicit val config: Configuration                  = CirceCodecUtils.capitalizeConfiguration
+  implicit val config: Configuration                  = CirceCodecUtils.capitalizeConfig
   implicit val codec: Codec.AsObject[RippleStateNode] = deriveConfiguredCodec[RippleStateNode]
 
 }

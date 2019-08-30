@@ -1,14 +1,12 @@
 package com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes
 
-import io.circe._
-import io.circe.generic.semiauto._
-
 import com.odenzo.ripple.models.atoms._
 import com.odenzo.ripple.models.utils.CirceCodecUtils
 import io.circe._
 import io.circe.generic.extras.Configuration
-import io.circe.syntax._
 import io.circe.generic.extras.semiauto._
+
+import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.support.RippleTransaction
 case class PaymentTx(
     account: AccountAddr,
     amount: CurrencyAmount,
@@ -23,7 +21,7 @@ case class PaymentTx(
 
 object PaymentTx {
   private val tx: (String, Json)     = "TransactionType" -> Json.fromString("Payment")
-  implicit val config: Configuration = CirceCodecUtils.capitalizeConfiguration.withDefaults
+  implicit val config: Configuration = CirceCodecUtils.capitalizeConfig.withDefaults
 
   implicit val encoder: Encoder.AsObject[PaymentTx] = deriveConfiguredEncoder[PaymentTx].mapJsonObject(tx +: _)
   implicit val decoder: Decoder[PaymentTx]          = deriveConfiguredDecoder[PaymentTx]

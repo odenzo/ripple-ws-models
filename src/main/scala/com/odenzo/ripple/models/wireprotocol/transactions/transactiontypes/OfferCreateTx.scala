@@ -5,6 +5,7 @@ import io.circe.{Json, Encoder, Decoder}
 
 import com.odenzo.ripple.models.atoms.{TxnSequence, OfferCreateFlag, RippleTime, BitMask, AccountAddr, CurrencyAmount}
 import com.odenzo.ripple.models.utils.CirceCodecUtils
+import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.support.RippleTransaction
 
 /**
   * Creates (or modifies) existing book order offer.

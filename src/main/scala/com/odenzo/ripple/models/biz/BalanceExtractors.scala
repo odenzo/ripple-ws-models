@@ -38,15 +38,17 @@ trait BalanceExtractors {
     * @return
     */
   def extractBalance(rs: TxRs): List[AccountBalance] = {
-    if (!rs.validated) OError("Transaction Not Validated").asLeft
+    if (!rs.common.validated === false) OError("Transaction Not Validated").asLeft
     val parties: Option[(AccountAddr, AccountAddr)] = rs.tx match {
       case tx: PaymentTx => Some(Tuple2(tx.account, tx.destination))
       case other         => None
     }
 
-    val delivered: CurrencyAmount = rs.meta.flatMap(m => m.delivered_amount).getOrElse(Drops(0))
+    val delivered: CurrencyAmount = rs.common.metaData.flatMap(m => m.delivered_amount).getOrElse(Drops(0))
 
-    val allBalances: List[AccountBalance] = rs.meta.map(extractBalancesFromMeta).getOrElse(List.empty[AccountBalance])
+    val allBalances: List[AccountBalance] = rs.common.metaData
+      .map(extractBalancesFromMeta)
+      .getOrElse(List.empty[AccountBalance])
     allBalances
   }
 

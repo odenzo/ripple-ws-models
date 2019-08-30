@@ -2,11 +2,12 @@ package com.odenzo.ripple.models.wireprotocol.transactions
 
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax._
-import io.circe.{Decoder, Encoder, Json, JsonObject}
+import io.circe.{Json, Encoder, JsonObject, Decoder}
 
 import com.odenzo.ripple.models.atoms.ledgertree.statenodes.OfferNode
 import com.odenzo.ripple.models.atoms._
-import com.odenzo.ripple.models.support.{RippleRq, RippleRs}
+import com.odenzo.ripple.models.support.{RippleRs, RippleRq}
+import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 /**
   * Gets a list of offers, aka order book, between two currencies.
@@ -16,30 +17,23 @@ import com.odenzo.ripple.models.support.{RippleRq, RippleRs}
   */
 case class BookOffersRq(
     taker: Option[AccountAddr] = None,
-    taker_gets: Option[Script],
-    taker_pays: Option[Script],
-    ledger: Ledger      = LedgerName.VALIDATED_LEDGER,
+    taker_gets: Script,
+    taker_pays: Script,
+    ledger: LedgerID = LedgerName.VALIDATED_LEDGER,
     limit: Option[Long] = None,
-    id: RippleMsgId     = RippleMsgId.random
+    marker: Option[Marker] = None,
+    id: RippleMsgId = RippleMsgId.random
 ) extends RippleRq
 
 case class BookOffersRs(offers: List[OfferNode], ledger_index: Option[LedgerSequence], ledger_hash: Option[LedgerHash])
     extends RippleRs
 
-object BookOffersRq {
+object BookOffersRq extends CirceCodecUtils {
 
   val command: (String, Json) = "command" -> Json.fromString("book_offers")
 
-  implicit val scriptEncoder: Encoder[Option[Script]] = Encoder.instance[Option[Script]] {
-    case Some(script) => Encoder[Script].apply(script)
-    case None         => JsonObject.singleton("currency", Json.fromString("XRP")).asJson
-  }
-
   implicit val encoder: Encoder.AsObject[BookOffersRq] = {
-    deriveEncoder[BookOffersRq]
-      .mapJsonObject(o => command +: o)
-      .mapJsonObject(o => Ledger.renameLedgerField(o))
-
+    deriveEncoder[BookOffersRq].mapJsonObject(withCommandAndLedgerID("book_offers"))
   }
 
 }

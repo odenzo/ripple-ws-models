@@ -1,10 +1,11 @@
 package com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes
 
 import io.circe.syntax._
-import io.circe.{Encoder, Decoder, JsonObject}
+import io.circe.{Encoder, JsonObject, Decoder}
 
 import com.odenzo.ripple.models.atoms.RippleTxnType.PaymentChannelClaim
 import com.odenzo.ripple.models.atoms.{Drops, RipplePublicKey, PaymentChannelHash, TxnHash}
+import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.support.RippleTransaction
 
 /**
   *  Claim from a Payment Channel

@@ -6,6 +6,7 @@ import io.circe.{Json, Encoder, Decoder}
 
 import com.odenzo.ripple.models.atoms._
 import com.odenzo.ripple.models.utils.CirceCodecUtils
+import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.support.RippleTransaction
 
 /**
   * There are no transaction specific flags.

@@ -1,16 +1,11 @@
 package com.odenzo.ripple.models.atoms.ledgertree.statenodes
 
-import io.circe.{JsonObject, Encoder, HCursor, Decoder, Codec, Json}
+import io.circe.Codec
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.deriveConfiguredCodec
-import io.circe._
-import io.circe.syntax._
-import io.circe.generic.extras.semiauto._
+
 import com.odenzo.ripple.models.atoms._
-import com.odenzo.ripple.models.atoms.ledgertree.AccountData
-import com.odenzo.ripple.models.atoms.ledgertree.transactions.TxPayment.logger
 import com.odenzo.ripple.models.utils.CirceCodecUtils
-import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.{AccountSetTx, PaymentTx}
 
 // https://ripple.com/build/ledger-format/#accountroot, probably should merge in AccountData and AccountRootEntry
 // which is anemic now. Actually, looks like it is broken.

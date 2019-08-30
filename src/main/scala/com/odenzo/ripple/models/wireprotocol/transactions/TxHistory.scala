@@ -4,7 +4,7 @@ import io.circe._
 import io.circe.generic.semiauto._
 import io.circe.syntax._
 
-import com.odenzo.ripple.models.atoms.ledgertree.transactions.LedgerTransaction
+import com.odenzo.ripple.models.atoms.ledgertree.transactions.LedgerTxn
 import com.odenzo.ripple.models.atoms._
 import com.odenzo.ripple.models.support.{RippleRs, RippleRq}
 
@@ -15,7 +15,7 @@ case class TxHistoryRq(start: Int, id: RippleMsgId = RippleMsgId.EMPTY) extends 
 
 case class TxHistoryRs(
     index: Int,
-    txs: List[LedgerTransaction]
+    txs: List[LedgerTxn]
 ) extends RippleRs
 
 object TxHistoryRq {

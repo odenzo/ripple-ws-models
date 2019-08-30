@@ -1,5 +1,6 @@
 package com.odenzo.ripple.models.atoms
 
+import io.circe.Decoder
 import io.circe.syntax._
 
 import com.odenzo.ripple.models.support.RippleCodecUtils
@@ -27,15 +28,15 @@ class RippleKeys$Test extends CodecTesting {
 }
        """.stripMargin
 
-  val json = getOrFailLogging(io.circe.parser.parse(realJson))
+  val json = testCompleted(io.circe.parser.parse(realJson))
 
   test("Roundtrip Sample") {
-    val keys: ErrorOr[AccountKeys] = RippleCodecUtils.decodeFullyOnSuccess(json, AccountKeys.decoder)
+    val keys: ErrorOr[AccountKeys] = RippleCodecUtils.decodeFullyOnSuccess(json, Decoder[AccountKeys])
     logger.info(s"Keys: $keys")
-    val bjson = getOrFailLogging(keys).asJson
+    val bjson = testCompleted(keys).asJson
     logger.info(s"Back to JSON:\n" + bjson.spaces2)
     val exp = CirceUtils.json2jsonobject(json).flatMap(CirceUtils.findObjectField("result", _).map(_.asJson))
-    bjson shouldEqual getOrFailLogging(exp)
+    bjson shouldEqual testCompleted(exp)
   }
 
 }

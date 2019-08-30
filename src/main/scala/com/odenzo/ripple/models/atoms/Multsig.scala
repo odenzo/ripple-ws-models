@@ -21,7 +21,7 @@ import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.Trust
 case class Signer(account: AccountAddr, signingPubKey: RipplePublicKey, txnSignature: TxnSignature)
 
 object Signer {
-  implicit val config: Configuration         = CirceCodecUtils.capitalizeConfiguration
+  implicit val config: Configuration         = CirceCodecUtils.capitalizeConfig
   implicit val codec: Codec.AsObject[Signer] = deriveConfiguredCodec[Signer]
 }
 
@@ -34,6 +34,8 @@ case class Signers(signers: List[Signer])
 
 object Signers {
   import io.circe.generic.semiauto._
+  // This is needed to swap each signer in a single field JsonObject within the Json Array
+  // COuld use Dummy here but...
   implicit val encoder: Encoder[Signers] = Encoder.instance[Signers] { v =>
     val objects: immutable.Seq[JsonObject] = v.signers.map(s => JsonObject.singleton("Signer", s.asJson))
     val json: Json                         = objects.asJson
@@ -64,7 +66,7 @@ case class SignerEntry(account: AccountAddr, signerWeight: Int)
 /** The correct encoding and decoding within nested JsonObject is handled here */
 object SignerEntry {
 
-  implicit val config: Configuration              = CirceCodecUtils.capitalizeConfiguration
+  implicit val config: Configuration              = CirceCodecUtils.capitalizeConfig
   implicit val codec: Codec.AsObject[SignerEntry] = deriveConfiguredCodec[SignerEntry]
 
 }

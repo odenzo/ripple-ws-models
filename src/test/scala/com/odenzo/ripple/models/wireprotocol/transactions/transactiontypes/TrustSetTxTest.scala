@@ -29,7 +29,7 @@ class TrustSetTxTest extends CodecTesting {
 
   test("Codec") {
 
-    val obj = getOrFailLogging(parseAndDecode(json, Decoder[TrustSetTx]))
+    val obj = testCompleted(parseAndDecode(json, Decoder[TrustSetTx]))
     obj.asJson
     logger.debug(s"$obj")
   }

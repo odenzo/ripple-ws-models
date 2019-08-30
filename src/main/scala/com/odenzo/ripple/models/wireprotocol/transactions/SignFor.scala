@@ -4,8 +4,9 @@ import io.circe.generic.semiauto.deriveEncoder
 import io.circe.{Json, _}
 
 import com.odenzo.ripple.models.atoms._
-import com.odenzo.ripple.models.support.{RippleRq, RippleRs}
-import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.{PendingTxData, RippleTransaction}
+import com.odenzo.ripple.models.atoms.ledgertree.transactions.TxCommon
+import com.odenzo.ripple.models.support.{RippleRs, RippleRq}
+import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.support.RippleTransaction
 
 /**
   * [[https://ripple.com/build/rippled-apis/#sign]]
@@ -28,7 +29,7 @@ case class SignForRq(
   * Ultimately this should/could use SignRs?
   *
   */
-case class SignForRs(tx_blob: TxBlob, signed: PendingTxData, tx_json: RippleTransaction) extends RippleRs
+case class SignForRs(tx_blob: TxBlob, signed: TxCommon, tx_json: RippleTransaction) extends RippleRs
 
 object SignForRq {
 
@@ -45,7 +46,7 @@ object SignForRs {
   implicit val decoder2: Decoder[SignForRs] = Decoder.instance { c =>
     for {
       txblob <- c.get[TxBlob]("tx_blob")
-      signed <- c.get[PendingTxData]("tx_json")
+      signed <- c.get[TxCommon]("tx_json")
       txrs   <- c.get[RippleTransaction]("tx_json")
 
     } yield SignForRs(txblob, signed, txrs)

@@ -7,6 +7,7 @@ import io.circe.generic.semiauto._
 
 import com.odenzo.ripple.models.atoms._
 import com.odenzo.ripple.models.support.{RippleScrollingRq, RippleScrollingRs}
+import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 /**
   * https://ripple.com/build/rippled-apis/#account-channels
@@ -20,9 +21,9 @@ import com.odenzo.ripple.models.support.{RippleScrollingRq, RippleScrollingRs}
 case class AccountChannelsRq(
     account: AccountAddr,
     destination_account: Option[AccountAddr],
-    ledger: Ledger         = LedgerName.CURRENT_LEDGER,
-    id: RippleMsgId        = RippleMsgId.random,
-    limit: Limit           = Limit(50),
+    ledger: LedgerID = LedgerName.CURRENT_LEDGER,
+    id: RippleMsgId = RippleMsgId.random,
+    limit: Limit = Limit(50),
     marker: Option[Marker] = None
 ) extends RippleScrollingRq {
   def scrollWith(marker: Marker): AccountChannelsRq = this.copy(marker = Option(marker))
@@ -36,14 +37,10 @@ case class AccountChannelsRs(
     marker: Option[Marker]
 ) extends RippleScrollingRs
 
-object AccountChannelsRq {
+object AccountChannelsRq extends CirceCodecUtils {
 
-  val command: (String, Json) = "command" -> Json.fromString("account_channels")
   implicit val encoder: Encoder.AsObject[AccountChannelsRq] = {
-    deriveEncoder[AccountChannelsRq]
-      .mapJsonObject(o => command +: o)
-      .mapJsonObject(o => Ledger.renameLedgerField(o))
-
+    deriveEncoder[AccountChannelsRq].mapJsonObject(withCommandAndLedgerID("account_channels"))
   }
 }
 

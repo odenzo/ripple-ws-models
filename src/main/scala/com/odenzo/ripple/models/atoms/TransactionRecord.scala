@@ -3,7 +3,7 @@ package com.odenzo.ripple.models.atoms
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 
-import com.odenzo.ripple.models.atoms.ledgertree.transactions.LedgerTransaction
+import com.odenzo.ripple.models.atoms.ledgertree.transactions.LedgerTxn
 
 /**
   * Models an individual transaction in the list of transactions returned by account_tx.
@@ -15,7 +15,7 @@ import com.odenzo.ripple.models.atoms.ledgertree.transactions.LedgerTransaction
 case class TransactionRecord(
     ledger_index: Option[LedgerSequence],
     meta: Meta,
-    tx: LedgerTransaction,
+    tx: LedgerTxn,
     validated: Boolean
 )
 

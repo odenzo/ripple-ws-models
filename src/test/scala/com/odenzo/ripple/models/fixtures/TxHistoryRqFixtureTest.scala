@@ -9,13 +9,11 @@ import io.circe.{Json, Decoder}
 import io.circe.syntax._
 import monocle.Optional
 
-import com.odenzo.ripple.models.atoms.ledgertree.transactions.LedgerTransaction
+import com.odenzo.ripple.models.atoms.ledgertree.transactions.LedgerTxn
 import com.odenzo.ripple.models.testkit.CodecTesting
 import com.odenzo.ripple.models.utils.CirceUtils
 import com.odenzo.ripple.models.utils.caterrors.{AppError, AppJsonDecodingError}
-import com.odenzo.ripple.models.wireprotocol.ledgerinfo.LedgerRs
 import com.odenzo.ripple.models.wireprotocol.transactions.TxHistoryRs
-import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.RippleTransaction
 
 /**
   * Fixtures made using the (deprecated) TxHistory command.
@@ -29,12 +27,11 @@ class TxHistoryRqFixtureTest extends CodecTesting {
       _ = logger.warn(s"Processing ${files.length} fixture files")
       decoded <- files.traverse(processOneFile)
     } yield decoded
-    getOrFailLogging(complete)
+    testCompleted(complete)
   }
 
-  def processOneFile(f: Path): Either[AppError, List[LedgerTransaction]] = {
+  def processOneFile(f: Path): Either[AppError, List[LedgerTxn]] = {
 
-    import io.circe.optics._
     import io.circe.optics.JsonPath._
     val _txs: Optional[Json, Vector[Json]] = root.result.txs.arr
     for {
@@ -45,10 +42,10 @@ class TxHistoryRqFixtureTest extends CodecTesting {
       lts <- txs.zipWithIndex.traverse {
         case (txnjson, indx) =>
           logger.debug(s"txs Index $indx  ${txnjson.spaces4}")
-          val decoded: Either[AppJsonDecodingError, LedgerTransaction] = decode(txnjson, Decoder[LedgerTransaction])
+          val decoded: Either[AppJsonDecodingError, LedgerTxn] = decode[LedgerTxn](txnjson)
           logIfError(decoded)
       }
-      decoded <- CirceUtils.decode(result.asJson, Decoder[TxHistoryRs])
+      decoded <- decode[TxHistoryRs](result.asJson)
       // _ = logger.debug(s"DEcoderd ${pprint.apply(decoded)}")
     } yield lts
   }

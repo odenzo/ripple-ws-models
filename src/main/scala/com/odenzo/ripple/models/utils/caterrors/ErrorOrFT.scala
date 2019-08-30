@@ -18,7 +18,6 @@ import com.odenzo.ripple.models.utils.caterrors.CatsTransformers.{ErrorOr, Error
   */
 object CatsTransformers extends Logging {
 
-  // Can we just make this a trait and add some helpers?
   type ErrorOr[A] = Either[AppError, A]
 
   /** Shorthand for a Future ErrorOr ... prefer to standardize on ErrorOrFT instead */
@@ -65,10 +64,9 @@ trait CatsTransformerOps {
   }
 
   /** Takes a future and catches all non fatal exceptions, returning ErrorFT with the exception wrapped in OError
+    * So if future has an non-fatal exception it returns Succesfully with a left Either containing the exception
     */
   def fromFuture[B](b: Future[B])(implicit ec: ExecutionContext): ErrorOrFT[B] = {
-    //val lifted: Future[Either[BError, B]] = Either.catchNonFatal(b).leftMap(t => new OErrorException(err=t))
-    // .sequence
 
     val caught: Either[Throwable, Future[B]] = Either.catchNonFatal(b)
     val massaged: Either[Future[AppException], Future[B]] = {

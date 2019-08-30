@@ -10,6 +10,7 @@ import io.circe.jawn.JawnParser
 import io.circe.syntax._
 import scribe.Logging
 
+import com.odenzo.ripple.models.support.RippleRq
 import com.odenzo.ripple.models.utils.caterrors.CatsTransformers.ErrorOr
 import com.odenzo.ripple.models.utils.caterrors.{AppError, AppException, AppJsonDecodingError, AppJsonParsingError}
 
@@ -17,6 +18,21 @@ import com.odenzo.ripple.models.utils.caterrors.{AppError, AppException, AppJson
   *  Traits for working with Circe Json / DOM
   */
 trait CirceUtils extends Logging {
+
+  /**
+    * To avoid importing io.circe.syntax to use .asJson :-)
+    *  Also allows explicitly passing in the encoder
+    **/
+  def encode[A](a: A)(implicit enc: Encoder[A]): Json = {
+    enc.apply(a)
+  }
+
+  /** Easily decode wrapped in our Either AppError style. */
+  def decode[A](json: Json, desc: String = "")(implicit decoder: Decoder[A]): Either[AppJsonDecodingError, A] = {
+    json.as[A].leftMap { err =>
+      AppJsonDecodingError(json, err)
+    }
+  }
 
   /** Ripled doesn't like objects like { x=null } */
   val droppingNullsPrinter: Printer = Printer.spaces2.copy(dropNullValues = true)
@@ -42,7 +58,7 @@ trait CirceUtils extends Logging {
   }
 
   def parseAndDecode[A](m: String, decoder: Decoder[A]): Either[AppError, A] = {
-    parseAsJson(m).flatMap(decode(_, decoder))
+    parseAsJson(m).flatMap(decode(_)(decoder))
   }
   def parseAsJson(f: File): Either[AppException, Json] = {
     logger.info(s"Parsing FIle $f")
@@ -51,35 +67,11 @@ trait CirceUtils extends Logging {
     }
   }
 
-  /** Monoid/Semigroup for Circe Json Object so we can add them togeher. */
+  /** Monoid/Semigroup for Circe Json Object so we can add them togeher
+    * Note that a + b kind of equals b + a -- the field order may differ but === still holds */
   implicit val jsonObjectMonoid: Monoid[JsonObject] = new Monoid[JsonObject] {
     def empty: JsonObject                                 = JsonObject.empty
     def combine(x: JsonObject, y: JsonObject): JsonObject = JsonObject.fromIterable(x.toVector |+| y.toVector)
-  }
-
-  /**
-    *  {{{
-    *    CirceUtils.decode(json.as[List[Foo]], json, "Decoding all Foo in the Bar")
-    *  }}}
-    * @param v
-    * @param json
-    * @param note
-    * @tparam T
-    * @return
-    */
-  def decode[T](v: Result[T], json: Json, note: String = "No Clues"): ErrorOr[T] = {
-    v.leftMap { err: DecodingFailure =>
-      new AppJsonDecodingError(json, err, note)
-    }
-  }
-
-  def decode[T](json: Json, decoder: Decoder[T]): Either[AppJsonDecodingError, T] = {
-    //val targs = typeOf[T] match { case TypeRef(_, _, args) => args }
-    //val tmsg = s"type of $decoder has type arguments $targs"
-
-    val decoderInfo = decoder.toString
-    val msg         = s"Using Decoder $decoderInfo for Type"
-    decoder.decodeJson(json).leftMap((e: DecodingFailure) => new AppJsonDecodingError(json, e, msg))
   }
 
   /** For now does top level pruning of null fields from JSON Object
@@ -99,13 +91,6 @@ trait CirceUtils extends Logging {
 
   }
 
-  def json2jsonobject(json: Json): Either[AppError, JsonObject] = {
-    json.asObject match {
-      case None     => AppError("Converting JSON to Object wasn't an object", json).asLeft
-      case Some(jo) => jo.asRight
-    }
-  }
-
   /**
     *   Deep descent through Json to find the first field by name.
     *   Returns error if not found, ignores multiple fields by returning only first.
@@ -119,6 +104,7 @@ trait CirceUtils extends Logging {
     }
   }
 
+  /** Finds top level field in the supplied json object */
   def findField(name: String, json: JsonObject): Either[AppError, Json] = {
     Either.fromOption(json(name), AppError(s"Field $name not found ", json.asJson))
   }
@@ -139,6 +125,12 @@ trait CirceUtils extends Logging {
     Either.fromOption(json.asString, AppError("Expected JSON String", json))
   }
 
+  def json2jsonobject(json: Json): Either[AppError, JsonObject] = {
+    json.asObject match {
+      case None     => AppError(" JSON to Object wasn't an object", json).asLeft
+      case Some(jo) => jo.asRight
+    }
+  }
 }
 
 object CirceUtils extends CirceUtils
