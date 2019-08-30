@@ -4,6 +4,7 @@ import io.circe._
 
 import com.odenzo.ripple.models.atoms._
 import com.odenzo.ripple.models.utils.CirceCodecUtils
+import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.support.RippleTransaction
 
 /**
   *  Create an escrow. No txn specific flagss.

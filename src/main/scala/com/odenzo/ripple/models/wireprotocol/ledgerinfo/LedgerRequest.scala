@@ -1,10 +1,12 @@
 package com.odenzo.ripple.models.wireprotocol.ledgerinfo
 
 import io.circe._
+import io.circe.generic.extras.Configuration
 import io.circe.generic.semiauto.deriveEncoder
 
 import com.odenzo.ripple.models.atoms._
-import com.odenzo.ripple.models.support.{RippleRq, RippleRs}
+import com.odenzo.ripple.models.support.{RippleRs, RippleRq}
+import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 /**
   * TODO: Not done at all.
@@ -15,9 +17,38 @@ import com.odenzo.ripple.models.support.{RippleRq, RippleRs}
   * WARNING: I don't use this, so its just a framework.
   * @param ledger This must be a LedgerHash or LedgerIndex, no named ledgers it seems
   */
-case class LedgerRequestRq(ledger: Ledger, id: RippleMsgId = RippleMsgId.random) extends RippleRq
-case class LedgerRequestRs(json: Json)                                           extends RippleRs
+case class LedgerRequestRq(ledger: LedgerID, id: RippleMsgId = RippleMsgId.random) extends RippleRq
+case class LedgerRequestRs(json: Json)                                             extends RippleRs
 
+/** Will actually give ledger information. This may be a duplicate of ledger call, check.
+  * This is a Ledger Header https://ripple.com/build/ledger-format/#header-format */
+case class LedgerRequestSucceed(ledger: Json, ledger_index: LedgerSequence)
+
+object LedgerRequestRq extends CirceCodecUtils {
+  import io.circe._
+  import io.circe.syntax._
+  import io.circe.generic.extras.semiauto._
+  implicit val config: Configuration = Configuration.default
+  implicit val encoder: Encoder.AsObject[LedgerRequestRq] = deriveConfiguredEncoder[LedgerRequestRq]
+    .mapJsonObject(withCommandAndLedgerID("ledger_request"))
+  implicit val decoder: Decoder[LedgerRequestRq] = deriveConfiguredDecoder[LedgerRequestRq]
+
+}
+
+object LedgerRequestRs {
+
+  import io.circe._
+  import io.circe.syntax._
+  import io.circe.generic.extras.semiauto._
+  implicit val config: Configuration             = Configuration.default
+  implicit val decoder: Decoder[LedgerRequestRs] = deriveConfiguredCodec[LedgerRequestRs]
+}
+
+// This class isn't used much so I don't worry about filling in details.
+// But the request can result in
+// 1)   Failed
+// 2)  In Progress - ledger getting fetched
+//
 case class LedgerRequestFailed(acquiring: Option[Json])
 
 case class LedgerRequestPending(
@@ -30,24 +61,3 @@ case class LedgerRequestPending(
     peers: Long,
     timeouts: Long
 )
-
-/** Will actually give ledger information. This may be a duplicate of ledger call, check.
-  * This is a Ledger Header https://ripple.com/build/ledger-format/#header-format */
-case class LedgerRequestSucceed(ledger: Json, ledger_index: LedgerSequence)
-
-object LedgerRequestRq {
-  val command: (String, Json) = "command" -> Json.fromString("ledger_request")
-  implicit val encoder: Encoder.AsObject[LedgerRequestRq] = {
-    deriveEncoder[LedgerRequestRq]
-      .mapJsonObject(o => command +: o)
-      .mapJsonObject(o => Ledger.renameLedgerField(o))
-  }
-}
-
-object LedgerRequestRs {
-
-  implicit val decoder: Decoder[LedgerRequestRs] = Decoder.instance[LedgerRequestRs] { hc =>
-    val resjson = hc.focus.getOrElse(Json.Null)
-    Right(LedgerRequestRs(resjson))
-  }
-}

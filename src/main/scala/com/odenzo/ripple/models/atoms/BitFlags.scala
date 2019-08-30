@@ -7,6 +7,8 @@ import io.circe.{Encoder, Decoder, Json}
 import spire.math.{ULong, UInt, SafeLong}
 
 /*
+  FIXME: Latest changed to Int make encoding of a flag with global flag set spit out a negative number.
+
  * This whole thing is a bit tortured.
  * Basic requirements: Enumerated Labels for BitFlags
  * A BitMask to represent a set of typed BitFlags

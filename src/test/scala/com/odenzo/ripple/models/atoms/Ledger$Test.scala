@@ -45,7 +45,7 @@ class Ledger$Test extends CodecTesting {
     val deepName: Result[LedgerName]      = json.hcursor.get[LedgerName]("ledger_index")
     val shallow: Result[LedgerIndex]      = json.hcursor.get[LedgerIndex]("ledger_index")
     val deepHash: Result[LedgerHash]      = json.hcursor.get[LedgerHash]("ledger_hash")
-    def full                              = Decoder[Ledger].decodeJson(json)
+    def full                              = Decoder[LedgerID].decodeJson(json)
 
     logger.debug(s"Decoding Scenarios on: ${json.spaces2}")
     logResult(deepIndex, "Deep Index")

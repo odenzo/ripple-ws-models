@@ -110,7 +110,7 @@ class RipplePathFindTest extends CodecTesting {
                    |}""".stripMargin
 
     val rs = CirceUtils.parseAndDecode(rsText, Decoder[RipplePathFindRs])
-    val ok = getOrFailLogging(rs)
+    val ok = testCompleted(rs)
     logger.info(s"OK = $ok")
   }
 }

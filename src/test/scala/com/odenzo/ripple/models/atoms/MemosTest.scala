@@ -29,7 +29,7 @@ class MemosTest extends CodecTesting {
 
   test("Memo List") {
     val res: Either[AppError, Memos] = parseAndDecode(json, Decoder[Memos])
-    val v                            = getOrFailLogging(res)
+    val v                            = testCompleted(res)
 
     logger.debug(s"Result: ${PPrinter.Color(v)}")
 
@@ -37,7 +37,7 @@ class MemosTest extends CodecTesting {
 
   test("Memo ") {
     val res: Either[AppError, Memo] = parseAndDecode(memojson, Decoder[Memo])
-    val v                           = getOrFailLogging(res)
+    val v                           = testCompleted(res)
     logger.debug(s"Result: ${PPrinter.Color(v)}")
 
   }
@@ -53,7 +53,7 @@ class MemosTest extends CodecTesting {
         |                        }
         |                    ]""".stripMargin
     val res = parseAndDecode(fjson, Decoder[Memos])
-    getOrFailLogging(res)
+    testCompleted(res)
   }
 
 }

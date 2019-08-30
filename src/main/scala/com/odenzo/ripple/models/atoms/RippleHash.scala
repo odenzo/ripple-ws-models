@@ -91,7 +91,6 @@ object RippleHash {
 
 object TxnHash {
   implicit val codec: Codec[TxnHash] = deriveUnwrappedCodec[TxnHash]
-
 }
 
 object ChannelIndex {

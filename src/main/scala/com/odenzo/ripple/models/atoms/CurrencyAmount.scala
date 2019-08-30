@@ -15,8 +15,6 @@ sealed trait CurrencyAmount
 
 object CurrencyAmount {
 
-  // Compiler warns this would fail on FiatAmount ? WTF, with partial or full match style.
-  // Maybe this is the FiatAmount object
   implicit val encoder: Encoder[CurrencyAmount] = Encoder.instance[CurrencyAmount] {
     case v: FiatAmount => v.asJson
     case v: Drops      => v.asJson
@@ -62,7 +60,7 @@ object FiatAmount {
 
   implicit val decode: Decoder[FiatAmount] = new Decoder[FiatAmount] {
     final def apply(c: HCursor): Decoder.Result[FiatAmount] = {
-      (c.get[BigDecimal]("value"), c.as[Script]).mapN(FiatAmount.apply)
+      (c.get[BigDecimal]("value"), c.as[Script]).mapN(FiatAmount(_, _))
     }
   }
 
@@ -99,12 +97,11 @@ object Drops {
   private val stringDrops = Decoder.decodeString.map(rs => Drops(BigInt(rs)))
   private val longDrops   = Decoder.decodeLong.map(l => Drops(BigInt(l)))
 
-  // REgression bug or are these always longs now. They are in subscribe messages. Bastards
   implicit val encoder: Encoder[Drops] = Encoder.encodeString.contramap[Drops](d => d.amount.toString())
   implicit val decoder: Decoder[Drops] = stringDrops.or(longDrops)
 
   /**
-    * Another type class instance. SemiGroup
+    * Another type class instance. SemiGroup   |+| or combine
     */
   implicit val monoid: Monoid[Drops] = new Monoid[Drops] {
     override def empty: Drops = Drops.zero

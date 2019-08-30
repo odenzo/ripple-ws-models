@@ -1,10 +1,11 @@
 package com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes
 
 import io.circe.syntax._
-import io.circe.{Encoder, Decoder, JsonObject}
+import io.circe.{Encoder, JsonObject, Decoder}
 
 import com.odenzo.ripple.models.atoms.RippleTxnType.PaymentChannelCreate
 import com.odenzo.ripple.models.atoms._
+import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.support.RippleTransaction
 
 /** Funding an existing payment channel.
   * [[https://ripple.com/build/transactions/#paymentchannelcreate]]

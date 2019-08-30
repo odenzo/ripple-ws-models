@@ -10,7 +10,7 @@ class BookOffersRqTest extends CodecTesting {
 
   test("Customer Encoder") {
     val script = Script(Currency.NZD, GenesisAccount.address)
-    testEncoding(BookOffersRq(taker_gets = None, taker_pays = Some(script)), Encoder[BookOffersRq])
+    testEncoding(BookOffersRq(taker_gets = script, taker_pays = script), Encoder[BookOffersRq])
   }
 
   val sample = """ {

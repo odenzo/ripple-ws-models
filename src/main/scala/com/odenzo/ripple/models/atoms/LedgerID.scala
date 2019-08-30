@@ -9,6 +9,7 @@ import cats.implicits._
 import cats.implicits._
 import io.circe.Decoder.Result
 import io.circe._
+import io.circe.generic.extras.Configuration
 import io.circe.syntax._
 
 import com.odenzo.ripple.models.utils.caterrors.{AppError, AppException}
@@ -29,13 +30,13 @@ import com.odenzo.ripple.models.utils.caterrors.{AppError, AppException}
   *  See AccountCurrenciesRq and AccountCurrenciesRs for example of using this type of encoding
   *  in the Circe Encoder and Decoders.
   */
-sealed trait Ledger
+sealed trait LedgerID
 
 /** Represents a value that identifies a ledger. Encoded as ledger_index fields, long or string */
-sealed trait LedgerIndex extends Ledger
+sealed trait LedgerIndex extends LedgerID
 
 /** Ledger Hash is encoded as leger_hash field in API */
-case class LedgerHash(v: RippleHash) extends Ledger
+case class LedgerHash(v: RippleHash) extends LedgerID
 
 /** Name of a ledger, e.g. "validated"  Could be an enumeration almost. The ledger specified
   * over time changes. So -- this should be changed to extend Ledger not LedgerId */
@@ -62,75 +63,12 @@ object LedgerCurrentIndex {
 
 }
 
-object Ledger {
-
-  /** FIXME: Dodgy unsafe hack that relies on unvalidated Hash being a valid hash to discern what type
-    *   The ledger field can either be a hash or an index. THe name in the Json Object for the field is
-    *   dependant on that type. If a number we rename field to ledger_index.
-    *   P
-    *   If the fieldName in the JsonObject is present, we assume its iether a valid ledger hash or a ledger index.
-    *   If a number then always a ledger index. If a String and a valid hash treat as ledger_hash else ledger_index.
-    *   Basically, all this is to set the correct name of the json field.
-    *
-    * @param autoLedger JSON Object.
-    * @param fieldName Field to probe the value, and rename the key based on the value (index number of hash)
-    * @return
-    */
-  def renameLedgerField(autoLedger: JsonObject, fieldName: String = "ledger"): JsonObject = {
-    val oldKey = fieldName
-
-    // Looks like Json.fold is reasonable way but not now.
-    // Also, case Json.JString(v)  not working really. Are there unaaply somewhere.
-    val ledgerVal: Option[(String, Json)] = autoLedger(oldKey).map {
-      case json if json.isNumber => ("ledger_index", json)
-      case json if json.isString =>
-        val hashOrName: (String, Json) = json.asString match {
-          case Some(ledger) if Hash256.isValidHash(ledger) => ("ledger_hash", json)
-          case Some(assume_named_ledger)                   => ("ledger_index", json)
-        }
-        hashOrName
-
-      case json if json.isNull => ("ledger_index", json)        // Where is will be stripped again ^_^
-      case other               => ("INVALID_LEDGER", Json.Null) // Not sure how to signal error yet
-    }
-
-    ledgerVal.map(field => field +: autoLedger.remove(oldKey)).getOrElse(autoLedger)
-
-  }
-
-  /**
-    * Generic lifter being applied just to ledger default encoding for now. The default encoder will
-    * make a Ledger subobject in Json, with differing fields based on the concrete instance Ledger subtype.
-    * (i.e LedgerIndex, LedgerHash, LedgerId, LedgerName...)
-    * @param withLedger
-    * @param field
-    * @return
-    */
-  def liftLedgerFields(withLedger: JsonObject, field: String = "ledger"): JsonObject = {
-
-    val replaced: Option[JsonObject] = withLedger(field).map { subs =>
-      // We should make this subs is a JsonObject to be pedantic and give good error messages
-      val cursor = subs.hcursor
-      // Lets make this more generic for fun
-      val fieldsToLift: List[String] = cursor.keys.getOrElse(Vector.empty[String]).toList
-      // val expectedFields: List[String] = "ledger_hash" :: "ledger_index" :: Nil
-
-      // product should do the trick, or need OptionT?
-      val fields: List[(String, Json)] = fieldsToLift.flatMap(name => cursor.downField(name).focus.map((name, _)))
-
-      val newBase = withLedger.toList.filterNot(f => f._1.equals(field)) ::: fields
-      JsonObject.fromIterable(newBase)
-    }
-    // If we found an object named field then we took all the subfield (possibly none) and shifted to field in new
-    // JsonObject. If no field was found then we return the origiinal
-    // TODO: Refactor (getOrElse {...} on top matches human description more
-    replaced.getOrElse(withLedger)
-  }
+object LedgerID {
 
   /** This encoder will create a Json object for ledger. But we always need to lift those objects up a level
     * Might as well make keys for all to make it easier to list.
     **/
-  implicit val encoder: Encoder[Ledger] = Encoder.instance[Ledger] {
+  implicit val encoder: Encoder[LedgerID] = Encoder.instance[LedgerID] {
     case l @ LedgerName(n)     => Encoder[LedgerName].apply(l)
     case l @ LedgerSequence(n) => Encoder[LedgerSequence].apply(l)
     case l @ LedgerHash(n)     => Encoder[LedgerHash].apply(l)
@@ -141,19 +79,12 @@ object Ledger {
     * Takes a ledger handle type from either ledger_hash or ledger_index.
     * If ledger_hash can be parse returns that, else tries for ledger_index (returning that error if fails)
     */
-  implicit val decoder: Decoder[Ledger] = Decoder.instance[Ledger] { hc =>
-    hc.get[LedgerHash]("ledger_hash") match {
-      case ok @ Right(hash) => ok
-      case Left(_)          => hc.get[LedgerIndex]("ledger_index")
-    }
-  }
+  implicit val decoder: Decoder[LedgerID] =
+    Decoder.decodeEither[LedgerHash, LedgerIndex]("ledger_hash", "ledger_index").map(et => et.fold(identity, identity))
 
 }
 
 object LedgerIndex {
-
-  /** For encoding a ledger id as a field in an object */
-  def toField(id: LedgerIndex): (String, Json) = ("ledger_index", encoder.apply(id))
 
   /** These both get encoded to ledger_index field.  */
   implicit val encoder: Encoder[LedgerIndex] = Encoder.instance[LedgerIndex] {
@@ -176,9 +107,12 @@ object LedgerName {
   val CURRENT_LEDGER: LedgerName   = LedgerName("current")
   val VALIDATED_LEDGER: LedgerName = LedgerName("validated")
   val CLOSED_LEDGER: LedgerName    = LedgerName("closed")
+  import io.circe._
+  import io.circe.generic.extras.semiauto._
 
-  implicit val encoder: Encoder[LedgerName] = Encoder.encodeString.contramap[LedgerName](_.v)
-  implicit val decoder: Decoder[LedgerName] = Decoder.decodeString.map(v => LedgerName(v))
+  // Better to have this an enumeration eventually
+
+  implicit val decoder: Codec[LedgerName] = deriveUnwrappedCodec[LedgerName]
 }
 
 import io.circe._
@@ -202,9 +136,6 @@ object LedgerSequence {
   * LedgerHash gets encoded to ledger_hash field
   */
 object LedgerHash {
-  // FIXME: Hashes Hacked together
-  def toField(hash: LedgerHash): (String, Json) = ("ledger_hash", encoder.apply(hash))
-  implicit val encoder: Encoder[LedgerHash]     = Encoder[RippleHash].contramap[LedgerHash](v => v.v)
-  implicit val decoder: Decoder[LedgerHash]     = Decoder.decodeString.map(s => LedgerHash(RippleHash(s)))
+  implicit val codec: Codec[LedgerHash] = deriveUnwrappedCodec[LedgerHash]
 
 }

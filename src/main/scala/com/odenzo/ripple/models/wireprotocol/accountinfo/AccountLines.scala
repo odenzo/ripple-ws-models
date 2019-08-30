@@ -5,6 +5,7 @@ import io.circe.generic.semiauto._
 
 import com.odenzo.ripple.models.atoms._
 import com.odenzo.ripple.models.support.{RippleScrollingRq, RippleScrollingRs}
+import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 /**
   *  Used to get the trust lines and their balances. For currencies other than XRP.
@@ -21,7 +22,7 @@ case class AccountLinesRq(
     peer: Option[AccountAddr] = None,
     limit: Limit = Limit.default,
     marker: Option[Marker] = None,
-    ledger: Ledger = LedgerName.CURRENT_LEDGER,
+    ledger: LedgerID = LedgerName.CURRENT_LEDGER,
     id: RippleMsgId = RippleMsgId.random
 ) extends RippleScrollingRq
 
@@ -34,12 +35,9 @@ case class AccountLinesRs(
     marker: Option[Marker]
 ) extends RippleScrollingRs
 
-object AccountLinesRq {
-  val command: (String, Json) = "command" -> Json.fromString("account_lines")
+object AccountLinesRq extends CirceCodecUtils {
   implicit val encoder: Encoder.AsObject[AccountLinesRq] = {
-    deriveEncoder[AccountLinesRq]
-      .mapJsonObject(o => command +: o)
-      .mapJsonObject(o => Ledger.renameLedgerField(o))
+    deriveEncoder[AccountLinesRq].mapJsonObject(withCommandAndLedgerID("account_lines"))
   }
 
 }

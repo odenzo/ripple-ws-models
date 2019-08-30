@@ -9,6 +9,7 @@ import io.circe.{Encoder, JsonObject, Decoder}
 import com.odenzo.ripple.models.atoms.RippleTxnType.SignerListSet
 import com.odenzo.ripple.models.atoms.{AccountAddr, SignerEntry}
 import com.odenzo.ripple.models.utils.CirceCodecUtils
+import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.support.RippleTransaction
 
 /** For setting or removing Multi-Signature List.
   *

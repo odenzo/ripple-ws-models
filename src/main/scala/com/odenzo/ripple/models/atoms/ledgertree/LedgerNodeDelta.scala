@@ -23,7 +23,7 @@ object AffectedLedgerNode {
   import io.circe.generic.extras._
   import io.circe.generic.extras.semiauto._
   import io.circe.generic.extras.{semiauto => genextras}
-  implicit val circeConfig: Configuration                = CirceCodecUtils.capitalizeConfiguration
+  implicit val circeConfig: Configuration                = CirceCodecUtils.capitalizeConfig
   implicit val codec: Codec.AsObject[AffectedLedgerNode] = genextras.deriveConfiguredCodec[AffectedLedgerNode]
 }
 
@@ -47,7 +47,7 @@ object LedgerNodeDelta {
   import io.circe.generic.extras._
   import io.circe.generic.extras.semiauto._
   import io.circe.generic.extras.{semiauto => genextras}
-  implicit val circeConfig: Configuration             = CirceCodecUtils.capitalizeConfiguration
+  implicit val circeConfig: Configuration             = CirceCodecUtils.capitalizeConfig
   implicit val codec: Codec.AsObject[LedgerNodeDelta] = genextras.deriveConfiguredCodec[LedgerNodeDelta]
 
 }

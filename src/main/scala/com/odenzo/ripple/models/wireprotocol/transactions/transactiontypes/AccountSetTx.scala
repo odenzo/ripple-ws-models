@@ -4,6 +4,7 @@ import io.circe._
 import io.circe.syntax._
 
 import com.odenzo.ripple.models.atoms._
+import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.support.RippleTransaction
 
 /**
   * Set the flage Options on a Ripple Account.
@@ -17,7 +18,7 @@ case class AccountSetTx(
     clearFlag: Option[AccountSetFlag] = None,
     domain: Option[Blob] = None,
     transferRate: Option[Long] = None
-) extends RippleTransaction {}
+) extends RippleTransaction
 
 object AccountSetTx {
 

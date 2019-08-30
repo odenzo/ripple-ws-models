@@ -14,6 +14,6 @@ class RippleQualityTest extends CodecTesting {
     val t    = RippleQuality(UInt32(123))
     val json = t.asJson
     val t2   = json.as[RippleQuality]
-    getOrFailLogging(t2)
+    testCompleted(t2)
   }
 }

@@ -1,12 +1,10 @@
 package com.odenzo.ripple.models.atoms.ledgertree
 
-import io.circe.{Json, Encoder, Decoder}
+import io.circe.Decoder
 import io.circe.generic.semiauto._
-import io.circe.syntax._
 
 import com.odenzo.ripple.models.atoms._
-import com.odenzo.ripple.models.atoms.ledgertree.transactions.LedgerTransaction
-import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.RippleTransaction
+import com.odenzo.ripple.models.atoms.ledgertree.transactions.LedgerTransactions
 
 /** You can look up ledger headers user ledger inquiry. Testing for this does that.
   * If current ledger then no ledger_hash is returned but ledger_index used not ledger_current_index
@@ -55,38 +53,4 @@ case class LedgerClosedInfo(
 
 object LedgerClosedInfo {
   implicit val decoder: Decoder[LedgerClosedInfo] = deriveDecoder[LedgerClosedInfo]
-}
-
-/** Represent an expanded transaction is a ledger (typically validated)
-  * The txn is at the top level and needs to be lifted, metaData is a top field. */
-case class LedgerTxn(txn: LedgerTransaction, metaData: Meta)
-
-object LedgerTxn {
-  implicit val decoder: Decoder[LedgerTxn] = Decoder.instance { hcursor =>
-    for {
-      txn <- hcursor.as[LedgerTransaction]
-      md  <- hcursor.get[Meta]("metaData")
-    } yield LedgerTxn(txn, md)
-  }
-
-  implicit val encoder: Encoder.AsObject[LedgerTxn] = deriveEncoder[LedgerTxn]
-}
-
-/** Represents a list of Ledger Tranasction that is either expanded or a */
-case class LedgerTransactions(either: Either[List[LedgerTxn], List[LedgerNodeIndex]])
-
-object LedgerTransactions {
-
-  // Our cursor is on the Array of transactions. Each transaction is a LedgerNodeIndex or LedgerTxn
-  implicit val decoder: Decoder[LedgerTransactions] = Decoder[List[LedgerTxn]]
-    .either(Decoder[List[LedgerNodeIndex]])
-    .map(LedgerTransactions.apply)
-
-  implicit val encoder: Encoder[LedgerTransactions] = new Encoder[LedgerTransactions] {
-    override final def apply(a: LedgerTransactions): Json = a.either match {
-      case Left(l)  => l.asJson
-      case Right(l) => l.asJson
-    }
-  }
-
 }

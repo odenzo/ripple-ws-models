@@ -5,6 +5,7 @@ import io.circe.generic.semiauto._
 
 import com.odenzo.ripple.models.atoms._
 import com.odenzo.ripple.models.support.{RippleScrollingRq, RippleScrollingRs}
+import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 /**
   * https://ripple.com/build/rippled-apis/#account-tx
@@ -50,12 +51,10 @@ case class AccountTxRs(
     validated: Option[Boolean]
 ) extends RippleScrollingRs
 
-object AccountTxRq {
+object AccountTxRq extends CirceCodecUtils {
   val command: (String, Json) = "command" -> Json.fromString("account_tx")
   implicit val encoder: Encoder.AsObject[AccountTxRq] = {
-    deriveEncoder[AccountTxRq]
-      .mapJsonObject(o => command +: o)
-      .mapJsonObject(o => Ledger.renameLedgerField(o))
+    deriveEncoder[AccountTxRq].mapJsonObject(withCommandAndLedgerID("account_tx"))
   }
 }
 

@@ -1,6 +1,7 @@
 package com.odenzo.ripple.models.wireprotocol.accountinfo
 
 import io.circe._
+import io.circe.generic.extras.Configuration
 import io.circe.generic.semiauto._
 
 import com.odenzo.ripple.models.atoms._
@@ -14,8 +15,8 @@ import com.odenzo.ripple.models.utils.CirceCodecUtils
   */
 case class AccountObjectsRq(
     account: AccountAddr,
-    objectType: Option[String],
-    ledger: Ledger = LedgerName.VALIDATED_LEDGER,
+    tipe: Option[String],
+    ledger: LedgerID = LedgerName.VALIDATED_LEDGER,
     limit: Limit = Limit.default,
     marker: Option[Marker] = None,
     id: RippleMsgId = RippleMsgId.random
@@ -28,16 +29,11 @@ case class AccountObjectsRs(
     resultLedger: Option[ResultLedger]
 ) extends RippleScrollingRs
 
-object AccountObjectsRq {
-
-  private val command: (String, Json) = "command" -> Json.fromString("account_objects")
-  private val fieldChanger            = CirceCodecUtils.changeFieldName("objectType", "type")(_)
-
+object AccountObjectsRq extends CirceCodecUtils {
   implicit val encoder: Encoder.AsObject[AccountObjectsRq] = {
     deriveEncoder[AccountObjectsRq]
-      .mapJsonObject(o => command +: o)
-      .mapJsonObject(o => fieldChanger(o)) // objectType to type
-      .mapJsonObject(o => Ledger.renameLedgerField(o))
+      .mapJsonObject(withCommandAndLedgerID("account_objects") andThen withRenameField("tipe", "type"))
+
   }
 }
 

@@ -16,7 +16,7 @@ case class GatewayBalancesRq(
     account: AccountAddr,
     strict: Boolean = true,
     hotwallet: Seq[AccountAddr] = Seq.empty[AccountAddr],
-    ledger: Ledger = LedgerName.VALIDATED_LEDGER,
+    ledger: LedgerID = LedgerName.VALIDATED_LEDGER,
     id: RippleMsgId = RippleMsgId.random
 ) extends RippleRq {
 

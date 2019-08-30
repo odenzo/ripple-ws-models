@@ -4,21 +4,21 @@ import cats.implicits._
 import io.circe.generic.extras.Configuration
 import io.circe.{Json, JsonObject, ACursor}
 
-import com.odenzo.ripple.models.atoms.Hash256
+import com.odenzo.ripple.models.atoms.{Hash256, RippleTxnType}
 import com.odenzo.ripple.models.utils.caterrors.CatsTransformers.ErrorOr
 import com.odenzo.ripple.models.utils.caterrors.{AppError, OError}
+import io.circe.syntax._
 
 /** Going to start using Ripple Generic Extras. */
 trait CirceCodecUtils {
 
-  def withCommand(cmd: String): JsonObject => JsonObject = withField("command", cmd)
-
-  def withTxnType()
-
-  def withField(name: String, v: String)(in: JsonObject): JsonObject = {
-    import io.circe.syntax._
-    (name := v) +: in
-  }
+  //--------- JsonObject mappers ---------------
+  def withCommand(cmd: String): JsonObject => JsonObject                 = withField("command", cmd)
+  def withTxnType(txn: RippleTxnType): JsonObject => JsonObject          = withField("TransactionType", txn.toString)
+  def withLiftLedgerID: JsonObject => JsonObject                         = leftLedgetField(_, "ledger")
+  def withCommandAndLedgerID(cmd: String): JsonObject => JsonObject      = withCommand(cmd) andThen withLiftLedgerID
+  def withField(name: String, v: String)(in: JsonObject): JsonObject     = (name := v) +: in
+  def withRenameField(old: String, to: String): JsonObject => JsonObject = changeFieldName(old, to)
 
   /**
     * Utility to rename a field in a JsonObject, typically used in encoders .mapJsonObject
@@ -28,7 +28,7 @@ trait CirceCodecUtils {
     *
     * @return
     */
-  def renameLedgerField(autoLedger: JsonObject, fieldName: String = "ledger"): JsonObject = {
+  def leftLedgetField(autoLedger: JsonObject, fieldName: String = "ledger"): JsonObject = {
     val oldKey = fieldName
 
     // Looks like Json.fold is reasonable way but not now.
@@ -80,46 +80,20 @@ trait CirceCodecUtils {
     replaced.getOrElse(withLedger)
   }
 
-  //  /**
-  //    * Used as a prepare() function to convert case class fields to uppercase first letter.
-  //    * TODO: Can't figure our how to do it. Luckly circe-derivation to the rescue even though pre-release.
-  //    */
-  //  def upcaseFields(ac:ACursor) : ACursor = {
-  //
-  //    val fields = ac.fieldSet.getOrElse(Set.empty[String])
-  //    fields.foreach { name =>
-  //      ac.downField(name)
-  //      val fieldVal = ac.focus.getOrElse(Json.Null)
-  //      ac.delete
-  //      // ac.set(json)   // Cant change the field name only value
-  //
-  //    }
-  //    ac
-  //
-  //  }
-
-  type KeyTransformer = String => String
-
-  /** This is the transforms from io.circe.generic.extras */
-  val snakeCaseTransformation: KeyTransformer =
-    _.replaceAll("([A-Z]+)([A-Z][a-z])", "$1_$2").replaceAll("([a-z\\d])([A-Z])", "$1_$2").toLowerCase
-
-  /** Capitalize a somewhat normal word */
-  def capitalize(s: String): String = s.capitalize
+  // ------------- Functions applied to field names -----------------
 
   /** Transformation to capitalize the first letter only of a field name */
-  val capitalizeTransformation: String => String = capitalize
-
+  val capitalizeTransformation: String => String   = (s: String) => s.capitalize
   val decapitalizeTransformation: String => String = unCapitalize
 
-  val capitalizeConfiguration: Configuration =
-    Configuration.default.copy(transformMemberNames = capitalizeTransformation)
+  // -------------- Some common pre-build configurations for Circe Generic Extras -----------
+  val capitalizeConfig: Configuration = Configuration.default.copy(transformMemberNames = capitalizeTransformation)
 
   def capitalizeExcept(skip: Set[String] = Set("hash", "index")): Configuration = {
     def fn(s: String): String = {
       s match {
-        case skip if skip.contains("hash") => skip
-        case other                         => capitalize(other)
+        case skipped if skip.contains(skipped) => skipped
+        case other                             => capitalizeTransformation(other)
       }
     }
     Configuration.default.copy(transformMemberNames = fn)
@@ -248,6 +222,77 @@ trait CirceCodecUtils {
       theList.traverse((tup: (String, Json)) => fn(tup._1, tup._2))
     }
   }
+}
+
+/**
+  *  Given a Ledger when we encode it has to go to a different field name.
+  *  Because we do-not unwrap the Ledger it is always something like "ledger:Ledger" in enclosing case classes.
+  *  So, encoding gives "ledger" :  X  where X is a JsonObject that depends on the subtype
+  *  These are used to  list the fields in X to the same level as ledger field and delete ledger field.
+  *
+  *  For ledger this is a subset special case because X will always have exactly one field.
+  *   This functions are used within a Encoder[C].mapJsonObject
+  */
+trait LedgerMungers {
+
+  /**
+    *  Used for Encoding objects with a ledger:Ledger field
+    *
+    * @param autoLedger JSON Object.
+    * @param fieldName Field to probe the value, and rename the key based on the value
+    * @return
+    */
+  def renameLedgerField(autoLedger: JsonObject, fieldName: String = "ledger"): JsonObject = {
+    val oldKey = fieldName
+
+    // Looks like Json.fold is reasonable way but not now.
+    // Also, case Json.JString(v)  not working really. Are there unaaply somewhere.
+    val ledgerVal: Option[(String, Json)] = autoLedger(oldKey).map {
+      case json if json.isNumber => ("ledger_index", json)
+      case json if json.isString =>
+        val hashOrName: (String, Json) = json.asString match {
+          case Some(ledger) if Hash256.isValidHash(ledger) => ("ledger_hash", json)
+          case Some(assume_named_ledger)                   => ("ledger_index", json)
+        }
+        hashOrName
+
+      case json if json.isNull => ("ledger_index", json)        // Where is will be stripped again ^_^
+      case other               => ("INVALID_LEDGER", Json.Null) // Not sure how to signal error yet
+    }
+
+    ledgerVal.map(field => field +: autoLedger.remove(oldKey)).getOrElse(autoLedger)
+
+  }
+
+  /**
+    * Generic lifter being applied just to ledger default encoding for now. The default encoder will
+    * make a Ledger subobject in Json, with differing fields based on the concrete instance Ledger subtype.
+    * (i.e LedgerIndex, LedgerHash, LedgerId, LedgerName...)
+    * @param withLedger
+    * @param field
+    * @return
+    */
+  def liftLedgerFields(withLedger: JsonObject, field: String = "ledger"): JsonObject = {
+
+    val replaced: Option[JsonObject] = withLedger(field).map { subs =>
+      // We should make this subs is a JsonObject to be pedantic and give good error messages
+      val cursor = subs.hcursor
+      // Lets make this more generic for fun
+      val fieldsToLift: List[String] = cursor.keys.getOrElse(Vector.empty[String]).toList
+      // val expectedFields: List[String] = "ledger_hash" :: "ledger_index" :: Nil
+
+      // product should do the trick, or need OptionT?
+      val fields: List[(String, Json)] = fieldsToLift.flatMap(name => cursor.downField(name).focus.map((name, _)))
+
+      val newBase = withLedger.toList.filterNot(f => f._1.equals(field)) ::: fields
+      JsonObject.fromIterable(newBase)
+    }
+    // If we found an object named field then we took all the subfield (possibly none) and shifted to field in new
+    // JsonObject. If no field was found then we return the origiinal
+    // TODO: Refactor (getOrElse {...} on top matches human description more
+    replaced.getOrElse(withLedger)
+  }
+
 }
 
 object CirceCodecUtils extends CirceCodecUtils

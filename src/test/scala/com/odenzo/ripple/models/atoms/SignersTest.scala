@@ -29,13 +29,13 @@ class SignersTest extends CodecTesting {
       |""".stripMargin
 
   test("Codec") {
-    val test = jsonRoundTrip(json, Encoder[Signers], Decoder[Signers])
-    getOrFailLogging(test)
+    val test = jsonRoundTrip(json)(Encoder[Signers], Decoder[Signers])
+    testCompleted(test)
   }
 
   test("Empty String PubKey") {
     val foo = """ "" """
-    val res = getOrFailLogging(jsonRoundTrip(foo, Encoder[RipplePublicKey], Decoder[RipplePublicKey]))
+    val res = testCompleted(jsonRoundTrip[RipplePublicKey](foo))
     logger.debug(s"$res")
     logger.debug("BACK: " + res._2.asJson)
   }

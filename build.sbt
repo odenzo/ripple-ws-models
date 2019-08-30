@@ -31,6 +31,10 @@ lazy val wsmodels = (project in file("."))
       case Some((2, n)) if n <= 12 => optsV12 ++ warningsV12 ++ lintersV12
       case Some((2, n)) if n >= 13 => optsV13 ++ warningsV13 ++ lintersV13
       case _                       => Seq("-Yno-adapted-args")
+    }),
+    libraryDependencies += (CrossVersion.partialVersion(scalaVersion.value) match { // Partial function?
+      case Some((2, 12)) => compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+      case _             => "com.lihaoyi" %% "pprint" % "0.5.5" // Dummy
     })
   )
 
@@ -39,8 +43,9 @@ lazy val commonSettings = Seq(
   resolvers ++= Seq(
     Resolver.mavenLocal,
     Resolver.defaultLocal,
+    Resolver.bintrayRepo("odenzo", "maven"),
     Resolver.jcenterRepo,
-    Resolver.bintrayRepo("odenzo", "maven")
+    Resolver.sonatypeRepo("releases")
   )
 )
 

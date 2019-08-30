@@ -1,9 +1,10 @@
 package com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes
 
-import io.circe._
+import io.circe.generic.extras.Configuration
 
 import com.odenzo.ripple.models.atoms._
 import com.odenzo.ripple.models.utils.CirceCodecUtils
+import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.support.RippleTransaction
 
 /**
   * Don't understand the correct use case for this.
@@ -19,28 +20,14 @@ case class EscrowCancelTx(
     account: AccountAddr, // Not neded?
     owner: AccountAddr,
     offerSequence: TxnSequence // This is the sequence field in EscrowCreate
-) extends RippleTransaction {}
+) extends RippleTransaction
 
-object EscrowCancelTx {
+object EscrowCancelTx extends CirceCodecUtils {
 
-  import io.circe.generic.semiauto._
+  import io.circe._
+  import io.circe.generic.extras.semiauto._
 
-  private final val tx: (String, Json) = "TransactionType" -> Json.fromString("EscrowCancel")
-
-  implicit val derivedEncoder: Encoder.AsObject[EscrowCancelTx] = {
-    deriveEncoder[EscrowCancelTx]
-      .mapJsonObject(o => tx +: o)
-      .mapJsonObject(o => CirceCodecUtils.upcaseFields(o))
-
-  }
-
-  implicit val decoder: Decoder[EscrowCancelTx] = Decoder.instance[EscrowCancelTx] { cursor =>
-    for {
-      acct     <- cursor.get[AccountAddr]("Account")
-      owner    <- cursor.get[AccountAddr]("Owner")
-      offerSeq <- cursor.get[TxnSequence]("OfferSequence")
-    } yield EscrowCancelTx(acct, owner, offerSeq)
-
-  }
+  implicit val config: Configuration                   = capitalizeConfig
+  implicit val encoder: Codec.AsObject[EscrowCancelTx] = deriveConfiguredCodec[EscrowCancelTx]
 
 }

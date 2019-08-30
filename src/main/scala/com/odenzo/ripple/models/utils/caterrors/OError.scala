@@ -216,7 +216,7 @@ class AppErrorRestCall(
   * @param err  The decoding failure from Circe.
   * @param note Informational message to enhance the exception, provides context.
   */
-class AppJsonDecodingError(val json: Json, val err: DecodingFailure, val note: String = "") extends AppError {
+case class AppJsonDecodingError(val json: Json, val err: DecodingFailure, val note: String = "") extends AppError {
   val msg: String             = note + ":" + err.message
   val base: String            = s"\n OR: ${err.show}"
   val cause: Option[AppError] = None
@@ -233,13 +233,6 @@ object AppJsonDecodingError {
 
   /**
     * Wrap the Decoding error if there was one, and return as Either
-    *
-    * @param v
-    * @param json
-    * @param note
-    * @tparam T
-    *
-    * @return
     */
   def wrapResult[T](v: Result[T], json: Json, note: String = "No Clues"): ErrorOr[T] = {
     v.leftMap { err: DecodingFailure =>

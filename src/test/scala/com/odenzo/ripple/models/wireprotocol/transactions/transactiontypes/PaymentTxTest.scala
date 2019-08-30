@@ -26,7 +26,7 @@ class PaymentTxTest extends CodecTesting {
         |                    }
         |""".stripMargin
 
-    val tx: PaymentTx = getOrFailLogging(parseAndDecode(json, Decoder[PaymentTx]))
+    val tx: PaymentTx = testCompleted(parseAndDecode(json, Decoder[PaymentTx]))
     logger.debug(s"Decoded: ${PPrinter.Color(tx)}")
     val ej = Encoder[PaymentTx].apply(tx)
     logger.debug(s"Encoded Json: ${ej.spaces4}") // Flags are parsed incorrectly and returns as negatival cal

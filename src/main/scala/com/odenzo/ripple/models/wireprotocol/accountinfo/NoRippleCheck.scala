@@ -4,7 +4,8 @@ import io.circe._
 import io.circe.generic.semiauto._
 
 import com.odenzo.ripple.models.atoms._
-import com.odenzo.ripple.models.support.{RippleRq, RippleRs}
+import com.odenzo.ripple.models.support.{RippleRs, RippleRq}
+import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 /**
   * https://ripple.com/build/rippled-apis/#noripple-check
@@ -22,7 +23,7 @@ case class NoRippleCheckRq(
     account: AccountAddr,
     role: String = "user", // gateway or user
     transactions: Boolean = true,
-    ledger: Ledger = LedgerName.CURRENT_LEDGER,
+    ledger: LedgerID = LedgerName.CURRENT_LEDGER,
     limit: Long = 300,
     id: RippleMsgId = RippleMsgId.random
 ) extends RippleRq {
@@ -44,13 +45,11 @@ case class NoRippleCheckRq(
 case class NoRippleCheckRs(resultLedger: Option[ResultLedger], problems: List[String], transactions: List[Json])
     extends RippleRs
 
-object NoRippleCheckRq {
+object NoRippleCheckRq extends CirceCodecUtils {
 
-  private val command = "command" -> Json.fromString("noripple_check")
   implicit val encoder: Encoder.AsObject[NoRippleCheckRq] = {
-    deriveEncoder[NoRippleCheckRq]
-      .mapJsonObject(o => command +: o)
-      .mapJsonObject(o => Ledger.renameLedgerField(o))
+    deriveEncoder[NoRippleCheckRq].mapJsonObject(withCommandAndLedgerID("noripple_check"))
+
   }
 }
 
