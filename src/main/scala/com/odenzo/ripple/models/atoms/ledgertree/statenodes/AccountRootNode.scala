@@ -38,6 +38,6 @@ case class AccountRootNode(
 ) extends LedgerNode
 
 object AccountRootNode {
-  implicit val config: Configuration                  = CirceCodecUtils.capitalizeExcept()
+  implicit val config: Configuration                  = CirceCodecUtils.configCapitalizeExcept()
   implicit val codec: Codec.AsObject[AccountRootNode] = deriveConfiguredCodec[AccountRootNode]
 }

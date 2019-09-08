@@ -2,7 +2,7 @@ package com.odenzo.ripple.models.atoms
 
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.deriveConfiguredCodec
-import io.circe.{Encoder, Decoder, Codec}
+import io.circe.Codec
 
 import com.odenzo.ripple.models.utils.CirceCodecUtils
 

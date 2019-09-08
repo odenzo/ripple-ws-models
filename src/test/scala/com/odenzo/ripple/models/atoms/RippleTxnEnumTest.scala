@@ -5,6 +5,7 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 
 import com.odenzo.ripple.models.testkit.CodecTesting
+import com.odenzo.ripple.models.wireprotocol.txns.RippleTxnType
 
 class RippleTxnEnumTest extends CodecTesting {
 

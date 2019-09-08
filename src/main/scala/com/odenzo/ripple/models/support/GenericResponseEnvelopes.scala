@@ -2,12 +2,13 @@ package com.odenzo.ripple.models.support
 
 import cats.implicits._
 import io.circe.generic.semiauto._
-import io.circe.{Decoder, Json}
+import io.circe.syntax._
+import io.circe._
 
 import com.odenzo.ripple.models.atoms._
 
 sealed trait RippleGenericResponse {
-  def id: RippleMsgId
+  def id: Option[RippleMsgId]
   def status: String
 }
 
@@ -18,58 +19,48 @@ sealed trait RippleGenericResponse {
   * @param status
   * @param result The JSON in the result field that is specific to the type of response
   */
-case class RippleGenericSuccess(id: RippleMsgId, status: String, result: Json) extends RippleGenericResponse {
-
+case class RippleGenericSuccess(id: Option[RippleMsgId], status: String, result: JsonObject)
+    extends RippleGenericResponse {
   assert(status.equals("success"), "status must be success")
-
 }
 
 object RippleGenericSuccess {
-  implicit val successDecoder: Decoder[RippleGenericSuccess] = deriveDecoder[RippleGenericSuccess]
-
+  val codec                                                    = deriveCodec[RippleGenericSuccess]
+  implicit val decoder: Decoder[RippleGenericSuccess]          = codec.ensure(_.status === "success", "Not Success")
+  implicit val encoder: Encoder.AsObject[RippleGenericSuccess] = codec
 }
 
 /**
   *   Hmmm, submit is giving me error and error_exception at top level Generic (not engine level)
-  * @param id
-  * @param status
-  * @param error
-  * @param error_code
-  * @param error_message
-  * @param request  The raw JSON request which caused this response.
   */
 case class RippleGenericError(
-    id: RippleMsgId,
+    id: Option[RippleMsgId],
     status: String,
     error: String,
     error_code: Long,
     error_message: String,
-    request: Json
+    request: JsonObject
 ) extends RippleGenericResponse {
 
   assert(status.equals("error"), "statys must be error")
-  // Extension point for handling complication error transaction codes etc.
-  val errors: RippleResponseError = RippleResponseError(error, error_code, error_message)
 
 }
 
-/**
-  *  Alternative final encoding of a RippleResonse that is not scrollable, for now Scrollable as NEList of RippleAnswer
-  * @param id
-  * @param status
-  * @param ans
-  * @tparam B
-  */
-case class RippleAnswer[B <: RippleRs](id: RippleMsgId, status: String, ans: Either[RippleGenericError, B])
-
 object RippleGenericError {
-
-  implicit val errorDecoder: Decoder[RippleGenericError] = deriveDecoder[RippleGenericError]
+  val codec                                                  = deriveCodec[RippleGenericError]
+  implicit val decoder: Decoder[RippleGenericError]          = codec.ensure(_.status === "error", "Not an error")
+  implicit val encoder: Encoder.AsObject[RippleGenericError] = codec
 }
 
 /** This covers Transaction and Command responses from Rippled, but not the subscription events/messages.
   */
 object RippleGenericResponse {
+
+  implicit val encoder: Encoder.AsObject[RippleGenericResponse] = Encoder.AsObject.instance[RippleGenericResponse] {
+    case b: RippleGenericSuccess => b.asJsonObject
+    case b: RippleGenericError   => b.asJsonObject
+
+  }
 
   /** Decode to either Success or Error as right or a decoding failure as left */
   implicit val decoder: Decoder[RippleGenericResponse] =
@@ -80,8 +71,7 @@ object RippleGenericResponse {
 
   // I thought
   val orDecoder: Decoder[RippleGenericResponse] =
-    Decoder[RippleGenericSuccess].widen
-      .or(Decoder[RippleGenericError].widen)
+    Decoder[RippleGenericSuccess].widen or Decoder[RippleGenericError].widen
 
   val eitherDecoder: Decoder[Either[RippleGenericSuccess, RippleGenericError]] =
     Decoder[RippleGenericSuccess].widen.either(Decoder[RippleGenericError].widen)

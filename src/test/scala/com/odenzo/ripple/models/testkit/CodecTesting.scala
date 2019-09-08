@@ -5,14 +5,14 @@ import java.util
 
 import cats.implicits._
 import io.circe.Decoder.Result
-import io.circe.{Json, Encoder, Decoder}
+import io.circe._
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.{Assertion, EitherValues, Matchers}
 import scribe.{Logging, Logger}
 
 import com.odenzo.ripple.models.utils.{CirceUtils, ScribeConfig}
 import com.odenzo.ripple.models.utils.caterrors.{AppError, AppException, AppJsonDecodingError}
-import io.circe.syntax
+import com.odenzo.ripple.models.atoms.LedgerHash
 
 /**
   * test* methods have assertions the others are just helpers.
@@ -20,6 +20,8 @@ import io.circe.syntax
 trait CodecTesting extends AnyFunSuite with Matchers with EitherValues with Logging with CirceUtils {
 
   ScribeConfig.setTestLogging
+
+  val dummyLedgerHash = LedgerHash(List.fill(20)("FF").mkString)
 
   /**
     * Utility to parse a JSON string. Will fail test if cannot parse.
@@ -33,6 +35,10 @@ trait CodecTesting extends AnyFunSuite with Matchers with EitherValues with Logg
     }
   }
 
+  def parseAsJObj(s: String): Either[AppError, JsonObject] = {
+    CirceUtils.json2jsonobject(parse(s))
+  }
+
   /** Parses Json to object and pack to json, returns  last two */
   def jsonRoundTrip[A](jsonStr: String)(implicit enc: Encoder[A], dec: Decoder[A]): Either[AppError, (A, Json, A)] = {
     for {
@@ -44,11 +50,10 @@ trait CodecTesting extends AnyFunSuite with Matchers with EitherValues with Logg
     } yield (obj, jsonBack, obj)
   }
 
-  def objRoundTrip[A](a: A)(implicit enc: Encoder[A], dec: Decoder[A]): Either[AppJsonDecodingError, (A, Json)] = {
+  def objRoundTrip[A](a: A)(implicit codec: Codec.AsObject[A]): Either[AppJsonDecodingError, (A, Json)] = {
     for {
       json <- encode(a).asRight
       obj  <- decode(json)
-      _ = logger.debug(s"Object ${pprint.apply(obj)}")
     } yield (obj, json)
   }
 
@@ -107,10 +112,7 @@ trait CodecTesting extends AnyFunSuite with Matchers with EitherValues with Logg
     AppException.wrapPure("Finding Files") {
       // The Fixtures are now in the resource directory so load via resource
       // But non trivial to do in general case (from Jar and from IDE)
-      import java.net.URL
-      import java.nio.file.Files
-      import java.nio.file.Path
-      import java.nio.file.Paths
+      import java.nio.file.{Files, Path, Paths}
       val url                      = this.getClass.getResource(s"/$dir")
       val path                     = Paths.get(url.toURI)
       val all: util.Iterator[Path] = Files.newDirectoryStream(path).iterator()

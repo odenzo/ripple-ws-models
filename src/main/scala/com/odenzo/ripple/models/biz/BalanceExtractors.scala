@@ -7,9 +7,9 @@ import io.circe.syntax._
 import com.odenzo.ripple.models.atoms.ledgertree.LedgerNodeDelta
 import com.odenzo.ripple.models.atoms._
 import com.odenzo.ripple.models.utils.caterrors.OError
-import com.odenzo.ripple.models.wireprotocol.accountinfo.AccountTxRs
-import com.odenzo.ripple.models.wireprotocol.transactions.TxRs
-import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.PaymentTx
+import com.odenzo.ripple.models.wireprotocol.commands.publicmethods.accountinfo.AccountTxRs
+import com.odenzo.ripple.models.wireprotocol.commands.publicmethods.transactionmethods.TxRs
+import com.odenzo.ripple.models.wireprotocol.txns.PaymentTx
 
 /**
   * Some utility functions for extracting the current balance of accounts in a payment transaction.

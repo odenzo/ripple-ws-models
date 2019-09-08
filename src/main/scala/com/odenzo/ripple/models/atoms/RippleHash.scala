@@ -1,11 +1,9 @@
 package com.odenzo.ripple.models.atoms
 
 import scala.util.Try
-import io.circe._
-import io.circe.syntax._
-import io.circe.generic.extras.semiauto._
+
 import cats.implicits._
-import io.circe.{Encoder, Decoder, Codec}
+import io.circe.Codec
 import io.circe.generic.extras.semiauto._
 /*
  * Note: There are also Hash160 and Hash128.
@@ -22,6 +20,7 @@ sealed trait Hash256 {
   def v: String
 }
 
+/** LedgerHash is in LedgerID and is only 20 bytes */
 object Hash256 {
   def validate(h: Hash256): Unit = require(isValidHash(h.v), "Ripple Hash Code must be exactly 64 chars")
 

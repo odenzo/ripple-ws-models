@@ -2,7 +2,7 @@ package com.odenzo.ripple.models.atoms
 
 import scala.collection.immutable
 
-import enumeratum.values.{IntEnumEntry, IntEnum, IntCirceEnum}
+import enumeratum.values.{IntCirceEnum, IntEnum, IntEnumEntry}
 
 /**
   * AccountFlags used (mostly/only?) in AccountSet. Not these are <em>not bit-mask kind of flags</em>

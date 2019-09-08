@@ -1,6 +1,6 @@
 package com.odenzo.ripple.models.atoms
 
-import io.circe.{Decoder, Encoder, Json}
+import io.circe.{Json, Encoder, Decoder}
 
 import com.odenzo.ripple.models.testkit.CodecTesting
 

@@ -5,13 +5,12 @@ import java.nio.file.Path
 import cats._
 import cats.data._
 import cats.implicits._
-import io.circe.Decoder
 import io.circe.syntax._
 
 import com.odenzo.ripple.models.testkit.CodecTesting
 import com.odenzo.ripple.models.utils.CirceUtils
 import com.odenzo.ripple.models.utils.caterrors.AppError
-import com.odenzo.ripple.models.wireprotocol.ledgerinfo.LedgerRs
+import com.odenzo.ripple.models.wireprotocol.commands.publicmethods.ledgerinfo.LedgerRs
 
 class LedgerRqFixtureTest extends CodecTesting {
 

@@ -1,15 +1,17 @@
 package com.odenzo.ripple.models.utils.caterrors
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{Success, Failure, Try}
 
 import cats._
+import cats.data._
 import cats.implicits._
+import io.circe.syntax._
 import io.circe.Decoder.Result
-import io.circe.{DecodingFailure, Json, ParsingFailure}
+import io.circe.{ParsingFailure, Json, DecodingFailure}
 
 import com.odenzo.ripple.models.support.{JsonReqRes, RippleGenericError}
 import com.odenzo.ripple.models.utils.caterrors.CatsTransformers.ErrorOr
-import com.odenzo.ripple.models.wireprotocol.transactions.SubmitRs
+import com.odenzo.ripple.models.wireprotocol.RippleTxnRs
 
 /**
   * Base class that all errors (including OError) must extends directly or indirectly.
@@ -169,16 +171,16 @@ object AppRippleGenericError {
     s"""
        | Ripple Generic Error:
        | Request:
-       | ${err.rr.rq.spaces4}
+       | ${err.rr.rq.asJson.spaces4}
        | Result:
-       | ${err.rr.rs.spaces4}
+       | ${err.rr.rs.asJson.spaces4}
        |  Decoded: ${err.rippleGenericError}
    """.stripMargin
   }
 }
 
 /** This can happen after submitting a signed request, we keep all the info for debugging */
-class AppRippleEngineError(val submitRR: JsonReqRes, val rs: SubmitRs) extends AppError {
+class AppRippleEngineError(val submitRR: JsonReqRes, val rs: RippleTxnRs) extends AppError {
   def msg: String = "Submission of a Transaction Failed on Ripple"
 
   def cause: Option[AppError] = None
@@ -190,10 +192,10 @@ object AppRippleEngineError {
     s"""
        | Ripple Engine Error:
        | Request:
-       | ${err.submitRR.rq.spaces4}
+       | ${err.submitRR.rq.asJson.spaces4}
        | Result:
-       | ${err.submitRR.rs.spaces4}
-       |  Decoded: ${err.rs.engine}
+       | ${err.submitRR.rs.asJson.spaces4}
+
    """.stripMargin
   }
 }

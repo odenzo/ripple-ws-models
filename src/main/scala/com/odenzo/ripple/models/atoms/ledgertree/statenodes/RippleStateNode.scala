@@ -1,14 +1,11 @@
 package com.odenzo.ripple.models.atoms.ledgertree.statenodes
 
-import io.circe.Decoder
 import io.circe.generic.extras.Configuration
 import io.circe._
-import io.circe.syntax._
 import io.circe.generic.extras.semiauto._
 
 import com.odenzo.ripple.models.atoms.ledgertree.LedgerNodeIndex
 import com.odenzo.ripple.models.atoms.{LedgerSequence, RippleQuality, FiatAmount, TxnHash}
-import com.odenzo.ripple.models.support.RippleCodecUtils
 import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 // TODO: Need a RippleStateFlag
@@ -43,7 +40,7 @@ case class RippleStateNode(
 ) extends LedgerNode
 
 object RippleStateNode {
-  implicit val config: Configuration                  = CirceCodecUtils.capitalizeConfig
+  implicit val config: Configuration                  = CirceCodecUtils.configCapitalize
   implicit val codec: Codec.AsObject[RippleStateNode] = deriveConfiguredCodec[RippleStateNode]
 
 }

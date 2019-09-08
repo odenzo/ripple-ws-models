@@ -1,9 +1,9 @@
 package com.odenzo.ripple.models.utils.caterrors
 
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{Await, Future, ExecutionContext}
 import scala.util.control.NonFatal
-import scala.util.{Failure, Success, Try}
+import scala.util.{Success, Failure, Try}
 
 import cats.data._
 import cats.implicits._

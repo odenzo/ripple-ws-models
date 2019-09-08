@@ -1,6 +1,6 @@
 package com.odenzo.ripple.models.atoms
 
-import io.circe.{Decoder, Encoder}
+import io.circe.{Encoder, Decoder}
 
 import com.odenzo.ripple.models.support.GenesisAccount
 import com.odenzo.ripple.models.testkit.CodecTesting

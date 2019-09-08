@@ -1,6 +1,5 @@
 package com.odenzo.ripple.models.atoms
 
-import enumeratum.values.CirceValueEnum
 import io.circe.JsonNumber
 import spire.math.UInt
 import io.circe.syntax._

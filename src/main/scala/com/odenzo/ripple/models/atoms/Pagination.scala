@@ -1,11 +1,7 @@
 package com.odenzo.ripple.models.atoms
 
-import io.circe.generic.semiauto.deriveDecoder
-import io.circe.syntax._
-import io.circe.{Json, Encoder, JsonObject, Decoder}
 import io.circe._
 import io.circe.generic.extras.Configuration
-import io.circe.syntax._
 import io.circe.generic.extras.semiauto._
 // Put all the type defs in package object?
 //type Marker = Option[Json]
@@ -29,7 +25,7 @@ object Pagination {
 
   val defaultPaging =
     new Pagination(
-      limit  = Some(Limit(50)),
+      limit = Some(Limit(50)),
       marker = None,
       LedgerSequence.WILDCARD_LEDGER,
       LedgerSequence.WILDCARD_LEDGER

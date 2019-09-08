@@ -1,11 +1,7 @@
 package com.odenzo.ripple.models.atoms
 
 import io.circe._
-import io.circe.syntax._
 import io.circe.generic.extras.semiauto._
-import io.circe.generic.JsonCodec
-import io.circe.generic.extras.ConfiguredJsonCodec
-import io.circe.{Encoder, Decoder}
 
 /**
   *

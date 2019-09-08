@@ -2,12 +2,8 @@ package com.odenzo.ripple.models.utils
 
 import cats.Show
 import io.circe.generic.extras.Configuration
-import io.circe.generic.extras.semiauto.deriveConfiguredCodec
-import io.circe.{Encoder, Decoder, Codec}
-import io.circe._
-import io.circe.syntax._
+import io.circe.Codec
 import io.circe.generic.extras.semiauto._
-import com.odenzo.ripple.models.atoms.Limit
 
 /**
   *

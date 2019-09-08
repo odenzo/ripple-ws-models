@@ -1,11 +1,6 @@
 package com.odenzo.ripple.models.atoms.ledgertree
 
-import scala.collection.immutable.Nil
-
 import io.circe._
-import io.circe.generic.extras._
-import io.circe.generic.semiauto._
-import io.circe.syntax._
 
 import com.odenzo.ripple.models.atoms.LedgerSequence
 import com.odenzo.ripple.models.atoms.ledgertree.statenodes._
@@ -20,10 +15,8 @@ case class AffectedLedgerNode(modifiedNode: Option[LedgerNodeDelta], createdNode
 
 object AffectedLedgerNode {
 
-  import io.circe.generic.extras._
-  import io.circe.generic.extras.semiauto._
-  import io.circe.generic.extras.{semiauto => genextras}
-  implicit val circeConfig: Configuration                = CirceCodecUtils.capitalizeConfig
+  import io.circe.generic.extras.{semiauto => genextras, _}
+  implicit val circeConfig: Configuration                = CirceCodecUtils.configCapitalize
   implicit val codec: Codec.AsObject[AffectedLedgerNode] = genextras.deriveConfiguredCodec[AffectedLedgerNode]
 }
 
@@ -44,10 +37,8 @@ case class LedgerNodeDelta(
 
 object LedgerNodeDelta {
 
-  import io.circe.generic.extras._
-  import io.circe.generic.extras.semiauto._
-  import io.circe.generic.extras.{semiauto => genextras}
-  implicit val circeConfig: Configuration             = CirceCodecUtils.capitalizeConfig
+  import io.circe.generic.extras.{semiauto => genextras, _}
+  implicit val circeConfig: Configuration             = CirceCodecUtils.configCapitalize
   implicit val codec: Codec.AsObject[LedgerNodeDelta] = genextras.deriveConfiguredCodec[LedgerNodeDelta]
 
 }

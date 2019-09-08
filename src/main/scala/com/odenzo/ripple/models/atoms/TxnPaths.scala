@@ -1,10 +1,7 @@
 package com.odenzo.ripple.models.atoms
 
-import io.circe.generic.semiauto._
-import io.circe.{Json, Encoder, Decoder}
 import io.circe._
 import io.circe.generic.extras.Configuration
-import io.circe.syntax._
 import io.circe.generic.extras.semiauto._
 
 trait TxnPaths
@@ -36,7 +33,7 @@ case class PaymentPath(hops: List[PaymentPathStep])
 case class PaymentPathStep(
     currency: Option[Currency],
     issuer: Option[AccountAddr],
-    `type`: Option[Int]      = None,
+    `type`: Option[Int] = None,
     type_hex: Option[String] = None
 )
 

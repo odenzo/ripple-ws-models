@@ -1,6 +1,6 @@
 package com.odenzo.ripple.models.atoms.ledgertree
 
-import io.circe.Decoder
+import io.circe.{Codec, Encoder, Decoder}
 import io.circe.generic.semiauto._
 
 import com.odenzo.ripple.models.atoms._
@@ -35,11 +35,15 @@ case class LedgerHeader(
 object LedgerHeader {
 
   val baseDecoder = deriveDecoder[LedgerHeader] // closed_info always None
+
+  implicit val encoder: Encoder.AsObject[LedgerHeader] = deriveEncoder[LedgerHeader]
+
   implicit val decoder: Decoder[LedgerHeader] = {
     deriveDecoder[LedgerHeader].product(Decoder[Option[LedgerClosedInfo]]).map {
       case (header, info) => header.copy(closed_info = info)
     }
   }
+  // implicit val encoder: Encoder.AsObject[LedgerHeader] = deriveEncoder[LedgerHeader]
 }
 
 /** The header when information for a ledger that has not yet closed (or validated) */
@@ -52,5 +56,5 @@ case class LedgerClosedInfo(
 )
 
 object LedgerClosedInfo {
-  implicit val decoder: Decoder[LedgerClosedInfo] = deriveDecoder[LedgerClosedInfo]
+  implicit val codec: Codec.AsObject[LedgerClosedInfo] = deriveCodec[LedgerClosedInfo]
 }

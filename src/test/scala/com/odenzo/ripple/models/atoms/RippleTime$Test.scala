@@ -1,9 +1,7 @@
 package com.odenzo.ripple.models.atoms
 
 import com.odenzo.ripple.models.testkit.CodecTesting
-import io.circe._
 import io.circe.syntax._
-import io.circe.generic.extras.semiauto._
 class RippleTime$Test extends CodecTesting {
 
   test("Round Tripping RippleTime") {

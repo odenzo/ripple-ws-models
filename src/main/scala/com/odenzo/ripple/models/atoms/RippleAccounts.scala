@@ -1,12 +1,11 @@
 package com.odenzo.ripple.models.atoms
 
-import cats.Show
-import io.circe._
-import io.circe.syntax._
-
 import io.circe._
 import io.circe.syntax._
 import io.circe.generic.extras.semiauto._
+import cats.{Show, _}
+import cats.data._
+import cats.implicits._
 
 sealed trait Account
 
@@ -22,7 +21,7 @@ object Account {
   def from(account: String): Account = {
     val a = account.trim
     if (a.startsWith("~")) AccountAlias(a)
-    else AccountAlias(a)
+    else AccountAddr(a)
   }
 
   implicit val encoder: Encoder[Account] = Encoder.instance {
@@ -30,15 +29,19 @@ object Account {
     case alias: AccountAlias => alias.asJson
   }
 
+  implicit val decoder: Decoder[Account] = List[Decoder[Account]](
+    Decoder[AccountAlias].widen,
+    Decoder[AccountAddr].widen
+  ).reduceLeft(_ or _)
 }
 
-/** Represents a raw Ripple Account Address (sometimes called accountId (e.g. AccountKeys payload) */
+/** Represents a raw Ripple Account Address (sometimes called accountId (e.g. AccountKeys payload)
+  * TODO: Base58Check */
 final case class AccountAddr(address: String) extends Account {
   require(address.startsWith("r"), s"Ripple Account Address doesnt start with r :: [$address]")
 
 }
 object AccountAddr {
-
   implicit val codec: Codec[AccountAddr] = deriveUnwrappedCodec[AccountAddr]
   implicit val show: Show[AccountAddr]   = Show.show[AccountAddr](v => v.address)
 
@@ -50,16 +53,21 @@ object AccountAddr {
   *
   **/
 final case class AccountAlias(account: String) extends Account {
-  require(account.startsWith("~"), "Ripple Aliases must start with ~ character")
+  //require(account.startsWith("~"), "Ripple Aliases must start with ~ character")
 
 }
 
 object AccountAlias {
-  implicit val codec: Codec[AccountAlias] = deriveUnwrappedCodec[AccountAlias]
+  val codec: Codec[AccountAlias] = deriveUnwrappedCodec[AccountAlias]
+  implicit val decoder: Decoder[AccountAlias] =
+    codec.ensure(alias => alias.account.startsWith("~"), "Account Aliases must start with ~")
+
+  implicit val encoder: Encoder[AccountAlias] = codec
 }
 
 /**
   * Use for dt:string addressing of an account mapped to a single ripple address (e.g. a gateway account)
+  * Can be used for anything though
   * @param tag
   */
 case class DestinationTag(tag: UInt32)
@@ -69,17 +77,13 @@ object DestinationTag {
   implicit val codec: Codec[DestinationTag] = deriveUnwrappedCodec[DestinationTag]
 }
 
-/** Note this is not valid for most of the WebSocket Requests
-  * And I guess technically it is (acc: Account, dt:String)
-  * since can use aliases
-  * JSON Formats quite different normally.
-  * FIXME: Broken migrate to AccountTag product encoding/decoding
-  * */
-case class DTAccountAddr(address: AccountAddr, dt: DestinationTag) {
-  def toValue = s"$address:$dt" // FIXME: Confirm Use-Case
-}
+/**
+  *
+  * @param tag
+  */
+case class SourceTag(tag: UInt32)
 
-object DTAccountAddr {
-  implicit val encoder: Encoder[DTAccountAddr] = Encoder[String].contramap[DTAccountAddr](v => s"${v.address}:${v.dt}")
-
+object SourceTag {
+  def apply(dt: Long): SourceTag       = SourceTag(UInt32(dt))
+  implicit val codec: Codec[SourceTag] = deriveUnwrappedCodec[SourceTag]
 }

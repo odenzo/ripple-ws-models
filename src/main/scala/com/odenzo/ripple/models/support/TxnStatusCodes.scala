@@ -1,6 +1,5 @@
 package com.odenzo.ripple.models.support
 
-import scala.collection.immutable
 import scala.collection.immutable.NumericRange
 import scala.collection.immutable.NumericRange.Inclusive
 

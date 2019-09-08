@@ -1,42 +1,29 @@
 package com.odenzo.ripple.models.atoms
 
-import java.time.DateTimeException
-import scala.util.Try
-
 import cats._
 import cats.data._
 import cats.implicits._
-import cats.implicits._
-import io.circe.Decoder.Result
 import io.circe._
-import io.circe.generic.extras.Configuration
-import io.circe.syntax._
-
-import com.odenzo.ripple.models.utils.caterrors.{AppError, AppException}
 
 /**
-  * TODO: Redo, and reference other Ledger type things, like LastLedgerIndex
-  * Representations of a Ledger 'handle'
-  * For instance, in ripple commands ledger_hash or ledger_index fields can be used to identify ledger to work with.
-  *  Hash is unique, ledger_index can be either  a named ledger (String) such as "Validated" or an unsigned int value
-  *  (a real index)
+  * A LedgerID is either LedgerHash, LedgerName, LedgerSequence.
+  * Each of this is represented in JsonObject as a simple field.
+  * The field name varies: LedgerHash => "ledger_hash" while LedgerName and LedgerSequence go to "ledger_index"
+  *
+  * So:
+  * - LedgerName : LedgerIndex : LedgerID
+  * - LedgerSequence : LedgerIndex : LedgerID
+  * - LedgerHash : LedgerID
   *
   *
-  *  This whole hack depends on case classes having  "... ledger:Ledger".
-  *  The encoding to Json then checks is Ledger is LedgerHash and encoded "ledger_hash" = "theHash"
-  *  or if LedgerIndex uses "ledger_index" field with either String in unsigned number value depending
-  *  on if LedgerName or LedgerSequence.
-  *  https://xrpl.org/basic-data-types.html#specifying-ledgers
-  *  See AccountCurrenciesRq and AccountCurrenciesRs for example of using this type of encoding
-  *  in the Circe Encoder and Decoders.
   */
 sealed trait LedgerID
 
 /** Represents a value that identifies a ledger. Encoded as ledger_index fields, long or string */
 sealed trait LedgerIndex extends LedgerID
 
-/** Ledger Hash is encoded as leger_hash field in API */
-case class LedgerHash(v: RippleHash) extends LedgerID
+/** Ledger Hash is encoded as leger_hash field in API, ledger hashses are 32 bytes in hex */
+case class LedgerHash(v: String) extends LedgerID
 
 /** Name of a ledger, e.g. "validated"  Could be an enumeration almost. The ledger specified
   * over time changes. So -- this should be changed to extend Ledger not LedgerId */
@@ -64,23 +51,51 @@ object LedgerCurrentIndex {
 }
 
 object LedgerID {
+  import io.circe._
+  import io.circe.syntax._
 
-  /** This encoder will create a Json object for ledger. But we always need to lift those objects up a level
-    * Might as well make keys for all to make it easier to list.
-    **/
-  implicit val encoder: Encoder[LedgerID] = Encoder.instance[LedgerID] {
-    case l @ LedgerName(n)     => Encoder[LedgerName].apply(l)
-    case l @ LedgerSequence(n) => Encoder[LedgerSequence].apply(l)
-    case l @ LedgerHash(n)     => Encoder[LedgerHash].apply(l)
-
+  def asJObjField(lid: LedgerID): (String, Json) = {
+    lid match {
+      case l @ LedgerName(_)     => "ledger_index" := l
+      case l @ LedgerSequence(_) => "ledger_index" := l
+      case l @ LedgerHash(_)     => "ledger_hash"  := l
+    }
   }
+  // Skipping object style because a trap, if using Leaf type totally different encoding than LedgerID
+
+  def apply(s: String): LedgerID    = if (s.length != 32 * 2) LedgerName(s) else LedgerHash(s)
+  def apply(seq: Long): LedgerIndex = LedgerSequence(seq)
+
+  implicit val encoder: Encoder[LedgerID] = Encoder.instance[LedgerID] {
+    case l: LedgerName     => Encoder[LedgerName].apply(l)
+    case l: LedgerSequence => Encoder[LedgerSequence].apply(l)
+    case l: LedgerHash     => Encoder[LedgerHash].apply(l)
+  }
+
+  // We have no discriminator field in the JSON so have to try most restrictive to least restricive
+  implicit val decoder: Decoder[LedgerID] = {
+    val d1 = Decoder[LedgerHash].widen[LedgerID]
+    val d2 = Decoder[LedgerIndex].widen[LedgerID]
+    d1 or d2
+  }
+
+  /** Decided to be principled. "field" : [LedgerHash|LedgerName|LedferSequence] are implicit.
+    * When we have  { "ldeger_indexx" : ...  OR "ledger_hash" can use this a product.
+    */
+  val objEncoder: Encoder.AsObject[LedgerID] =
+    Encoder.encodeEither[LedgerHash, LedgerIndex]("ledger_hash", "ledger_index").contramapObject[LedgerID] {
+      case l: LedgerHash  => Left(l)
+      case l: LedgerIndex => Right(l)
+    }
 
   /**
     * Takes a ledger handle type from either ledger_hash or ledger_index.
     * If ledger_hash can be parse returns that, else tries for ledger_index (returning that error if fails)
     */
-  implicit val decoder: Decoder[LedgerID] =
-    Decoder.decodeEither[LedgerHash, LedgerIndex]("ledger_hash", "ledger_index").map(et => et.fold(identity, identity))
+  val objDecoder: Decoder[LedgerID] =
+    Decoder
+      .decodeEither[LedgerHash, LedgerIndex]("ledger_hash", "ledger_index")
+      .map(et => et.fold(identity, identity))
 
 }
 
@@ -104,6 +119,7 @@ object LedgerIndex {
 }
 
 object LedgerName {
+  // Use enumeration Circe Style.
   val CURRENT_LEDGER: LedgerName   = LedgerName("current")
   val VALIDATED_LEDGER: LedgerName = LedgerName("validated")
   val CLOSED_LEDGER: LedgerName    = LedgerName("closed")
@@ -116,7 +132,6 @@ object LedgerName {
 }
 
 import io.circe._
-import io.circe.syntax._
 import io.circe.generic.extras.semiauto._
 
 /** This is really an unsigned in in Ripple */
@@ -136,6 +151,7 @@ object LedgerSequence {
   * LedgerHash gets encoded to ledger_hash field
   */
 object LedgerHash {
-  implicit val codec: Codec[LedgerHash] = deriveUnwrappedCodec[LedgerHash]
-
+  val codec: Codec[LedgerHash]              = deriveUnwrappedCodec[LedgerHash]
+  implicit val encoder: Encoder[LedgerHash] = codec
+  implicit val decoder: Decoder[LedgerHash] = codec.ensure(lh => lh.v.length === 32 * 2, "LedgerHash != 20 bytes")
 }
