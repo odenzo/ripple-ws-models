@@ -26,6 +26,6 @@ case class Meta(
 )
 
 object Meta extends CirceCodecUtils {
-  implicit val config: Configuration       = CirceCodecUtils.capitalizeExcept(Set("delivered_amount"))
+  implicit val config: Configuration       = CirceCodecUtils.configCapitalizeExcept(Set("delivered_amount"))
   implicit val codec: Codec.AsObject[Meta] = deriveConfiguredCodec[Meta]
 }

@@ -1,7 +1,7 @@
 package com.odenzo.ripple.models.atoms
 
-import io.circe.Decoder
-import io.circe.generic.semiauto.deriveDecoder
+import io.circe.Codec
+import io.circe.generic.semiauto._
 
 import com.odenzo.ripple.models.atoms.ledgertree.transactions.LedgerTxn
 
@@ -21,5 +21,5 @@ case class TransactionRecord(
 
 object TransactionRecord {
 
-  implicit val decoder: Decoder[TransactionRecord] = deriveDecoder[TransactionRecord]
+  implicit val codec: Codec.AsObject[TransactionRecord] = deriveCodec[TransactionRecord]
 }

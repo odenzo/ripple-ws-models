@@ -2,7 +2,6 @@ package com.odenzo.ripple.models.atoms
 
 import cats._
 import cats.implicits._
-import io.circe.Decoder.Result
 import io.circe._
 import io.circe.syntax._
 import io.circe.generic.extras.semiauto._
@@ -41,7 +40,13 @@ object Currency {
   * @param currency  Standard currency code, CANNOT BE XRP though.
   * @param issuer The account that issues the currency
   */
-case class Script(currency: Currency, issuer: AccountAddr)
+case class Script(currency: Currency, issuer: AccountAddr) {
+
+  def makeAmount(a: BigDecimal): FiatAmount = FiatAmount(a, this)
+
+  def makeIntAmount(l: Long): FiatAmount = FiatAmount(BigDecimal(l), this)
+
+}
 
 object Script {
 

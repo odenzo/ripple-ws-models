@@ -1,10 +1,9 @@
 package com.odenzo.ripple.models.atoms
 
-import io.circe.{Encoder, Decoder, Json}
+import io.circe.{Encoder, Decoder}
 import io.circe.syntax._
 
 import com.odenzo.ripple.models.testkit.CodecTesting
-import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 class SignersTest extends CodecTesting {
 

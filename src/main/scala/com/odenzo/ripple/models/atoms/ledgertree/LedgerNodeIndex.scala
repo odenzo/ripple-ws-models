@@ -1,8 +1,6 @@
 package com.odenzo.ripple.models.atoms.ledgertree
 
-import io.circe.{Decoder, Encoder}
 import io.circe._
-import io.circe.syntax._
 import io.circe.generic.extras.semiauto._
 
 /**

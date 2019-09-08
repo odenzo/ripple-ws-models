@@ -1,6 +1,6 @@
 package com.odenzo.ripple.models.atoms.ledgertree.statenodes
 
-import io.circe.{Decoder, Codec}
+import io.circe.Codec
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.deriveConfiguredCodec
 
@@ -15,7 +15,7 @@ import com.odenzo.ripple.models.utils.CirceCodecUtils
 case class AmendmentsNode(flags: Long, amendments: List[LedgerNodeIndex], index: LedgerNodeIndex) extends LedgerNode
 
 object AmendmentsNode {
-  implicit val config: Configuration                 = CirceCodecUtils.capitalizeExcept()
+  implicit val config: Configuration                 = CirceCodecUtils.configCapitalizeExcept()
   implicit val codec: Codec.AsObject[AmendmentsNode] = deriveConfiguredCodec[AmendmentsNode]
 
 }

@@ -3,14 +3,13 @@ package com.odenzo.ripple.models.atoms.ledgertree.transactions
 import com.odenzo.ripple.models.utils.CirceCodecUtils
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.deriveConfiguredCodec
-import io.circe.{Codec, Decoder}
+import io.circe.Codec
 import cats._
 import cats.data._
 import cats.implicits._
 
 import com.odenzo.ripple.models.atoms._
-
-// TODO: See if we can reduce this to just one TxCommon for validated/current/closed scenarios
+import com.odenzo.ripple.models.wireprotocol.txns.RippleTxnType
 
 /** Common fields *extracts* from LedgerRs.result.ledger.tranasactions example */
 case class TxCommon(
@@ -27,13 +26,16 @@ case class TxCommon(
     ledger_index: Option[LedgerSequence],
     date: Option[RippleTime], // Only if validated when using TxRs     // This is not in LedgerRs.result.ledget
     // .transactions
-    hash: TxnHash,
+    hash: Option[TxnHash],
     validated: Boolean = false
 )
 
 object TxCommon {
   implicit val config: Configuration =
-    CirceCodecUtils.capitalizeExcept(Set("hash", "date", "metaData", "validated")).withDefaults
+    CirceCodecUtils.configCapitalizeExcept(Set("hash", "date", "metaData", "validated")).withDefaults
+
+  // Well, I think if we use an unwrapped codec (a) It will use config and (b) it will practically lift
+  // so  X(a:A,b:B, date:RippleTime, validated:Boolen) with we autoderive X(a:A,b:B, txcommon:TxCommon)
   implicit val codec: Codec.AsObject[TxCommon] = deriveConfiguredCodec[TxCommon]
 
   /** Dummy TxCommon for development hacking. */
@@ -49,6 +51,6 @@ object TxCommon {
     None,
     None,
     None,
-    TxnHash("garbage")
+    TxnHash("garbage").some
   )
 }

@@ -7,7 +7,7 @@ import enumeratum._
 import enumeratum.values.{StringEnum, StringEnumEntry}
 import io.circe.Decoder.Result
 import io.circe.generic.semiauto.deriveDecoder
-import io.circe.{Decoder, Encoder, Json, JsonObject}
+import io.circe.{Json, Encoder, JsonObject, Decoder}
 import scribe.Logging
 
 import com.odenzo.ripple.models.utils.CirceCodecUtils
@@ -35,9 +35,7 @@ case object RippleLogLevel extends Enum[RippleLogLevel] with CirceEnum[RippleLog
   implicit val decoder: Decoder[RippleLogLevel] = Circe.decodeCaseInsensitive(this)
 }
 
-// TODO: Lowest Priority I actually am tired of the all caps for constants. FistCap enough I think.
 sealed abstract class RippleLogPartition(val value: String) extends StringEnumEntry
-
 case object RippleLogPartition extends StringEnum[RippleLogPartition] {
 
   val values: immutable.IndexedSeq[RippleLogPartition] = findValues

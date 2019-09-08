@@ -1,9 +1,6 @@
 import sbt.Keys.resolvers
 import MyCompileOptions._
 
-//resolvers += Resolver.sonatypeRepo("releases")
-//addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full)
-
 ThisBuild / organization := "com.odenzo"
 ThisBuild / name         := "ripple-ws-models"
 
@@ -34,23 +31,23 @@ lazy val wsmodels = (project in file("."))
     }),
     libraryDependencies += (CrossVersion.partialVersion(scalaVersion.value) match { // Partial function?
       case Some((2, 12)) => compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
-      case _             => "com.lihaoyi" %% "pprint" % "0.5.5" // Dummy
+      case _             => "org.scalacheck" %% "scalacheck" % scalaCheckVersion % Test
     })
+    // libraryDependencies += compilerPlugin("io.tryp" % "splain" % "0.4.1" cross CrossVersion.patch)
   )
 
 lazy val commonSettings = Seq(
   libraryDependencies ++= libs ++ lib_circe ++ lib_cats ++ lib_spire ++ lib_monocle ++ lib_scribe,
   resolvers ++= Seq(
-    Resolver.mavenLocal,
+    Resolver.sonatypeRepo("releases"),
     Resolver.defaultLocal,
     Resolver.bintrayRepo("odenzo", "maven"),
-    Resolver.jcenterRepo,
-    Resolver.sonatypeRepo("releases")
+    Resolver.jcenterRepo
   )
 )
 
 val circeVersion           = "0.12.0-RC4"
-val catsVersion            = "2.0.0-RC2"
+val catsVersion            = "2.0.0-RC3"
 val catsEffectVersion      = "2.0.0-RC2"
 val spireVersion           = "0.17.0-M1"
 val scribeVersion          = "2.7.9"
@@ -73,7 +70,8 @@ val lib_circe =
     "io.circe" %% "circe-generic"        % circeVersion,
     "io.circe" %% "circe-parser"         % circeVersion,
     "io.circe" %% "circe-generic-extras" % circeVersion,
-    "io.circe" %% "circe-optics"         % "0.12.0-RC2",
+    "io.circe" %% "circe-optics"         % "0.12.0-RC2" % Test,
+    "io.circe" %% "circe-literal"        % circeVersion % Test,
     //"io.circe"     %% "circe-derivation"     % circeVersion,
     "com.beachape" %% "enumeratum"       % enumeratumVersion,
     "com.beachape" %% "enumeratum-circe" % enumeratumCirceVersion

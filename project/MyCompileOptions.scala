@@ -18,7 +18,7 @@ object MyCompileOptions {
       //   "-Xfuture", // Turn on future language features.
       "-Yno-adapted-args", // Do not adapt an argument list (either by inserting () or creating a tuple) to match
       // the receiver.
-      "-Ypartial-unification"  // Enable partial unification in type constructor inference
+      "-Ypartial-unification" // Enable partial unification in type constructor inference
       //"-Ymacro-annotations"    // Cannot use in 2.12 -- use addCompilerPlugin("org.scalamacros" %% "paradise" %
       // "2.1.0" cross CrossVersion.full)
     )
@@ -63,9 +63,9 @@ object MyCompileOptions {
 
   val warningsV13: Seq[String] =
     Seq(
-      "-Ywarn-dead-code",     // Warn when dead code is identified.
-      "-Ywarn-extra-implicit" // Warn when more than one implicit parameter section is defined.
-
+      "-Ywarn-dead-code",      // Warn when dead code is identified.
+      "-Ywarn-extra-implicit", // Warn when more than one implicit parameter section is defined.
+      "-Ymacro-annotations"
       //"-Ywarn-inaccessible", // Warn about inaccessible types in method signatures. (Gone in 2.13)
       // "-Ywarn-infer-any", // Warn when a type argument is inferred to be `Any`. (Gone in 2.13)
       // "-Ywarn-nullary-override", // Warn when non-nullary `def f()' overrides nullary `def f'.

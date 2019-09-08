@@ -1,10 +1,8 @@
 package com.odenzo.ripple.models.atoms.ledgertree.statenodes
 
 import cats.Show
-import io.circe.Decoder
 import io.circe.generic.extras.Configuration
 import io.circe._
-import io.circe.syntax._
 import io.circe.generic.extras.semiauto._
 
 import com.odenzo.ripple.models.atoms.ledgertree.LedgerNodeIndex
@@ -39,7 +37,7 @@ case class OfferDirectoryNode(
 ) extends DirectoryNode
 
 object OfferDirectoryNode {
-  implicit val config: Configuration                       = CirceCodecUtils.capitalizeConfig
+  implicit val config: Configuration                       = CirceCodecUtils.configCapitalize
   implicit val decoder: Codec.AsObject[OfferDirectoryNode] = deriveConfiguredCodec[OfferDirectoryNode]
   implicit val show: Show[OfferDirectoryNode]              = Show.fromToString[OfferDirectoryNode]
 }
@@ -64,7 +62,7 @@ case class OwnerDirectoryNode(
 ) extends DirectoryNode
 
 object OwnerDirectoryNode {
-  implicit val config: Configuration                       = CirceCodecUtils.capitalizeConfig
+  implicit val config: Configuration                       = CirceCodecUtils.configCapitalize
   implicit val decoder: Codec.AsObject[OwnerDirectoryNode] = deriveConfiguredCodec[OwnerDirectoryNode]
   implicit val show: Show[OwnerDirectoryNode]              = Show.fromToString[OwnerDirectoryNode]
 }

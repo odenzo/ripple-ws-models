@@ -4,15 +4,13 @@ import java.io.File
 
 import cats._
 import cats.implicits._
-import io.circe.Decoder.Result
 import io.circe._
 import io.circe.jawn.JawnParser
 import io.circe.syntax._
 import scribe.Logging
 
-import com.odenzo.ripple.models.support.RippleRq
 import com.odenzo.ripple.models.utils.caterrors.CatsTransformers.ErrorOr
-import com.odenzo.ripple.models.utils.caterrors.{AppError, AppException, AppJsonDecodingError, AppJsonParsingError}
+import com.odenzo.ripple.models.utils.caterrors._
 
 /**
   *  Traits for working with Circe Json / DOM
@@ -32,6 +30,29 @@ trait CirceUtils extends Logging {
     json.as[A].leftMap { err =>
       AppJsonDecodingError(json, err)
     }
+  }
+
+  /** Easily decode wrapped in our Either AppError style. */
+  def decodeObj[A](jobj: JsonObject, desc: String = "")(
+      implicit decoder: Decoder[A]
+  ): Either[AppJsonDecodingError, A] = {
+    decode(jobj.asJson)
+  }
+
+  def extractFieldFromObject(jobj: JsonObject, fieldName: String): Either[OError, Json] = {
+    Either.fromOption(jobj.apply(fieldName), AppError(s"Could not Find $fieldName in JSonObject "))
+  }
+
+  /**
+    * Little utility for common case where an JsonObject just has "key": value
+    * WHere value may be heterogenous?
+    *
+    * @param json
+    */
+  def extractAsKeyValueList(json: Json): ErrorOr[List[(String, Json)]] = {
+    val obj: Either[OError, JsonObject]           = json.asObject.toRight(AppError("JSON Fragment was not a JSON Object"))
+    val ans: Either[OError, List[(String, Json)]] = obj.map(_.toList)
+    ans
   }
 
   /** Ripled doesn't like objects like { x=null } */

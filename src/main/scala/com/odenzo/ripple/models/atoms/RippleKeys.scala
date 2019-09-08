@@ -1,9 +1,6 @@
 package com.odenzo.ripple.models.atoms
-import io.circe.generic.extras.semiauto._
 import cats.implicits._
 import io.circe.generic.extras.Configuration
-import io.circe.syntax._
-import io.circe.{Decoder, _}
 import io.circe._
 import io.circe.syntax._
 import io.circe.generic.extras.semiauto._
@@ -167,3 +164,5 @@ object ValidationKeys {
   implicit val config: Configuration                      = Configuration.default
   lazy implicit val codec: Codec.AsObject[ValidationKeys] = deriveConfiguredCodec[ValidationKeys]
 }
+
+case class RipplePassphrase(s: String)

@@ -3,7 +3,7 @@ package com.odenzo.ripple.models.utils
 import cats.implicits._
 import scribe.Level.Warn
 import scribe.filter._
-import scribe.{Level, Logger, Priority}
+import scribe.{Priority, Logger, Level}
 
 /**
   * Scribe has run-time configuration.

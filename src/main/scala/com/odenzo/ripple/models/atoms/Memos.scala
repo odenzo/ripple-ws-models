@@ -5,7 +5,6 @@ import cats.implicits._
 import io.circe._
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.{deriveConfiguredCodec, deriveUnwrappedCodec}
-import io.circe.syntax._
 
 import com.odenzo.ripple.models.utils.{HexData, CirceCodecUtils}
 import com.odenzo.ripple.models.utils.caterrors.OError
@@ -14,7 +13,8 @@ import com.odenzo.ripple.models.utils.caterrors.OError
   * Another bit of a dogs breakfast. This whole memo heirarchy
   *
   * Memos contains zero or more memos. The total size in bytes of memos in Ripple in constrained. (1K, 700K?)
-  *
+  *      TODO: Since memos is an optional field in TxOptions should try NonEmptyList.
+  *      DOn't think we ever get Memos = { } in json.
   * @param memos
   */
 case class Memos(memos: List[Memo]) {
@@ -39,12 +39,14 @@ object Memos {
     Memos(lom)
   }
 
-  implicit val encoder: Encoder[Memos] = Encoder.instance[Memos] { memos =>
+  // This is not an ObjectEncoder, because we use Json.NULL on empty array
+  implicit val encoder: Encoder[Memos] = Encoder.instance[Memos] { memos: Memos =>
+    import io.circe.syntax._
     if (memos.memos.isEmpty) Json.Null
     else {
-      val encoder: Encoder[List[Memo]] = Encoder[List[Memo]]
-      val fieldJson                    = encoder.apply(memos.memos)
-      fieldJson
+      memos.memos.map { m =>
+        JsonObject.singleton("Memo", m.asJson)
+      }.asJson
     }
 
   }
@@ -61,9 +63,9 @@ object Memos {
   */
 case class Memo(memoData: Option[MemoData], memoFormat: Option[MemoFormat] = None, memoType: Option[MemoType] = None) {
 
-  def withType(t: MemoType): Memo     = copy(memoType   = Some(t))
+  def withType(t: MemoType): Memo     = copy(memoType = Some(t))
   def withFormat(f: MemoFormat): Memo = copy(memoFormat = Some(f))
-  def withContent(d: MemoData): Memo  = copy(memoData   = d.some)
+  def withContent(d: MemoData): Memo  = copy(memoData = d.some)
 
 }
 
@@ -79,7 +81,7 @@ object Memo extends MemoUtils {
 
   }
 
-  implicit val config: Configuration       = CirceCodecUtils.capitalizeExcept(Set("delivered_amount"))
+  implicit val config: Configuration       = CirceCodecUtils.configCapitalizeExcept(Set("delivered_amount"))
   implicit val codec: Codec.AsObject[Memo] = deriveConfiguredCodec[Memo]
 }
 
@@ -97,7 +99,7 @@ object MemoData {
   def fromJson(j: Json): MemoData   = fromText(j.noSpaces)
   def fromText(s: String): MemoData = MemoData(HexData.fromString(s))
 
-  implicit val config: Configuration  = CirceCodecUtils.capitalizeExcept(Set("delivered_amount"))
+  implicit val config: Configuration  = CirceCodecUtils.configCapitalizeExcept(Set("delivered_amount"))
   implicit val codec: Codec[MemoData] = deriveUnwrappedCodec[MemoData]
 }
 
@@ -111,8 +113,7 @@ case class MemoFormat(format: HexData) {
   */
 object MemoFormat extends MemoUtils {
 
-  implicit val config: Configuration    = CirceCodecUtils.capitalizeExcept(Set("delivered_amount"))
-  implicit val codec: Codec[MemoFormat] = deriveConfiguredCodec[MemoFormat]
+  implicit val codec: Codec[MemoFormat] = deriveUnwrappedCodec[MemoFormat]
   implicit val show: Show[MemoFormat]   = Show.show[MemoFormat](mf => s"MemoFormat ${mf.format.asText}")
 
   val textUTF8: MemoFormat = unsafeFromText("""text/plain;charset=UTF-8""")

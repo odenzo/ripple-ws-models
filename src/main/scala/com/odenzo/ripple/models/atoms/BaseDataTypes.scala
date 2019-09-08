@@ -2,16 +2,12 @@ package com.odenzo.ripple.models.atoms
 
 import java.nio.charset.StandardCharsets
 
-import io.circe.{Encoder, Decoder}
-
 import com.odenzo.ripple.models.utils.ByteUtils
 import com.odenzo.ripple.models.utils.caterrors.{AppException, AppError}
 import cats._
 import cats.data._
 import cats.implicits._
 import io.circe._
-import io.circe.generic.JsonCodec
-import io.circe.syntax._
 import io.circe.generic.extras.semiauto._
 
 case class Blob(hex: String)

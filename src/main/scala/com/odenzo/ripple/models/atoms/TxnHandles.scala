@@ -1,8 +1,6 @@
 package com.odenzo.ripple.models.atoms
 
-import io.circe.{Decoder, Encoder}
 import io.circe._
-import io.circe.syntax._
 import io.circe.generic.extras.semiauto._
 
 /**
@@ -28,14 +26,12 @@ object TxnIndex {
 
 /**
   * This is the sequence of a transaction local to the "on-account" (which signs the txn)
-  * Give the account and TxnSequence can find.
-  * Name in JSON is usually (?!) Sequence
+  * Give the account and TxnSequence can be found. This is different than the ledger_index, which is
+  *  relative to the whole rippled.
   *
   **/
 case class TxnSequence(v: Long) {
-
-  /** Returns new TxnSequence with incremented value */
-  def increment = TxnSequence(v + 1)
+  def increment: TxnSequence = this.copy(v = v + 1)
 }
 
 object TxnSequence {

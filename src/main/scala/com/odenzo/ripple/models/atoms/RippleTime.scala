@@ -1,13 +1,10 @@
 package com.odenzo.ripple.models.atoms
 
 import java.time.Instant
+import scala.concurrent.duration.FiniteDuration
 
 import io.circe._
-import io.circe.generic.JsonCodec
-import io.circe.syntax._
 import io.circe.generic.extras.semiauto._
-import io.circe.generic.extras.{ConfiguredJsonCodec, Configuration}
-import io.circe.{Encoder, Decoder}
 
 /**
   * The rippled server and its APIs represent time as an unsigned integer. This number measures the number of seconds since
@@ -19,7 +16,8 @@ import io.circe.{Encoder, Decoder}
   */
 case class RippleTime(ticks: Long) extends AnyVal {
   def asInstant: Instant = Instant.ofEpochSecond(ticks + RippleTime.rippleOffset)
-  def asISO: String      = asInstant.toString
+
+  def asISO: String = asInstant.toString
 
   override def toString: String = s"$asISO (${ticks.toString()}"
 }
@@ -28,10 +26,10 @@ object RippleTime {
 
   val empty: RippleTime = RippleTime(0)
 
-  val rippleOffset: Long      = 946684800L
-  def now(): RippleTime       = fromInstant(Instant.now())
-  def fromInstant(i: Instant) = new RippleTime(i.getEpochSecond - RippleTime.rippleOffset)
-
-  implicit val codec: Codec[RippleTime] = deriveUnwrappedCodec[RippleTime]
+  val rippleOffset: Long                          = 946684800L
+  def now(): RippleTime                           = fromInstant(Instant.now())
+  def fromInstant(i: Instant)                     = new RippleTime(i.getEpochSecond - RippleTime.rippleOffset)
+  def inFuture(delta: FiniteDuration): RippleTime = fromInstant(Instant.now().plusMillis(delta.toMillis))
+  implicit val codec: Codec[RippleTime]           = deriveUnwrappedCodec[RippleTime]
 
 }

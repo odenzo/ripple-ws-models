@@ -22,12 +22,12 @@ import com.odenzo.ripple.models.atoms._
   */
 object GenesisAccount {
 
-  val pasphrase          = "masterpassphrase"
-  val address            = AccountAddr("rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh")
-  val masterSeed         = RippleSeed(Base58Checksum("snoPBrXtMeMyMHUVTgbuqAfg1SUTb"))
-  val secret: RippleSeed = masterSeed
+  val passphrase: RipplePassphrase = RipplePassphrase("masterpassphrase")
+  val address: AccountAddr         = AccountAddr("rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh")
+  val masterSeed: RippleSeed       = RippleSeed(Base58Checksum("snoPBrXtMeMyMHUVTgbuqAfg1SUTb"))
+  val secret: RippleSeed           = masterSeed
 
-  val accountKeys = AccountKeys(
+  val accountKeys: AccountKeys = AccountKeys(
     address,
     RippleKeyType("secp256k1"),
     RippleKey(RFC1751("I IRE BOND BOW TRIO LAID SEAT GOAL HEN IBIS IBIS DARE")),
@@ -37,6 +37,7 @@ object GenesisAccount {
     public_key_hex = "0330E7FC9D56BB25D6893BA3F317AE5BCF33B3291BD63DB32654A313222F7FD020"
   )
 
+  val fkp: FullKeyPair          = FullKeyPair(accountKeys, None)
   override def toString: String = "GENESIS"
 }
 

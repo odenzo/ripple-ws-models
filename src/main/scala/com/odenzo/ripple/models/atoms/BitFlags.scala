@@ -3,7 +3,7 @@ package com.odenzo.ripple.models.atoms
 import scala.collection.immutable
 
 import enumeratum.values._
-import io.circe.{Encoder, Decoder, Json}
+import io.circe.{Json, Encoder, Decoder}
 import spire.math.{ULong, UInt, SafeLong}
 
 /*
@@ -84,19 +84,21 @@ object BitMask {
   implicit val uLongDecoder: Decoder[ULong]       = Decoder[Long].map(l => new ULong(l))
   implicit val safeLongDecoder: Decoder[SafeLong] = Decoder[BigInt].map(SafeLong.apply)
 
-  implicit val encode0: Encoder[BitMask[BitFlag]]         = uIntEncoder.contramap(v => (v.v))
-  implicit val encode1: Encoder[BitMask[TrustSetFlag]]    = uIntEncoder.contramap(v => (v.v))
-  implicit val encode2: Encoder[BitMask[OfferCreateFlag]] = uIntEncoder.contramap(v => (v.v))
-  implicit val encode3: Encoder[BitMask[PaymentFlag]]     = uIntEncoder.contramap(v => (v.v))
-  implicit val encode4: Encoder[BitMask[LedgerFlag]]      = uIntEncoder.contramap(v => (v.v))
-  implicit val encode5: Encoder[BitMask[AccountRootFlag]] = uIntEncoder.contramap(v => (v.v))
+  implicit val encode0: Encoder[BitMask[BitFlag]]            = uIntEncoder.contramap(v => (v.v))
+  implicit val encode1: Encoder[BitMask[TrustSetFlag]]       = uIntEncoder.contramap(v => (v.v))
+  implicit val encode2: Encoder[BitMask[OfferCreateFlag]]    = uIntEncoder.contramap(v => (v.v))
+  implicit val encode3: Encoder[BitMask[PaymentFlag]]        = uIntEncoder.contramap(v => (v.v))
+  implicit val encode4: Encoder[BitMask[LedgerFlag]]         = uIntEncoder.contramap(v => (v.v))
+  implicit val encode5: Encoder[BitMask[AccountRootFlag]]    = uIntEncoder.contramap(v => (v.v))
+  implicit val encode6: Encoder[BitMask[PaymentChannelFlag]] = uIntEncoder.contramap(v => (v.v))
 
-  implicit val decode0: Decoder[BitMask[BitFlag]]         = uIntDecoder.map(l => BitMask[BitFlag](l))
-  implicit val decode1: Decoder[BitMask[TrustSetFlag]]    = uIntDecoder.map(l => BitMask[TrustSetFlag](l))
-  implicit val decode2: Decoder[BitMask[OfferCreateFlag]] = uIntDecoder.map(l => BitMask[OfferCreateFlag](l))
-  implicit val decode3: Decoder[BitMask[PaymentFlag]]     = uIntDecoder.map(l => BitMask[PaymentFlag](l))
-  implicit val decode4: Decoder[BitMask[LedgerFlag]]      = uIntDecoder.map(l => BitMask[LedgerFlag](l))
-  implicit val decode5: Decoder[BitMask[AccountRootFlag]] = uIntDecoder.map(l => BitMask[AccountRootFlag](l))
+  implicit val decode0: Decoder[BitMask[BitFlag]]            = uIntDecoder.map(l => BitMask[BitFlag](l))
+  implicit val decode1: Decoder[BitMask[TrustSetFlag]]       = uIntDecoder.map(l => BitMask[TrustSetFlag](l))
+  implicit val decode2: Decoder[BitMask[OfferCreateFlag]]    = uIntDecoder.map(l => BitMask[OfferCreateFlag](l))
+  implicit val decode3: Decoder[BitMask[PaymentFlag]]        = uIntDecoder.map(l => BitMask[PaymentFlag](l))
+  implicit val decode4: Decoder[BitMask[LedgerFlag]]         = uIntDecoder.map(l => BitMask[LedgerFlag](l))
+  implicit val decode5: Decoder[BitMask[AccountRootFlag]]    = uIntDecoder.map(l => BitMask[AccountRootFlag](l))
+  implicit val decode6: Decoder[BitMask[PaymentChannelFlag]] = uIntDecoder.map(l => BitMask[PaymentChannelFlag](l))
 
   // GlobalFlag.tfFullyCanonicalSig.value
 }
@@ -141,6 +143,22 @@ case object PaymentFlag extends IntEnum[PaymentFlag] with IntCirceEnum[PaymentFl
 
   case object tfFullyCanonicalSig extends PaymentFlag(0X00080000)
 
+}
+
+sealed abstract class PaymentChannelFlag(val value: Int) extends IntEnumEntry with BitFlag
+
+case object PaymentChannelFlag
+    extends IntEnum[PaymentChannelFlag]
+    with IntCirceEnum[PaymentChannelFlag]
+    with BitMaskFlagEnum[PaymentChannelFlag] {
+
+  /** Clear the expiration time */
+  case object tfRenew extends PaymentChannelFlag(0x00010000)
+
+  /** Request to close the channel */
+  case object tfClose extends PaymentChannelFlag(0x00020000)
+
+  val values: immutable.IndexedSeq[PaymentChannelFlag] = findValues
 }
 
 sealed abstract class LedgerFlag(val value: Int) extends IntEnumEntry with BitFlag
@@ -241,7 +259,7 @@ case object OfferCreateFlag
   case object tfFillOrKill extends OfferCreateFlag(0x00040000)
 
   /**
-    * Sell all offered even if get more than desired result.
+    * Sell all offered even if get more than desired result.  (?)
     */
   case object tfSell extends OfferCreateFlag(0x00080000)
 

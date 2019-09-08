@@ -2,7 +2,7 @@ package com.odenzo.ripple.models.atoms
 
 import io.circe.Decoder.Result
 import io.circe.syntax._
-import io.circe.{Encoder, Json}
+import io.circe.{Json, Encoder}
 
 import com.odenzo.ripple.models.testkit.CodecTesting
 

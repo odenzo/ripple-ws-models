@@ -5,7 +5,7 @@ import io.circe.{Json, Encoder, Decoder}
 import pprint.PPrinter
 
 import com.odenzo.ripple.models.testkit.CodecTesting
-import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.PaymentTx
+import com.odenzo.ripple.models.wireprotocol.txns.PaymentTx
 
 class GenericLedgerTransactionTest extends CodecTesting {
 

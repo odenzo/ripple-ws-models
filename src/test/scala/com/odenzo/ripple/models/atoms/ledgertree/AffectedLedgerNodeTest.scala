@@ -1,6 +1,6 @@
 package com.odenzo.ripple.models.atoms.ledgertree
 
-import io.circe.{Decoder, Json}
+import io.circe.{Json, Decoder}
 
 import com.odenzo.ripple.models.testkit.CodecTesting
 

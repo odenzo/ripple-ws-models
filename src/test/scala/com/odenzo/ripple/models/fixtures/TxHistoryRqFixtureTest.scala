@@ -5,7 +5,7 @@ import java.nio.file.Path
 import cats._
 import cats.data._
 import cats.implicits._
-import io.circe.{Json, Decoder}
+import io.circe.Json
 import io.circe.syntax._
 import monocle.Optional
 
@@ -13,7 +13,7 @@ import com.odenzo.ripple.models.atoms.ledgertree.transactions.LedgerTxn
 import com.odenzo.ripple.models.testkit.CodecTesting
 import com.odenzo.ripple.models.utils.CirceUtils
 import com.odenzo.ripple.models.utils.caterrors.{AppError, AppJsonDecodingError}
-import com.odenzo.ripple.models.wireprotocol.transactions.TxHistoryRs
+import com.odenzo.ripple.models.wireprotocol.commands.publicmethods.transactionmethods.TxHistoryRs
 
 /**
   * Fixtures made using the (deprecated) TxHistory command.

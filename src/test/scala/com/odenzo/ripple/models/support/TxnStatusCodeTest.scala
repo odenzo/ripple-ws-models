@@ -1,9 +1,7 @@
 package com.odenzo.ripple.models.support
 
 import io.circe.Decoder.Result
-import io.circe._
 import io.circe.syntax._
-import io.circe.generic.extras.semiauto._
 
 import com.odenzo.ripple.models.testkit.CodecTesting
 

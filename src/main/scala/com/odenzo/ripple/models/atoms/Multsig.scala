@@ -4,12 +4,10 @@ import scala.collection.immutable
 
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto._
-
 import io.circe.syntax._
-import io.circe.{JsonObject, Encoder, Decoder, Codec, Json}
+import io.circe._
 
 import com.odenzo.ripple.models.utils.CirceCodecUtils
-import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.TrustSetTx
 
 /**
   * Used for the actual signing of a transaction.
@@ -21,7 +19,7 @@ import com.odenzo.ripple.models.wireprotocol.transactions.transactiontypes.Trust
 case class Signer(account: AccountAddr, signingPubKey: RipplePublicKey, txnSignature: TxnSignature)
 
 object Signer {
-  implicit val config: Configuration         = CirceCodecUtils.capitalizeConfig
+  implicit val config: Configuration         = CirceCodecUtils.configCapitalize
   implicit val codec: Codec.AsObject[Signer] = deriveConfiguredCodec[Signer]
 }
 
@@ -66,7 +64,7 @@ case class SignerEntry(account: AccountAddr, signerWeight: Int)
 /** The correct encoding and decoding within nested JsonObject is handled here */
 object SignerEntry {
 
-  implicit val config: Configuration              = CirceCodecUtils.capitalizeConfig
+  implicit val config: Configuration              = CirceCodecUtils.configCapitalize
   implicit val codec: Codec.AsObject[SignerEntry] = deriveConfiguredCodec[SignerEntry]
 
 }

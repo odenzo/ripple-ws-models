@@ -1,6 +1,6 @@
 package com.odenzo.ripple.models.atoms.ledgertree.statenodes
 
-import io.circe.{Codec, Decoder, HCursor}
+import io.circe.Codec
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.deriveConfiguredCodec
 
@@ -33,6 +33,6 @@ case class OfferNode(
 ) extends LedgerNode
 
 object OfferNode {
-  implicit val config: Configuration            = CirceCodecUtils.capitalizeExcept(Set("owner_funds"))
+  implicit val config: Configuration            = CirceCodecUtils.configCapitalizeExcept(Set("owner_funds"))
   implicit val codec: Codec.AsObject[OfferNode] = deriveConfiguredCodec[OfferNode]
 }

@@ -1,9 +1,8 @@
 package com.odenzo.ripple.models.atoms
 
-import io.circe.{Decoder, Codec}
+import io.circe.Codec
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.deriveConfiguredCodec
-import io.circe.generic.semiauto.deriveDecoder
 
 /**
   * Represents a Ripple Payment Channel, as found in AccountChannels inquiry reponse
