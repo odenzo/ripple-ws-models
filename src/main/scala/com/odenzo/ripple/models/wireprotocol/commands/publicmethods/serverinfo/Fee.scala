@@ -5,20 +5,21 @@ import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.deriveConfiguredCodec
 
 import com.odenzo.ripple.models.atoms._
-import com.odenzo.ripple.models.wireprotocol.commands.{RippleRs, RippleRq}
+import com.odenzo.ripple.models.wireprotocol.commands.{RippleRq, RippleRs}
 import com.odenzo.ripple.models.wireprotocol.commands.admin.LedgerRequestRq.wrapCommandCodec
 
 // TODO: Make Fee object and allow to levels and drops
 case class FeeRq(id: RippleMsgId = RippleMsgId.random) extends RippleRq
 
+/** Same bullshit with current_queue_size  */
 case class FeeRs(
     current_ledger_size: Long,
     current_queue_size: Long,
-    drops: FeeDrops,
+    drops: FeeInfo,
     ledger_current_index: LedgerSequence,
     expected_ledger_size: Long,
     levels: FeeLevels,
-    max_queue_size: Long
+    max_queue_size: Option[Long]
 ) extends RippleRs
 
 object FeeRq {

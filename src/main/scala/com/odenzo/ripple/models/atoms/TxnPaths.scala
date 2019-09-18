@@ -18,30 +18,36 @@ case class RipplePathFindResult(
 
 /** List of possible transaction paths per the ripple_path_find result sub-object
   *
-  * @param source_amount This is a String or an object, not sure when is what
-  * @param paths_computed
   */
-case class AlternativePaths(paths_computed: List[List[PaymentPathStep]], source_amount: CurrencyAmount)
+case class AlternativePaths(apaths: List[AlternativePath])
+
+case class AlternativePath(
+    paths_computed: List[PaymentPath],
+    paths_canonical: List[PaymentPath],
+    source_amount: CurrencyAmount
+)
 
 /** This may be a more general thing to move into models */
 case class PaymentPath(hops: List[PaymentPathStep])
 
+object PaymentPath {
+  // hops field doesn't exixt. PaymentPath is a array of objects.
+  // Each object is a JsonObject corresponing to PaymentPathStep
+  implicit val config: Configuration     = Configuration.default
+  implicit val codec: Codec[PaymentPath] = deriveUnwrappedCodec[PaymentPath]
+
+}
+
 /**
   * Several different types of nodes. type = 1 is just account , type 48 is currency and issuer
   *     https://xrpl.org/paths.html
+  * type and type_hex are now deprecated so skipping them
   */
 case class PaymentPathStep(
+    account: Option[AccountAddr],
     currency: Option[Currency],
-    issuer: Option[AccountAddr],
-    `type`: Option[Int] = None,
-    type_hex: Option[String] = None
+    issuer: Option[AccountAddr]
 )
-
-object PaymentPath {
-  implicit val config: Configuration              = Configuration.default
-  implicit val codec: Codec.AsObject[PaymentPath] = deriveConfiguredCodec[PaymentPath]
-
-}
 
 object PaymentPathStep {
   implicit val config: Configuration                  = Configuration.default
@@ -54,6 +60,11 @@ object RipplePathFindResult {
 }
 
 object AlternativePaths {
-  implicit val config: Configuration                   = Configuration.default
-  implicit val codec: Codec.AsObject[AlternativePaths] = deriveConfiguredCodec[AlternativePaths]
+  implicit val config: Configuration          = Configuration.default
+  implicit val codec: Codec[AlternativePaths] = deriveUnwrappedCodec[AlternativePaths]
+}
+
+object AlternativePath {
+  implicit val config: Configuration                  = Configuration.default
+  implicit val codec: Codec.AsObject[AlternativePath] = deriveConfiguredCodec[AlternativePath]
 }

@@ -18,7 +18,7 @@ import com.odenzo.ripple.models.utils.caterrors.CatsTransformers.{ErrorOr, Error
   */
 object CatsTransformers extends Logging {
 
-  type ErrorOr[A] = Either[AppError, A]
+  type ErrorOr[A] = Either[ModelsLibError, A]
 
   /** Shorthand for a Future ErrorOr ... prefer to standardize on ErrorOrFT instead */
   type ErrorOrF[A] = Future[ErrorOr[A]]
@@ -26,7 +26,7 @@ object CatsTransformers extends Logging {
   /** Uses Cats EitherT monad transformat to wrap Future[Either[OError,A]
     *  Would like to make it so this is the inferred type by intellij
     */
-  type ErrorOrFT[A] = EitherT[Future, AppError, A]
+  type ErrorOrFT[A] = EitherT[Future, ModelsLibError, A]
 
   // See Advanced Scala with Cats.
   // type ErrorOrOptFT[A] = OptionT[ErrorOrFT]
@@ -42,14 +42,14 @@ trait CatsTransformerOps {
   }
 
   def pure[B](b: B)(implicit ec: ExecutionContext): ErrorOrFT[B] = {
-    EitherT.pure[Future, AppError](b)
+    EitherT.pure[Future, ModelsLibError](b)
   }
 
-  def fromEither[B](b: Either[AppError, B])(implicit ec: ExecutionContext): ErrorOrFT[B] = {
+  def fromEither[B](b: Either[ModelsLibError, B])(implicit ec: ExecutionContext): ErrorOrFT[B] = {
     EitherT.fromEither[Future](b)
   }
 
-  def fromError[B](e: AppError)(implicit ec: ExecutionContext): ErrorOrFT[B] = {
+  def fromError[B](e: ModelsLibError)(implicit ec: ExecutionContext): ErrorOrFT[B] = {
     fromEither[B](e.asLeft[B])
   }
 
@@ -76,24 +76,24 @@ trait CatsTransformerOps {
         wrapped
       }
     }
-    val a2: Future[Either[AppError, B]]      = massaged.bisequence
-    val answer: EitherT[Future, AppError, B] = EitherT(a2)
+    val a2: Future[Either[ModelsLibError, B]]      = massaged.bisequence
+    val answer: EitherT[Future, ModelsLibError, B] = EitherT(a2)
     answer
   }
 
 }
 
 object ErrorOr {
-  def ok[B](b: B): ErrorOr[B]            = b.asRight[AppError]: ErrorOr[B]
-  def failed[B](a: AppError): ErrorOr[B] = a.asLeft
+  def ok[B](b: B): ErrorOr[B]                  = b.asRight[ModelsLibError]: ErrorOr[B]
+  def failed[B](a: ModelsLibError): ErrorOr[B] = a.asLeft
 }
 
 object ErrorOrFT extends CatsTransformerOps {
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def NOT_IMPLEMENTED[T]: ErrorOrFT[T] = EitherT.fromEither[Future](AppError.NOT_IMPLEMENTED_ERROR)
+  def NOT_IMPLEMENTED[T]: ErrorOrFT[T] = EitherT.fromEither[Future](ModelsLibError.NOT_IMPLEMENTED_ERROR)
 
-  def apply[T](v: Future[Either[AppError, T]]): ErrorOrFT[T] = EitherT(v)
+  def apply[T](v: Future[Either[ModelsLibError, T]]): ErrorOrFT[T] = EitherT(v)
 
   def sync[T](eoft: ErrorOrFT[T], duration: Duration)(implicit ec: ExecutionContext): ErrorOr[T] = {
     Try {

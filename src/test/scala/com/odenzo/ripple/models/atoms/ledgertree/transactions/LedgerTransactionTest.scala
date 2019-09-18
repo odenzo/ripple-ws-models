@@ -1,8 +1,8 @@
 package com.odenzo.ripple.models.atoms.ledgertree.transactions
 
-import io.circe.{Encoder, Decoder}
+import io.circe.{Decoder, Encoder}
 
-import com.odenzo.ripple.models.atoms.{Signers, Signer}
+import com.odenzo.ripple.models.atoms.{Signer, Signers}
 import com.odenzo.ripple.models.testkit.CodecTesting
 
 class LedgerTransactionTest extends CodecTesting {
@@ -57,12 +57,12 @@ class LedgerTransactionTest extends CodecTesting {
       |""".stripMargin
 
   test("TxCommon No Signers") {
-    val res = testCompleted(jsonRoundTrip(json4)(Encoder[TxCommon], Decoder[TxCommon]))
+    val res = testCompleted(jsonRoundTrip(json4)(Encoder[LedgerTxCommon], Decoder[LedgerTxCommon]))
     logger.debug(s"Res: $res")
   }
 
   test("TxCommone") {
-    val res = testCompleted(jsonRoundTrip(json)(Encoder[TxCommon], Decoder[TxCommon]))
+    val res = testCompleted(jsonRoundTrip(json)(Encoder[LedgerTxCommon], Decoder[LedgerTxCommon]))
     logger.debug(s"Res: $res")
   }
 

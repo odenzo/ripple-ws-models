@@ -3,7 +3,7 @@ package com.odenzo.ripple.models.utils
 import cats.implicits._
 import io.circe.generic.extras.Configuration
 
-import com.odenzo.ripple.models.atoms.LedgerID
+import com.odenzo.ripple.models.atoms.{LedgerID, SignerEntry}
 import monocle.Lens
 import scribe.Logging
 
@@ -72,6 +72,14 @@ trait CirceCodecUtils extends Logging {
     val enc: Encoder.AsObject[A] = wrapCommandEncoderWithLedgerID(codec, command)
     val dec: Decoder[A]          = wrapCommandDecoder(codec)
     Codec.from(dec, enc)
+  }
+
+  def wrapListOfNestedObj[A: Codec.AsObject](name: String): Codec[List[A]] = {
+    val unwrapper: Decoder[List[A]] = Decoder.decodeList[A](Decoder[A].prepare(_.downField(name)))
+    val wrapper: Encoder[List[A]] = Encoder.encodeList[A](
+      Encoder.AsObject[A].mapJsonObject(b => JsonObject.singleton(name, b.asJson))
+    )
+    Codec.from(unwrapper, wrapper)
   }
 
   // ------------- Functions applied to field names -----------------

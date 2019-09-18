@@ -1,36 +1,33 @@
 package com.odenzo.ripple.models.atoms.ledgertree.statenodes
 
 import io.circe.Decoder
-
+import io.circe.generic.extras.Configuration
+import io.circe._
+import io.circe.syntax._
+import io.circe.generic.extras.semiauto._
 import com.odenzo.ripple.models.atoms._
+import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 /**
   * See also docs for account root node. I am guessing this has delta too?
   *
   */
 case class SignerListNode(
-    signerQuoruim: Option[AccountAddr],
-    signerEntries: Option[TxnSequence],
-    signerListID: Option[CurrencyAmount],
-    flags: Option[Long],
-    ownerNode: Option[UInt64], // LedgerNodeIndex type.
+    flags: Long,
+    ownerNode: Option[String],
     previousTxnId: Option[TxnHash],
     previousTxnLgrSeq: Option[LedgerSequence],
-    index: Option[String] // Guessing this is a LedgerNodeIndex of this node.
+    signerEntries: List[SignerEntry],
+    signerListID: Long,
+    signerQuorum: Long,
+    index: LedgerHash
 ) extends LedgerNode
 
-object SignerListNode {
+object SignerListNode extends CirceCodecUtils {
 
-  implicit val decode: Decoder[SignerListNode] =
-    Decoder.forProduct8(
-      "SignerQuorum",
-      "SignerEntries",
-      "SignerListID",
-      "Flags",
-      "OwnerNode",
-      "PreviousTxnID",
-      "PreviousTxnLgrSeq",
-      "index"
-    )(SignerListNode.apply)
+  implicit val config: Configuration = configCapitalizeExcept(Set("index"))
+
+  private implicit val cowrapper: Codec[List[SignerEntry]] = wrapListOfNestedObj[SignerEntry]("SignerEntry")
+  implicit val codec: Codec.AsObject[SignerListNode]       = deriveConfiguredCodec[SignerListNode]
 
 }

@@ -8,10 +8,10 @@ import cats.data._
 import cats.implicits._
 import io.circe.syntax._
 
-import com.odenzo.ripple.models.atoms.ledgertree.transactions.TxCommon
 import com.odenzo.ripple.models.atoms.TxBlob
 import com.odenzo.ripple.models.support.RippleEngineResult
-import com.odenzo.ripple.models.wireprotocol.commands.{RippleRs, RippleRq}
+import com.odenzo.ripple.models.wireprotocol.CommonTxnRs
+import com.odenzo.ripple.models.wireprotocol.commands.{RippleRq, RippleRs}
 import com.odenzo.ripple.models.wireprotocol.commands.publicmethods.transactionmethods.TxHistoryRq.wrapCommandCodec
 import com.odenzo.ripple.models.wireprotocol.txns.RippleTx
 
@@ -26,7 +26,7 @@ case class SubmitMultisignedRs(
     engine: RippleEngineResult,
     tx_blob: TxBlob,
     tx_json: RippleTx,
-    standard: TxCommon
+    standard: CommonTxnRs
 ) extends RippleRs
 
 object SubmitMultisignedRq {
@@ -41,7 +41,7 @@ object SubmitMultisignedRs {
   implicit val decoder: Decoder[SubmitMultisignedRs] = Decoder.instance { c =>
     val engine   = c.as[RippleEngineResult]
     val tx       = c.get[RippleTx]("tx_json")
-    val txcommon = c.get[TxCommon]("tx_json")
+    val txcommon = c.get[CommonTxnRs]("tx_json")
     val blob     = c.get[TxBlob]("tx_blob")
     (engine, blob, tx, txcommon).mapN(SubmitMultisignedRs.apply)
   }

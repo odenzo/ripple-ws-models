@@ -6,7 +6,7 @@ import io.circe.Json
 import com.odenzo.ripple.models.testkit.CodecTesting
 
 class OErrorTest extends CodecTesting {
-  import AppError._
+  import ModelsLibError._
 
   test("Message with Message") {
     val root = OError("I stubed my toe")
@@ -31,16 +31,16 @@ class OErrorTest extends CodecTesting {
   test("JSon on Top As OError") {
     val json =
       AppJsonError("This is a fake OErrorJson", Json.fromString("hello this is json really!"), OError("The Root"))
-    val upped: AppError = json
-    val str             = upped.show
+    val upped: ModelsLibError = json
+    val str                   = upped.show
     logger.info(s"JSONErrpr: [$str]")
   }
 
   test("JSon on Top As BaseError") {
     val json =
       AppJsonError("This is a fake OErrorJson", Json.fromString("hello this is json really!"), OError("The Root"))
-    val upped: AppError = json
-    val str             = upped.show
+    val upped: ModelsLibError = json
+    val str                   = upped.show
     logger.info(s"JSONErrpr: [$str]")
   }
 

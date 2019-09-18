@@ -11,7 +11,7 @@ import org.scalatest.{Assertion, EitherValues, Matchers}
 import scribe.{Logging, Logger}
 
 import com.odenzo.ripple.models.utils.{CirceUtils, ScribeConfig}
-import com.odenzo.ripple.models.utils.caterrors.{AppError, AppException, AppJsonDecodingError}
+import com.odenzo.ripple.models.utils.caterrors.{ModelsLibError, AppException, AppJsonDecodingError}
 import com.odenzo.ripple.models.atoms.LedgerHash
 
 /**
@@ -35,12 +35,14 @@ trait CodecTesting extends AnyFunSuite with Matchers with EitherValues with Logg
     }
   }
 
-  def parseAsJObj(s: String): Either[AppError, JsonObject] = {
+  def parseAsJObj(s: String): Either[ModelsLibError, JsonObject] = {
     CirceUtils.json2jsonobject(parse(s))
   }
 
   /** Parses Json to object and pack to json, returns  last two */
-  def jsonRoundTrip[A](jsonStr: String)(implicit enc: Encoder[A], dec: Decoder[A]): Either[AppError, (A, Json, A)] = {
+  def jsonRoundTrip[A](
+      jsonStr: String
+  )(implicit enc: Encoder[A], dec: Decoder[A]): Either[ModelsLibError, (A, Json, A)] = {
     for {
       json <- parseAsJson(jsonStr)
       obj  <- decode(json)
@@ -101,13 +103,13 @@ trait CodecTesting extends AnyFunSuite with Matchers with EitherValues with Logg
 
   def logIfError[A <: Throwable, T](ee: Either[A, T], msg: String = "Error: ", myLog: Logger = logger): Either[A, T] = {
     ee.leftMap {
-      case e: AppError  => myLog.error(s"Errors ${(e: AppError).show}")
-      case e: Throwable => myLog.error(s"Throwable $msg\t=> $e ")
+      case e: ModelsLibError => myLog.error(s"Errors ${(e: ModelsLibError).show}")
+      case e: Throwable      => myLog.error(s"Throwable $msg\t=> $e ")
     }
     ee
   }
 
-  def findFixtureFiles(dir: String, startingWith: String): Either[AppError, List[Path]] = {
+  def findFixtureFiles(dir: String, startingWith: String): Either[ModelsLibError, List[Path]] = {
     import collection.JavaConverters._ // Trying to keep scala 12 compatability with 13 now
     AppException.wrapPure("Finding Files") {
       // The Fixtures are now in the resource directory so load via resource

@@ -5,7 +5,7 @@ import scala.util.Try
 
 import io.circe.{Encoder, Decoder}
 
-import com.odenzo.ripple.models.utils.caterrors.AppError
+import com.odenzo.ripple.models.utils.caterrors.ModelsLibError
 
 case class LedgerIndexRange(start: LedgerSequence, end: LedgerSequence) {
   def asRange: NumericRange.Inclusive[Long] = start.v to end.v
@@ -25,7 +25,7 @@ object LedgerIndexRange {
             LedgerSequence(java.lang.Long.parseLong(end))
           )
 
-        case invalid => throw AppError(s"$invalid was not in [start]-[end] format.")
+        case invalid => throw ModelsLibError(s"$invalid was not in [start]-[end] format.")
       }
     }
   }

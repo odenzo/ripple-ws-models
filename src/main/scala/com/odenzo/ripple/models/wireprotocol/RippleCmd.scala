@@ -12,7 +12,7 @@ import io.circe._
 import io.circe.syntax._
 import io.circe.generic.extras.semiauto._
 
-import com.odenzo.ripple.models.utils.caterrors.AppError
+import com.odenzo.ripple.models.utils.caterrors.ModelsLibError
 import com.odenzo.ripple.models.wireprotocol.commands.RippleRq
 
 /** All ripple commands either succeed or fail and don't need signing.
@@ -45,11 +45,11 @@ object RippleCmdRs {}
   * @param marker
   */
 @Lenses("_") case class CommonCmdRq(
-    id: RippleMsgId                   = RippleMsgId.EMPTY,
+    id: RippleMsgId = RippleMsgId.EMPTY,
     ledger_index: Option[LedgerIndex] = LedgerName.CURRENT_LEDGER.some,
-    ledger_hash: Option[LedgerHash]   = None,
-    limit: Option[Limit]              = None,
-    marker: Option[Marker]            = None
+    ledger_hash: Option[LedgerHash] = None,
+    limit: Option[Limit] = None,
+    marker: Option[Marker] = None
 ) {
 
   def bindCmd[T <: RippleRq: Encoder.AsObject](rq: T) = RippleCmdRq(rq.asJsonObject, this)
@@ -85,15 +85,16 @@ object CommonCmdRq {
     ledger_index: Option[LedgerSequence],
     ledger_current_index: Option[LedgerSequence],
     ledger_hash: Option[LedgerHash], // Is this really a leadger hash, or just hash of txn
+    marker: Option[Marker],
     validated: Boolean = false
 ) {
 
-  def ledgerSequence: Either[AppError, LedgerSequence] =
-    AppError.required(ledger_index orElse ledger_current_index, "ledger_index AND ledger_current_index blank")
+  def ledgerSequence: Either[ModelsLibError, LedgerSequence] =
+    ModelsLibError.required(ledger_index orElse ledger_current_index, "ledger_index AND ledger_current_index blank")
 }
 
-object CommonCmdRs {
-  val empty: CommonCmdRs                          = CommonCmdRs(None, None, None, None, false)
+object CommonCmdRs extends CirceCodecUtils {
+  val empty: CommonCmdRs                          = CommonCmdRs(None, None, None, None, None, validated = false)
   implicit val config: Configuration              = Configuration.default.withDefaults
   implicit val codec: Codec.AsObject[CommonCmdRs] = deriveConfiguredCodec[CommonCmdRs]
 }

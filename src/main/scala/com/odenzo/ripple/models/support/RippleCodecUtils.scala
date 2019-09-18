@@ -4,7 +4,7 @@ import cats.implicits._
 import io.circe.{JsonObject, Decoder}
 
 import com.odenzo.ripple.models.utils.CirceUtils
-import com.odenzo.ripple.models.utils.caterrors.{AppError, AppJsonDecodingError}
+import com.odenzo.ripple.models.utils.caterrors.{ModelsLibError, AppJsonDecodingError}
 
 /** Going to start using Ripple generic extras now */
 trait RippleCodecUtils {
@@ -40,11 +40,11 @@ trait RippleCodecUtils {
     *  @tparam B
     *  @return     ErrorOr[B] if json parseable as RippleGenericSuccess and can decode to B success else error.
     */
-  def decodeFullyOnSuccess[B](rsObj: JsonObject, manDecoder: Decoder[B]): Either[AppError, B] = {
+  def decodeFullyOnSuccess[B](rsObj: JsonObject, manDecoder: Decoder[B]): Either[ModelsLibError, B] = {
     import io.circe.syntax._
     decodeGeneric(rsObj) match {
       case Right(rs: RippleGenericSuccess) => decodeResult(rs.result, manDecoder)
-      case Right(rs: RippleGenericError)   => AppError("Generic Error Not Handled", rsObj.asJson).asLeft
+      case Right(rs: RippleGenericError)   => ModelsLibError("Generic Error Not Handled", rsObj.asJson).asLeft
       case Left(ex)                        => ex.asLeft
     }
   }

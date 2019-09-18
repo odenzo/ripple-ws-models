@@ -5,7 +5,7 @@ import io.circe.syntax._
 import pprint.PPrinter
 
 import com.odenzo.ripple.models.testkit.CodecTesting
-import com.odenzo.ripple.models.utils.caterrors.AppError
+import com.odenzo.ripple.models.utils.caterrors.ModelsLibError
 
 class MemosTest extends CodecTesting {
 
@@ -53,8 +53,8 @@ class MemosTest extends CodecTesting {
   }
 
   test("Memo ") {
-    val res: Either[AppError, Memo] = parseAndDecode(memojson, Decoder[Memo])
-    val v                           = testCompleted(res)
+    val res: Either[ModelsLibError, Memo] = parseAndDecode(memojson, Decoder[Memo])
+    val v                                 = testCompleted(res)
     logger.debug(s"Result: ${PPrinter.Color(v)}")
 
   }

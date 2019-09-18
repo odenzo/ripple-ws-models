@@ -8,9 +8,10 @@ import io.circe.syntax._
 import io.circe._
 
 import com.odenzo.ripple.models.utils.CirceCodecUtils
+import com.odenzo.ripple.models.wireprotocol.txns.SignerListSetTx.wrapListOfNestedObj
 
 /**
-  * Used for the actual signing of a transaction.
+  * This is multisigned, Signers = List[Signer] objects
   *
   * @param account
   * @param signingPubKey
@@ -61,10 +62,17 @@ object Signers {
   */
 case class SignerEntry(account: AccountAddr, signerWeight: Int)
 
-/** The correct encoding and decoding within nested JsonObject is handled here */
+/** The correct encoding and decoding within nested JsonObject is NOT handled here */
 object SignerEntry {
 
   implicit val config: Configuration              = CirceCodecUtils.configCapitalize
   implicit val codec: Codec.AsObject[SignerEntry] = deriveConfiguredCodec[SignerEntry]
 
+}
+
+case class SignerEntries(entries: List[SignerEntry]) {}
+
+object SignerEntries {
+  private implicit val cowrapper: Codec[List[SignerEntry]] = wrapListOfNestedObj[SignerEntry]("SignerEntry")
+  implicit val codec: Codec[SignerEntries]                 = deriveUnwrappedCodec[SignerEntries]
 }

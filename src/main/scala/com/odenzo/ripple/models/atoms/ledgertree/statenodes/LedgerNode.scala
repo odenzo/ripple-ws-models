@@ -16,16 +16,17 @@ object LedgerNode {
   // TODO: Make LedgerEntryType an enumeration
   implicit val decoder: Decoder[LedgerNode] = Decoder.instance { (c: HCursor) =>
     c.get[String]("LedgerEntryType") match {
-      case Right("AccountRoot")   => c.as[AccountRootNode]
-      case Right("DirectoryNode") => c.as[OfferDirectoryNode]
-      case Right("Escrow")        => c.as[EscrowNode]
-      case Right("Offer")         => c.as[OfferNode]
-      case Right("PayChannel")    => c.as[PayChannelNode]
-      case Right("RippleState")   => c.as[RippleStateNode]
-      case Right("SignerList")    => c.as[SignerListNode]
-      case Right("FeeSettings")   => c.as[FeeSettingsNode] // Exists, not in ledger_format doc.
-      case Right("LedgerHashes")  => c.as[LedgerHashesNode] // Exists, not in ledger_format doc.
-      case Right("Amendments")    => c.as[AmendmentsNode] // Exists, not in ledger_format doc.
+      case Right("AccountRoot")    => c.as[AccountRootNode]
+      case Right("DirectoryNode")  => c.as[OfferDirectoryNode]
+      case Right("DepositPreauth") => c.as[DepositPreauthNode]
+      case Right("Escrow")         => c.as[EscrowNode]
+      case Right("Offer")          => c.as[OfferNode]
+      case Right("PayChannel")     => c.as[PayChannelNode]
+      case Right("RippleState")    => c.as[RippleStateNode]
+      case Right("SignerList")     => c.as[SignerListNode]
+      case Right("FeeSettings")    => c.as[FeeSettingsNode] // Exists, not in ledger_format doc.
+      case Right("LedgerHashes")   => c.as[LedgerHashesNode] // Exists, not in ledger_format doc.
+      case Right("Amendments")     => c.as[AmendmentsNode] // Exists, not in ledger_format doc.
       case failed =>
         Decoder.failedWithMessage(s"Discriminator Not Handled $failed")(c)
     }

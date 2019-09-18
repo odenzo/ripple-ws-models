@@ -11,11 +11,11 @@ case class PaymentTx(
     amount: CurrencyAmount,
     destination: AccountAddr,
     destinationTag: Option[DestinationTag] = None,
-    invoiceID: Option[InvoiceHash]         = None,
-    paths: Option[PaymentPath]             = None,
-    sendMax: Option[CurrencyAmount]        = None,
-    deliverMin: Option[CurrencyAmount]     = None,
-    flags: BitMask[PaymentFlag]            = BitMask.empty[PaymentFlag]
+    invoiceID: Option[InvoiceHash] = None,
+    paths: Option[List[PaymentPath]] = None, // Contains an array of arrays
+    sendMax: Option[CurrencyAmount] = None,
+    deliverMin: Option[CurrencyAmount] = None,
+    flags: BitMask[PaymentFlag] = BitMask.empty[PaymentFlag]
 ) extends RippleTx
 
 object PaymentTx {

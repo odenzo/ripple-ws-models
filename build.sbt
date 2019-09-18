@@ -46,16 +46,17 @@ lazy val commonSettings = Seq(
   )
 )
 
-val circeVersion           = "0.12.0-RC4"
-val catsVersion            = "2.0.0-RC3"
-val catsEffectVersion      = "2.0.0-RC2"
-val spireVersion           = "0.17.0-M1"
-val scribeVersion          = "2.7.9"
-val scalaTestVersion       = "3.0.8"
-val scalaCheckVersion      = "1.14.0"
-val enumeratumVersion      = "1.5.13"
-val enumeratumCirceVersion = "1.5.21"
-val monocleVersion         = "2.0.0-RC1" // 1.5.0-cats based on cats 1.0.x
+val circeVersion             = "0.12.1"
+val circeGenericExtraVersion = "0.12.2"
+val catsVersion              = "2.0.0"
+val catsEffectVersion        = "2.0.0"
+val spireVersion             = "0.17.0-M1"
+val scribeVersion            = "2.7.10"
+val scalaTestVersion         = "3.0.8"
+val scalaCheckVersion        = "1.14.1"
+val enumeratumVersion        = "1.5.13"
+val enumeratumCirceVersion   = "1.5.21"
+val monocleVersion           = "2.0.0" // 1.5.0-cats based on cats 1.0.x
 
 val libs = Seq(
   "com.lihaoyi"    %% "pprint"     % "0.5.5",
@@ -69,8 +70,8 @@ val lib_circe =
     "io.circe" %% "circe-core"           % circeVersion,
     "io.circe" %% "circe-generic"        % circeVersion,
     "io.circe" %% "circe-parser"         % circeVersion,
-    "io.circe" %% "circe-generic-extras" % circeVersion,
-    "io.circe" %% "circe-optics"         % "0.12.0-RC2" % Test,
+    "io.circe" %% "circe-generic-extras" % circeGenericExtraVersion,
+    "io.circe" %% "circe-optics"         % "0.12.0" % Test,
     "io.circe" %% "circe-literal"        % circeVersion % Test,
     //"io.circe"     %% "circe-derivation"     % circeVersion,
     "com.beachape" %% "enumeratum"       % enumeratumVersion,

@@ -106,10 +106,11 @@ class RipplePathFindTest extends CodecTesting {
                  "BTC",
                  "USD",
                  "XRP"
-             ]
-         
+             ],
+            "source_account" : "r3sukQoNg7CPupp1c6u3eFAFSs7NmvVB7a"
      }"""
 
+    // Not sure source account is optional or I cut it off by mistake
     val rs = CirceUtils.decode(rsText)(Decoder[RipplePathFindRs])
     val ok = testCompleted(rs)
     logger.info(s"OK = $ok")

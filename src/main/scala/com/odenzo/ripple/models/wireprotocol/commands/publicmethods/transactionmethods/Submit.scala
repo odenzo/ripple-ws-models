@@ -4,13 +4,13 @@ import cats.data._
 import cats.implicits._
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.deriveConfiguredCodec
-import io.circe.{Codec, Encoder, JsonObject, Decoder}
+import io.circe.{Codec, Decoder, Encoder, JsonObject}
 
-import com.odenzo.ripple.models.atoms.ledgertree.transactions.TxCommon
-import com.odenzo.ripple.models.atoms.{TxBlob, RippleMsgId}
+import com.odenzo.ripple.models.atoms.{RippleMsgId, TxBlob}
 import com.odenzo.ripple.models.support.RippleEngineResult
 import com.odenzo.ripple.models.utils.CirceCodecUtils
-import com.odenzo.ripple.models.wireprotocol.commands.{RippleRs, RippleRq}
+import com.odenzo.ripple.models.wireprotocol.CommonTxnRs
+import com.odenzo.ripple.models.wireprotocol.commands.{RippleRq, RippleRs}
 
 /**
   * See RippleGenericResponse, RippleTxnRsStatus and the other pile of mess to be sorted out for response envelopes
@@ -47,7 +47,7 @@ object SubmitRs {
     val engine   = c.as[RippleEngineResult]
     val blob     = c.get[TxBlob]("tx_blob")
     val tx       = c.get[JsonObject]("tx_json")
-    val txcommon = c.get[TxCommon]("tx_json")
+    val txcommon = c.get[CommonTxnRs]("tx_json")
 
     (engine, blob, tx).mapN(SubmitRs.apply)
   }
