@@ -9,7 +9,7 @@ import io.circe.syntax._
 
 import com.odenzo.ripple.models.testkit.CodecTesting
 import com.odenzo.ripple.models.utils.CirceUtils
-import com.odenzo.ripple.models.utils.caterrors.AppError
+import com.odenzo.ripple.models.utils.caterrors.ModelsLibError
 import com.odenzo.ripple.models.wireprotocol.commands.publicmethods.ledgerinfo.LedgerRs
 
 class LedgerRqFixtureTest extends CodecTesting {
@@ -24,7 +24,7 @@ class LedgerRqFixtureTest extends CodecTesting {
     testCompleted(complete)
   }
 
-  def processOneFile(f: Path): Either[AppError, LedgerRs] = {
+  def processOneFile(f: Path): Either[ModelsLibError, LedgerRs] = {
     for {
       json       <- CirceUtils.parseAsJson(f.toFile).flatMap(json2jsonobject)
       ledgerJson <- findObjectField("result", json)

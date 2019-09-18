@@ -13,15 +13,7 @@ case class JsonReqRes(rq: JsonObject, rs: JsonObject)
 object JsonReqRes {
   def empty = JsonReqRes(JsonObject.empty, JsonObject.empty)
 
-  implicit val show: Show[JsonReqRes] = Show.show[JsonReqRes] { rr =>
-    s"""
-       | rq: ${rr.rq.asJson.spaces4}
-       | rs: ${rr.rs.asJson.spaces4}
-     """.stripMargin
+  implicit val show: Show[JsonReqRes]              = Show.show[JsonReqRes](rr => rr.asJson.spaces4)
+  implicit val codec: Encoder.AsObject[JsonReqRes] = deriveCodec[JsonReqRes]
 
-  }
-
-  implicit val encoder: Encoder.AsObject[JsonReqRes] = deriveEncoder[JsonReqRes]
 }
-
-// There is also a sealed SubscribeRq and SubscribeRs trait in Subcribe command

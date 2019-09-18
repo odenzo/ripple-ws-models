@@ -7,12 +7,12 @@ import cats.implicits._
 import spire.implicits._
 import spire.math._
 
-import com.odenzo.ripple.models.utils.caterrors.{AppError, AppException, OError}
+import com.odenzo.ripple.models.utils.caterrors.{ModelsLibError, AppException, OError}
 
 trait ByteUtils {
   val bytezero: Byte = 0.toByte
 
-  def hex2Bytes(hex: String): Either[AppError, List[Byte]] = Nested(hex2ubytes(hex)).map(_.toByte).value
+  def hex2Bytes(hex: String): Either[ModelsLibError, List[Byte]] = Nested(hex2ubytes(hex)).map(_.toByte).value
 
   def bigint2bytes(bi: BigInt): Array[Byte] = {
     val bytes: Array[Byte] = bi.toByteArray // Not sure the left padding on this.
@@ -34,7 +34,7 @@ trait ByteUtils {
     * Takes an arbitrary length string and returns an listed of unsigned bytes
     * If the number of hex digits is odd, is padded with zero on left.
     */
-  def hex2ubytes(v: String): Either[AppError, List[UByte]] = {
+  def hex2ubytes(v: String): Either[ModelsLibError, List[UByte]] = {
     val padded: String = v.length % 2 match {
       case 0 => v
       case 1 => '0' +: v
@@ -42,14 +42,14 @@ trait ByteUtils {
     padded.grouped(2).map(hex2ubyte).toList.sequence
   }
 
-  def hex2bitStr(v: String): Either[AppError, String] = hex2ubyte(v).map(ubyte2bitStr).map(_.mkString)
+  def hex2bitStr(v: String): Either[ModelsLibError, String] = hex2ubyte(v).map(ubyte2bitStr).map(_.mkString)
 
   /**
     *   Note for speed
     * @param v Must be a one or two character hex string not enforced
     * @return
     */
-  def hex2ubyte(v: String): Either[AppError, UByte] = {
+  def hex2ubyte(v: String): Either[ModelsLibError, UByte] = {
     hex2byte(v).map(UByte(_))
   }
 
@@ -60,7 +60,7 @@ trait ByteUtils {
     *
     * @return
     */
-  def hex2byte(v: String): Either[AppError, Byte] = {
+  def hex2byte(v: String): Either[ModelsLibError, Byte] = {
     AppException.wrap(s"$v hex to Byte") {
       java.lang.Long.parseLong(v, 16).toByte.asRight
     }
@@ -97,7 +97,7 @@ trait ByteUtils {
 
   /** List of four unsigned bytes representing unsigned long get converted */
   def ubytes2ulong(bytes: Iterable[UByte]): Either[OError, ULong] = {
-    if (bytes.size != 8) AppError("ulong requires exactly 4 ubytes").asLeft
+    if (bytes.size != 8) ModelsLibError("ulong requires exactly 4 ubytes").asLeft
     else {
       val ul                   = bytes.map(ub => ULong(ub.toLong)).toList.reverse
       val shifted: List[ULong] = ul.mapWithIndex((v: ULong, i: Int) => v << (i * 8))
@@ -114,7 +114,7 @@ trait ByteUtils {
   def uLong2hex(v: ULong): String = v.toHexString()
 
   /** Quicky to take 16 hex chars and turn into ULong. Hex prefixed with 0x if missing */
-  def hex2ulong(hex: String): Either[AppError, ULong] = {
+  def hex2ulong(hex: String): Either[ModelsLibError, ULong] = {
     AppException.wrap(s"Parsing ULong from $hex") {
       val bi = BigInt(hex, 16)
       ULong.fromBigInt(bi).asRight
@@ -135,7 +135,7 @@ trait ByteUtils {
       val ulong: ULong = shifted.foldLeft(ULong(0))(_ | _)
       ulong.asRight
     } else {
-      AppError(s"8 Bytes needed to convert to ulong but ${bytes.length}").asLeft
+      ModelsLibError(s"8 Bytes needed to convert to ulong but ${bytes.length}").asLeft
     }
   }
 
@@ -149,8 +149,8 @@ trait ByteUtils {
     s"Hex: ${a.toHexString} or  ${a.toBinaryString}"
   }
 
-  def ensureMaxLength(l: List[UByte], len: Int): Either[AppError, List[UByte]] = {
-    if (l.length > len) AppError(s"Byte List length ${l.length} > $len").asLeft
+  def ensureMaxLength(l: List[UByte], len: Int): Either[ModelsLibError, List[UByte]] = {
+    if (l.length > len) ModelsLibError(s"Byte List length ${l.length} > $len").asLeft
     else l.asRight
   }
 

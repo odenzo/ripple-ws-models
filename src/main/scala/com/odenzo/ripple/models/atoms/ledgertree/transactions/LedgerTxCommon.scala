@@ -9,10 +9,12 @@ import cats.data._
 import cats.implicits._
 
 import com.odenzo.ripple.models.atoms._
+import com.odenzo.ripple.models.support.TxnStatusCode
 import com.odenzo.ripple.models.wireprotocol.txns.RippleTxnType
 
-/** Common fields *extracts* from LedgerRs.result.ledger.tranasactions example */
-case class TxCommon(
+/** Common fields *extracts* from LedgerRs.result.ledger.tranasactions example
+  * Not sure where to put owner_funds which is for OfferCreateTx but only in ledger */
+case class LedgerTxCommon(
     fee: Drops,
     lastLedgerSequence: Option[LedgerSequence], // Depends on submission of request
     memos: Option[Memos],
@@ -21,25 +23,27 @@ case class TxCommon(
     signers: Option[Signers],
     transactionType: RippleTxnType,
     txnSignature: Option[TxnSignature],
-    metaData: Option[Meta],
-    //inLedger and last_ledger_index that same, but both missing
+    metaData: Option[Meta], // meta sometimes metaData if sourced from LedgerTxn though
+    meta: Option[Meta],     // meta is sourced from TxRq() :-(
     ledger_index: Option[LedgerSequence],
-    date: Option[RippleTime], // Only if validated when using TxRs     // This is not in LedgerRs.result.ledget
-    // .transactions
+    date: Option[RippleTime], // Only if validated when using TxRs
     hash: Option[TxnHash],
-    validated: Boolean = false
-)
+    validated: Option[Boolean]
+) {
 
-object TxCommon {
+  def transactionResult: Option[TxnStatusCode] = this.metaData.map(_.transactionResult)
+}
+
+object LedgerTxCommon {
   implicit val config: Configuration =
-    CirceCodecUtils.configCapitalizeExcept(Set("hash", "date", "metaData", "validated")).withDefaults
+    CirceCodecUtils.configCapitalizeExcept(Set("hash", "date", "meta", "validated", "ledger_index")).withDefaults
 
   // Well, I think if we use an unwrapped codec (a) It will use config and (b) it will practically lift
   // so  X(a:A,b:B, date:RippleTime, validated:Boolen) with we autoderive X(a:A,b:B, txcommon:TxCommon)
-  implicit val codec: Codec.AsObject[TxCommon] = deriveConfiguredCodec[TxCommon]
+  implicit val codec: Codec.AsObject[LedgerTxCommon] = deriveConfiguredCodec[LedgerTxCommon]
 
   /** Dummy TxCommon for development hacking. */
-  val dummy = TxCommon(
+  val dummy = LedgerTxCommon(
     Drops(666),
     None,
     None,
@@ -51,6 +55,8 @@ object TxCommon {
     None,
     None,
     None,
-    TxnHash("garbage").some
+    None,
+    TxnHash("garbage").some,
+    None
   )
 }

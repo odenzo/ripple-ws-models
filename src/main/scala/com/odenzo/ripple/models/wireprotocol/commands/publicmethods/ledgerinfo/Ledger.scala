@@ -7,7 +7,7 @@ import io.circe.generic.semiauto._
 
 import com.odenzo.ripple.models.atoms.ledgertree.LedgerHeader
 import com.odenzo.ripple.models.utils.CirceCodecUtils
-import com.odenzo.ripple.models.wireprotocol.commands.{RippleRs, RippleRq}
+import com.odenzo.ripple.models.wireprotocol.commands.{RippleRs, RippleRq, RippleScrollingRs, RippleScrollingRq}
 
 /**
   * https://ripple.com/build/rippled-apis/#ledger
@@ -33,17 +33,16 @@ case class LedgerRq(
 
 /**
   *
-  * @param ledger    Overview information
+  * @param ledger    Overview information, embedded may have full transactions or just hashes.
   */
 case class LedgerRs(ledger: LedgerHeader) extends RippleRs
 
 object LedgerRq extends CirceCodecUtils {
 
-  private type ME = LedgerRq
   private val command: String = "ledger"
 
-  implicit val config: Configuration     = Configuration.default.withDefaults
-  implicit val codec: Codec.AsObject[ME] = wrapCommandCodec(command, deriveConfiguredCodec)
+  implicit val config: Configuration           = Configuration.default.withDefaults
+  implicit val codec: Codec.AsObject[LedgerRq] = wrapCommandCodec(command, deriveConfiguredCodec[LedgerRq])
 }
 
 object LedgerRs {

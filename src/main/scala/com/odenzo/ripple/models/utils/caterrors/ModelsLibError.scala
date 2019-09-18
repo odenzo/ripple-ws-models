@@ -17,21 +17,22 @@ import com.odenzo.ripple.models.wireprotocol.RippleTxnRs
   * Base class that all errors (including OError) must extends directly or indirectly.
   * Not quite ready to move to case classes.
   */
-trait AppError extends Throwable { // Note this is not sealed and some shit defined elsewhere in the pasta bowl
+trait ModelsLibError extends Throwable { // Note this is not sealed and some shit defined elsewhere in the pasta bowl
   def msg: String
 
-  def cause: Option[AppError]
+  def cause: Option[ModelsLibError]
 
   def asErrorOr[A]: ErrorOr[A] = this.asLeft[A]
 }
 
 object ShowHack {
-  implicit val showBaseError: Show[AppError] = Show.show[AppError] {
+  implicit val showBaseError: Show[ModelsLibError] = Show.show[ModelsLibError] {
     case err: AppJsonError          => err.show
     case err: AppErrorRestCall      => err.show
     case err: AppJsonDecodingError  => err.show
     case err: AppRippleGenericError => err.show
     case err: AppRippleEngineError  => err.show
+    case err: AppRippleError        => err.show
     case err: AppException          => err.show
     case err: DecodingFailure       => err.toString()
     case err: OError                => "\n --- " + err.show
@@ -43,9 +44,9 @@ object ShowHack {
   * Base Error is never instanciated, but the apply is up here as convenience
   * and delegates down. These will go away soon.
   */
-object AppError {
+object ModelsLibError {
 
-  lazy implicit val show: Show[AppError] = Show.show[AppError] { failure: AppError =>
+  lazy implicit val show: Show[ModelsLibError] = Show.show[ModelsLibError] { failure: ModelsLibError =>
     val base = ShowHack.showBaseError.show(failure)
     val nested = failure.cause
       .map(sub => ShowHack.showBaseError.show(sub))
@@ -62,24 +63,24 @@ object AppError {
   }
   val NOT_IMPLEMENTED_ERROR: ErrorOr[Nothing] = Left(OError("Not Implemented"))
 
-  def apply(json: Json): AppError = AppJsonError("Invalid Json", json)
+  def apply(json: Json): ModelsLibError = AppJsonError("Invalid Json", json)
 
-  def apply(m: String, json: Json): AppError = AppJsonError(m, json)
+  def apply(m: String, json: Json): ModelsLibError = AppJsonError(m, json)
 
-  def apply(m: String, json: Json, e: AppError): AppError = AppJsonError(m, json, Some(e))
+  def apply(m: String, json: Json, e: ModelsLibError): ModelsLibError = AppJsonError(m, json, Some(e))
 
   def apply(m: String): OError = OError(m, None)
 
   def apply(m: String, ex: Throwable): AppException = new AppException(m, ex)
 
-  def required[T](v: Option[T], msg: String = "Required value not present"): Either[AppError, T] = {
+  def required[T](v: Option[T], msg: String = "Required value not present"): Either[ModelsLibError, T] = {
     Either.fromOption(v, OError(msg))
   }
 
   /**
     * Produces a list of strings summarizing the error, going down the stack.
     */
-  def summary(err: AppError): List[String] = {
+  def summary(err: ModelsLibError): List[String] = {
     err.cause match {
       case None         => err.msg :: Nil
       case Some(nested) => err.msg :: summary(nested)
@@ -93,14 +94,14 @@ object AppError {
   * Preferred method is to use the helper functions in StdContext.
   * These claseses may be made private in the future.
   */
-class OError(val msg: String = "No Message", val cause: Option[AppError] = None) extends AppError
+class OError(val msg: String = "No Message", val cause: Option[ModelsLibError] = None) extends ModelsLibError
 
 object OError {
 
   /** Ignore the compimle error in IntelliJ, but not the crappy coding needs redo */
   lazy implicit val showOError: Show[OError] = Show.show[OError] { (failure: OError) =>
     val top = s"OError -> ${failure.msg}"
-    val sub = failure.cause.map((x: AppError) => x.show)
+    val sub = failure.cause.map((x: ModelsLibError) => x.show)
     top + sub
   }
 
@@ -112,9 +113,9 @@ object OError {
 
   def apply(m: String) = new OError(m, None)
 
-  def apply(m: String, e: AppError) = new OError(m, Some(e))
+  def apply(m: String, e: ModelsLibError) = new OError(m, Some(e))
 
-  def apply(m: String, e: Option[AppError] = None) = new OError(m, e)
+  def apply(m: String, e: Option[ModelsLibError] = None) = new OError(m, e)
 
 }
 
@@ -123,46 +124,36 @@ object OError {
   * This can be used.
   * Prefer to use ORestCall when have source and response json at one place.
   */
-class AppJsonError(val msg: String, val json: Json, val cause: Option[AppError] = None) extends AppError {}
+class AppJsonError(val msg: String, val json: Json, val cause: Option[ModelsLibError] = None) extends ModelsLibError {}
 
-class AppJsonParsingError(val msg: String, val raw: String, val parser: ParsingFailure) extends AppError {
-  val cause: Option[AppError] = new AppException(parser.message, parser).some
+class AppJsonParsingError(val msg: String, val raw: String, val parser: ParsingFailure) extends ModelsLibError {
+  val cause: Option[ModelsLibError] = new AppException(parser.message, parser).some
 }
 
 /**
-  * A Ripple protocol error, parameterized on a payload. Typically a RippleGenericResponse
-  * This error should be moved into ComKit or rippled-wsmodels
-  *
-  * @param msg Explanatory message
-  * @param obj A model object expected as a result of decoding the Ripple response.
-  * @tparam T Type of grs
+  * This is a parent to handle errors generated while processing a Ripple call once we
+  *  have the base JsonReqRes (e.g. Decoding, command failures, whatever)
   */
-class AppRippleError[T](val msg: String, val obj: T) extends AppError {
-  val cause: Option[AppError] = None
+case class AppRippleError(rr: JsonReqRes, cause: Option[ModelsLibError]) extends ModelsLibError {
+  val msg = "Processing Ripple Request Response"
 }
 
 object AppRippleError {
 
-  implicit val show: Show[AppRippleError[_]] = Show.show { failure =>
-    val basic =
-      s""" AppRippleError[-] shower
-      | Error:   ${failure.msg}
-      | Object: ${failure.obj}
-      | Cause is OverRidden as None.
-    """
-    val sub = failure.obj match {
-      case v: AppError => v.show
-      case other       => other.getClass().toGenericString()
-    }
-    basic + sub
+  implicit val show: Show[AppRippleError] = Show.show { failure =>
+    s"""
+       | AppRippleError:
+       | Json Context:\n ${failure.rr.show}
+       | Cause: ${failure.cause.show}
+    """.stripMargin
 
   }
 }
 
-class AppRippleGenericError(val rr: JsonReqRes, val rippleGenericError: RippleGenericError) extends AppError {
+class AppRippleGenericError(val rr: JsonReqRes, val rippleGenericError: RippleGenericError) extends ModelsLibError {
   def msg: String = "Ripple Returned a Generic Error Result"
 
-  def cause: Option[AppError] = None
+  def cause: Option[ModelsLibError] = None
 }
 
 object AppRippleGenericError {
@@ -180,10 +171,10 @@ object AppRippleGenericError {
 }
 
 /** This can happen after submitting a signed request, we keep all the info for debugging */
-class AppRippleEngineError(val submitRR: JsonReqRes, val rs: RippleTxnRs) extends AppError {
+class AppRippleEngineError(val submitRR: JsonReqRes, val rs: RippleTxnRs) extends ModelsLibError {
   def msg: String = "Submission of a Transaction Failed on Ripple"
 
-  def cause: Option[AppError] = None
+  def cause: Option[ModelsLibError] = None
 }
 
 object AppRippleEngineError {
@@ -208,8 +199,8 @@ class AppErrorRestCall(
     val msg: String,
     val rawRq: Option[Json],
     val rawRs: Option[Json],
-    val cause: Option[AppError] = None
-) extends AppError
+    val cause: Option[ModelsLibError] = None
+) extends ModelsLibError
 
 /**
   * Represents a error in Circe Json decoding (Json => Model)
@@ -218,16 +209,17 @@ class AppErrorRestCall(
   * @param err  The decoding failure from Circe.
   * @param note Informational message to enhance the exception, provides context.
   */
-case class AppJsonDecodingError(val json: Json, val err: DecodingFailure, val note: String = "") extends AppError {
-  val msg: String             = note + ":" + err.message
-  val base: String            = s"\n OR: ${err.show}"
-  val cause: Option[AppError] = None
+case class AppJsonDecodingError(val json: Json, val err: DecodingFailure, val note: String = "")
+    extends ModelsLibError {
+  val msg: String                   = note + ":" + err.message
+  val base: String                  = s"\n OR: ${err.show}"
+  val cause: Option[ModelsLibError] = None
 
 }
 
 object AppJsonDecodingError {
   implicit val show: Show[AppJsonDecodingError] = Show.show[AppJsonDecodingError] { failure: AppJsonDecodingError =>
-    val base          = s"ODecodingError -->  ${failure.err.show} \n\t\t On JSON: ${failure.json.spaces2}"
+    val base          = s"OJsoneaDecodingError -->  ${failure.err.show} \n\t\t On JSON: ${failure.json.spaces2}"
     val stackAsString = "\n\nStack as String: " + StackUtils.stackAsString(failure.err)
     // val stackTrace = "\n\nStack Trace " + StackUtils.printStackTrace(failure.err)
     base + "\n DecodingFailure History: " + failure.err.history + stackAsString
@@ -252,15 +244,15 @@ object AppJsonError {
        | Error:\t ${failure.msg}
        | JSON :\t  ${failure.json.spaces2}
        | CAUSE:\t\n ${failure.cause
-         .map((x: AppError) => x.show)
+         .map((x: ModelsLibError) => x.show)
          .getOrElse("<Nothing>")}""".stripMargin
   }
 
   def apply(msg: String, json: Json): AppJsonError = new AppJsonError(msg, json)
 
-  def apply(msg: String, json: Json, cause: AppError): AppJsonError = new AppJsonError(msg, json, Some(cause))
+  def apply(msg: String, json: Json, cause: ModelsLibError): AppJsonError = new AppJsonError(msg, json, Some(cause))
 
-  def apply(msg: String, json: Json, cause: Option[AppError] = None): AppJsonError = {
+  def apply(msg: String, json: Json, cause: Option[ModelsLibError] = None): AppJsonError = {
     new AppJsonError(msg, json, cause)
   }
 }
@@ -279,30 +271,30 @@ object AppErrorRestCall {
 }
 
 /** This should be terminal node only */
-class AppException(val msg: String = "Wrapping Root Exception", val err: Throwable) extends AppError {
-  val cause: Option[AppError] = Option.empty
+class AppException(val msg: String = "Wrapping Root Exception", val err: Throwable) extends ModelsLibError {
+  val cause: Option[ModelsLibError] = Option.empty
 }
 
 object AppException extends StackUtils {
 
   implicit val show: Show[AppException] = Show.show[AppException] { errorException =>
-    s"OErrorException -->  ${errorException.msg} \n\t\t " +
+    s"AppException -->  ${errorException.msg} \n\t\t " +
       s"Exception Message: ${errorException.err}\n\t\t" +
       s"Exception Class: \t${errorException.err.getClass}\n\t\t" +
       s"StackTrace As String: ${stackAsString(errorException.err)}"
 
   }
 
-  def wrap[A](msg: String)(fn: => Either[AppError, A]): Either[AppError, A] = {
+  def wrap[A](msg: String)(fn: => Either[ModelsLibError, A]): Either[ModelsLibError, A] = {
     Try {
       fn
     } match {
-      case Success(v: Either[AppError, A]) => v
-      case Failure(exception)              => AppException(msg, exception).asLeft
+      case Success(v: Either[ModelsLibError, A]) => v
+      case Failure(exception)                    => AppException(msg, exception).asLeft
     }
   }
 
-  def wrapPure[A](msg: String)(fn: => A): Either[AppError, A] = {
+  def wrapPure[A](msg: String)(fn: => A): Either[ModelsLibError, A] = {
     Try {
       fn
     } match {

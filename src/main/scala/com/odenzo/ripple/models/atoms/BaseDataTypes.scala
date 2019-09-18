@@ -3,7 +3,7 @@ package com.odenzo.ripple.models.atoms
 import java.nio.charset.StandardCharsets
 
 import com.odenzo.ripple.models.utils.ByteUtils
-import com.odenzo.ripple.models.utils.caterrors.{AppException, AppError}
+import com.odenzo.ripple.models.utils.caterrors.{AppException, ModelsLibError}
 import cats._
 import cats.data._
 import cats.implicits._
@@ -13,7 +13,7 @@ import io.circe.generic.extras.semiauto._
 case class Blob(hex: String)
 
 object Blob {
-  def fromASCII(str: String): Either[AppError, Blob] = {
+  def fromASCII(str: String): Either[ModelsLibError, Blob] = {
     AppException.wrapPure("ASCII to Hex Bytes") {
       val bs: Array[Byte] = str.getBytes(StandardCharsets.US_ASCII)
       val s: String       = ByteUtils.bytes2hex(bs)

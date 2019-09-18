@@ -10,7 +10,7 @@ import com.odenzo.ripple.models.wireprotocol.txns.TrustSetTx.{configCapitalize, 
 /**
   * Creates (or modifies) existing book order offer.
   * https://ripple.com/build/transactions/#offercreate
-  *
+  *    FIXME: We are loosing the "owner_funds" record from the Ledger on inquiry
   * @param expiration
   * @param offerSequence Sequence number of offer to delete before creating this one.
   * @param takerGets

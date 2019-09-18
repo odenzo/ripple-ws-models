@@ -14,22 +14,23 @@ import com.odenzo.ripple.models.utils.CirceCodecUtils
   * FIXME: OfferNode but see also TxNode TxOfferCreate. Referred to as OfferCreateNode in docs. :-(
   */
 case class OfferNode(
+    account: AccountAddr,
     flags: Option[Long],
-    account: Option[AccountAddr],
+    bookDirectory: Option[LedgerIndex],
+    bookNode: Option[String], // really an option ?
+
     sequence: Option[TxnSequence],
     takerPays: Option[CurrencyAmount],
     takerGets: Option[CurrencyAmount],
-    bookDirectory: Option[LedgerIndex],
-    bookNode: Option[String], // really an option
     expiration: Option[RippleTime],
     ownerNode: Option[String], // LedgerNodeIndex type? "0000000000000000" So, its a LedgerId?
     previousTxnId: Option[TxnHash],
     previousTxnLgrSeq: Option[LedgerSequence],
-    index: Option[String], // Guessing this is a LedgerNodeIndex of this node.
-    owner_funds: Option[String],
-    quality: BigDecimal,
-    taker_gets_funded: Option[CurrencyAmount],
-    taker_pays_funded: Option[CurrencyAmount]
+    index: Option[RippleHash],                 // Guessing this is a LedgerNodeIndex of this node.
+    owner_funds: Option[String],               // Truly is option
+    quality: Option[BigDecimal],               // Truly is option
+    taker_gets_funded: Option[CurrencyAmount], // Truly is option
+    taker_pays_funded: Option[CurrencyAmount]  // Truly is option
 ) extends LedgerNode
 
 object OfferNode {

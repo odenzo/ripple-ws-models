@@ -12,22 +12,22 @@ import com.odenzo.ripple.models.utils.CirceCodecUtils
   *
   */
 case class PayChannelNode(
-    flags: Option[Long],
     account: Option[AccountAddr],
-    sequence: Option[TxnSequence],
-    takerPays: Option[CurrencyAmount],
-    takerGets: Option[CurrencyAmount],
-    bookDirectory: Option[AccountAddr],
-    bookNode: Option[UInt64], // really an option
-    expiration: Option[RippleTime],
-    ownerNode: Option[UInt64], // LedgerNodeIndex type.
+    amount: Drops,  // in quoted form
+    balance: Drops, // in quoted form
+    destination: AccountAddr,
+    flags: Option[Long],
+    ownerNode: Option[String], // LedgerNodeIndex type.
     previousTxnId: Option[TxnHash],
     previousTxnLgrSeq: Option[LedgerSequence],
-    index: Option[String] // Guessing this is a LedgerNodeIndex of this node.
+    publicKey: RipplePublicKey,
+    settleDelay: Option[Long],
+    sourceTag: Option[SourceTag],
+    index: Option[RippleHash] // Guessing this is a LedgerNodeIndex of this node.
 ) extends LedgerNode
 
 object PayChannelNode {
-  implicit val config: Configuration                 = CirceCodecUtils.configCapitalizeExcept()
+  implicit val config: Configuration                 = CirceCodecUtils.configCapitalizeExcept(Set("index"))
   implicit val codec: Codec.AsObject[PayChannelNode] = deriveConfiguredCodec[PayChannelNode]
 
 }

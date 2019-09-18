@@ -8,19 +8,19 @@ import com.odenzo.ripple.models.atoms._
 import com.odenzo.ripple.models.utils.CirceCodecUtils
 
 case class EscrowNode(
-    account: Option[AccountAddr],     // Think not optional
-    destination: Option[AccountAddr], // Think not optional
+    account: AccountAddr,
     amount: Option[Drops],
     condition: Option[String], // SHA256?
     cancelAfter: Option[RippleTime],
+    destination: Option[AccountAddr], // Think not optional
+    destinationNode: Option[String],
     finishAfter: Option[RippleTime],
     sourceTag: Option[DestinationTag],
     destinationTag: Option[DestinationTag],
     flags: Option[Long],
-    ownerNode: Option[UInt64],
     prevTxnID: Option[TxnHash],            // The 64 character hex index (key)  , proper name? LedgerNodeIndex?  Cannot
     prevTxnLgrSeq: Option[LedgerSequence], // LedgerSequence type...yeah should be called prevTxnLgrIndex then?
-    index: Option[String]                  // Guessing this is a LedgerNodeIndex of this node.
+    index: Option[RippleHash]              // Guessing this is a LedgerNodeIndex of this node.
 ) extends LedgerNode
 
 object EscrowNode {

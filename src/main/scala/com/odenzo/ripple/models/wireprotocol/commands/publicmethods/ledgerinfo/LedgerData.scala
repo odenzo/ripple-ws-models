@@ -1,8 +1,8 @@
 package com.odenzo.ripple.models.wireprotocol.commands.publicmethods.ledgerinfo
 
-import io.circe._
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.deriveConfiguredCodec
+import io.circe._
 
 import com.odenzo.ripple.models.atoms.ledgertree.statenodes.LedgerNode
 import com.odenzo.ripple.models.utils.CirceCodecUtils
@@ -25,7 +25,13 @@ import com.odenzo.ripple.models.wireprotocol.commands.{RippleScrollingRq, Ripple
   **/
 case class LedgerDataRq(binary: Boolean = false) extends RippleScrollingRq
 
-case class LedgerDataRs(state: List[LedgerNode]) extends RippleScrollingRs
+/**
+  *
+  * @param ledger Single large record of close time and other statistics including total_coins. When scrolling
+  *               this field is only present on the first response. This is deprecated and may go away anyway.
+  * @param state  This is for expanded state now, doesn't handle binary
+  */
+case class LedgerDataRs(ledger: Option[JsonObject], state: List[LedgerNode]) extends RippleScrollingRs
 
 object LedgerDataRq extends CirceCodecUtils {
   private type ME = LedgerDataRq
@@ -36,8 +42,7 @@ object LedgerDataRq extends CirceCodecUtils {
 }
 
 object LedgerDataRs {
-  import io.circe._
-  import io.circe.generic.extras.semiauto._
+
   implicit val config: Configuration               = Configuration.default.withDefaults
   implicit val codec: Codec.AsObject[LedgerDataRs] = deriveConfiguredCodec[LedgerDataRs]
 

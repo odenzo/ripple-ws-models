@@ -40,7 +40,7 @@ trait CirceUtils extends Logging {
   }
 
   def extractFieldFromObject(jobj: JsonObject, fieldName: String): Either[OError, Json] = {
-    Either.fromOption(jobj.apply(fieldName), AppError(s"Could not Find $fieldName in JSonObject "))
+    Either.fromOption(jobj.apply(fieldName), ModelsLibError(s"Could not Find $fieldName in JSonObject "))
   }
 
   /**
@@ -50,7 +50,7 @@ trait CirceUtils extends Logging {
     * @param json
     */
   def extractAsKeyValueList(json: Json): ErrorOr[List[(String, Json)]] = {
-    val obj: Either[OError, JsonObject]           = json.asObject.toRight(AppError("JSON Fragment was not a JSON Object"))
+    val obj: Either[OError, JsonObject]           = json.asObject.toRight(ModelsLibError("JSON Fragment was not a JSON Object"))
     val ans: Either[OError, List[(String, Json)]] = obj.map(_.toList)
     ans
   }
@@ -62,7 +62,7 @@ trait CirceUtils extends Logging {
     *  @param json
     *  @return
     */
-  def print(json: Json): String = json.pretty(droppingNullsPrinter)
+  def print(json: Json): String = json.printWith(droppingNullsPrinter)
 
   def printObj(jsonObject: JsonObject): String = print(jsonObject.asJson)
 
@@ -78,7 +78,7 @@ trait CirceUtils extends Logging {
     }
   }
 
-  def parseAndDecode[A](m: String, decoder: Decoder[A]): Either[AppError, A] = {
+  def parseAndDecode[A](m: String, decoder: Decoder[A]): Either[ModelsLibError, A] = {
     parseAsJson(m).flatMap(decode(_)(decoder))
   }
   def parseAsJson(f: File): Either[AppException, Json] = {
@@ -95,21 +95,9 @@ trait CirceUtils extends Logging {
     def combine(x: JsonObject, y: JsonObject): JsonObject = JsonObject.fromIterable(x.toVector |+| y.toVector)
   }
 
-  /** For now does top level pruning of null fields from JSON Object
-    * Now recurses */
-  def pruneNullFields(obj: JsonObject): JsonObject = {
-    obj
-      .filter {
-        case (field, value) => !value.isNull
-      }
-      .mapValues { js: Json =>
-        js.asObject match {
-          case Some(obj) => pruneNullFields(obj).asJson
-          case None      => js
-        }
-      }
-      .asJsonObject
-
+  /** For now does top level pruning of null fields from JSO, very innefficient */
+  def pruneNullFields(obj: Json): ErrorOr[Json] = {
+    parseAsJson(obj.asJson.printWith(droppingNullsPrinter))
   }
 
   /**
@@ -118,37 +106,37 @@ trait CirceUtils extends Logging {
     * @param name
     * @param json
     */
-  def findFirstField(name: String, json: Json): Either[AppError, Json] = {
+  def findFirstField(name: String, json: Json): Either[ModelsLibError, Json] = {
     json.findAllByKey(name) match {
       case head :: tail => head.asRight
-      case _            => AppError(s"Field $name not found in deep traverse ", json.asJson).asLeft
+      case _            => ModelsLibError(s"Field $name not found in deep traverse ", json.asJson).asLeft
     }
   }
 
   /** Finds top level field in the supplied json object */
-  def findField(name: String, json: JsonObject): Either[AppError, Json] = {
-    Either.fromOption(json(name), AppError(s"Field $name not found ", json.asJson))
+  def findField(name: String, json: JsonObject): Either[ModelsLibError, Json] = {
+    Either.fromOption(json(name), ModelsLibError(s"Field $name not found ", json.asJson))
   }
 
-  def findObjectField(name: String, json: JsonObject): Either[AppError, JsonObject] = {
+  def findObjectField(name: String, json: JsonObject): Either[ModelsLibError, JsonObject] = {
     findField(name, json).flatMap(json2jsonobject)
   }
 
-  def findStringField(name: String, jobj: JsonObject): Either[AppError, String] = {
+  def findStringField(name: String, jobj: JsonObject): Either[ModelsLibError, String] = {
     findField(name, jobj).flatMap(json2string)
   }
 
-  def json2array(json: Json): Either[AppError, List[Json]] = {
-    Either.fromOption(json.asArray.map(_.toList), AppError("Expected JSON Array", json))
+  def json2array(json: Json): Either[ModelsLibError, List[Json]] = {
+    Either.fromOption(json.asArray.map(_.toList), ModelsLibError("Expected JSON Array", json))
   }
 
-  def json2string(json: Json): Either[AppError, String] = {
-    Either.fromOption(json.asString, AppError("Expected JSON String", json))
+  def json2string(json: Json): Either[ModelsLibError, String] = {
+    Either.fromOption(json.asString, ModelsLibError("Expected JSON String", json))
   }
 
-  def json2jsonobject(json: Json): Either[AppError, JsonObject] = {
+  def json2jsonobject(json: Json): Either[ModelsLibError, JsonObject] = {
     json.asObject match {
-      case None     => AppError(" JSON to Object wasn't an object", json).asLeft
+      case None     => ModelsLibError(" JSON to Object wasn't an object", json).asLeft
       case Some(jo) => jo.asRight
     }
   }

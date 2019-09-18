@@ -20,11 +20,11 @@ import com.odenzo.ripple.models.utils.CirceCodecUtils
 // TODO: See if can write a transformer to shapeless record or tuple to eliminate options.
 // flatmap to params of case class basically.
 case class AccountRootNode(
-    account: Option[AccountAddr],              // Think not optional
-    flags: Option[Long],                       // Bitmask[AccountRootFlag]
-    sequence: Option[UInt32],                  // Account Sequence?
-    balance: Option[Drops],                    // Account Balance, including reserve
-    ownerCount: Option[UInt32],                // Number of objects owner has in the ledger?
+    account: AccountAddr,
+    flags: Long,                               // Bitmask[AccountRootFlag]
+    sequence: UInt32,                          // Account Sequence?
+    balance: Drops,                            // Account Balance, including reserve, in quoted format.
+    ownerCount: UInt32 = UInt32(0),            // Number of objects owner has in the ledger?
     previousTxnID: Option[String],             // Account or Ledger based?
     previousTxnLgrSeq: Option[LedgerSequence], // LedgerSequence type...yeah should be called prevTxnLgrIndex then?
     accountTxnId: Option[TxnHash],             // Most recent txn submitted on account
@@ -38,6 +38,6 @@ case class AccountRootNode(
 ) extends LedgerNode
 
 object AccountRootNode {
-  implicit val config: Configuration                  = CirceCodecUtils.configCapitalizeExcept()
+  implicit val config: Configuration                  = CirceCodecUtils.configCapitalizeExcept(Set("index"))
   implicit val codec: Codec.AsObject[AccountRootNode] = deriveConfiguredCodec[AccountRootNode]
 }

@@ -6,10 +6,9 @@ import io.circe._
 import io.circe.syntax._
 
 import com.odenzo.ripple.models.atoms._
-import com.odenzo.ripple.models.atoms.ledgertree.transactions.TxCommon
 import com.odenzo.ripple.models.utils.CirceCodecUtils
-import com.odenzo.ripple.models.wireprotocol.RippleTxnRq
-import com.odenzo.ripple.models.wireprotocol.commands.{RippleRs, RippleRq}
+import com.odenzo.ripple.models.wireprotocol.{CommonTxnRs, RippleTxnRq}
+import com.odenzo.ripple.models.wireprotocol.commands.{RippleRq, RippleRs}
 import com.odenzo.ripple.models.wireprotocol.txns.RippleTx
 
 /**
@@ -35,7 +34,7 @@ case class SignForRq(
   * Ultimately this should/could use SignRs?
   *
   */
-case class SignForRs(tx_blob: TxBlob, signed: TxCommon, tx_json: RippleTx) extends RippleRs
+case class SignForRs(tx_blob: TxBlob, signed: CommonTxnRs, tx_json: RippleTx) extends RippleRs
 
 object SignForRq extends CirceCodecUtils {
   private type ME = SignForRq
@@ -50,7 +49,7 @@ object SignForRs {
   implicit val decoder2: Decoder[SignForRs] = Decoder.instance { c =>
     for {
       txblob <- c.get[TxBlob]("tx_blob")
-      signed <- c.get[TxCommon]("tx_json")
+      signed <- c.get[CommonTxnRs]("tx_json")
       txrs   <- c.get[RippleTx]("tx_json")
 
     } yield SignForRs(txblob, signed, txrs)

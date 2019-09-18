@@ -12,10 +12,10 @@ import com.odenzo.ripple.models.wireprotocol.txns.RippleTx
 
 /** This represents a fully formed *unsigned* transaction that can be signed.
   * It is also possible to  post-processes to "auto-fill" some options like Sequence or Fee
+  * CUrrently used in multisigning only, woudl like to phase out.
   **/
 case class RippleTxnRq(tx: RippleTx, opt: TxOptions)
 
-// TODO: Interim doesn't deal with Ripple Engine Errors
 case class RippleTxnRs(tx: RippleTx, common: CommonTxnRs)
 
 object RippleTxnRq {
@@ -49,10 +49,11 @@ object RippleTxnRq {
   *   In both cases we have parsed out everything in result already except for tx_json
   *   So, essentially this is TxOptions, but with hash and any signing/TxnSignature/SigningPubKey data.
   *
+  * NOTE THIS IS USED TO RQ/RS not for the ledger things which are slightly different
  **/
 @Lenses("_") case class CommonTxnRs(
-    sequence: TxnSequence, // capitalize field name
-    hash: RippleHash,      // The hash of the trasnaction
+    sequence: TxnSequence,     // capitalize field name
+    hash: RippleHash,          // The hash of the trasnaction
     fee: Drops = Drops.stdFee, // Rq / Rs
     accountTxnID: Option[TxnHash],
     signingPubKey: SigningPublicKey,    // Will be ""  if Multisigning
@@ -60,7 +61,7 @@ object RippleTxnRq {
     signers: Option[Signers],           // None if not multisigning
     lastLedgerSequence: Option[LedgerSequence],
     memos: Option[Memos] = None // Rq / Rs
-) {}
+)
 
 object CommonTxnRs extends CirceCodecUtils {
 

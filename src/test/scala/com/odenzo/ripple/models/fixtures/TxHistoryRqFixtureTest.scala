@@ -12,7 +12,7 @@ import monocle.Optional
 import com.odenzo.ripple.models.atoms.ledgertree.transactions.LedgerTxn
 import com.odenzo.ripple.models.testkit.CodecTesting
 import com.odenzo.ripple.models.utils.CirceUtils
-import com.odenzo.ripple.models.utils.caterrors.{AppError, AppJsonDecodingError}
+import com.odenzo.ripple.models.utils.caterrors.{ModelsLibError, AppJsonDecodingError}
 import com.odenzo.ripple.models.wireprotocol.commands.publicmethods.transactionmethods.TxHistoryRs
 
 /**
@@ -30,7 +30,7 @@ class TxHistoryRqFixtureTest extends CodecTesting {
     testCompleted(complete)
   }
 
-  def processOneFile(f: Path): Either[AppError, List[LedgerTxn]] = {
+  def processOneFile(f: Path): Either[ModelsLibError, List[LedgerTxn]] = {
 
     import io.circe.optics.JsonPath._
     val _txs: Optional[Json, Vector[Json]] = root.result.txs.arr

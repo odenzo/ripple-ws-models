@@ -23,9 +23,10 @@ case class RipplePathFindRq(
 ) extends RippleRq
 
 case class RipplePathFindRs(
-    alternatives: List[AlternativePaths],
+    alternatives: AlternativePaths,
     destination_account: AccountAddr,
     destination_currencies: List[Currency],
+    source_account: AccountAddr,
     full_reply: Option[Boolean]
 ) extends RippleRs
 
