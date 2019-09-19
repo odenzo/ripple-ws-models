@@ -1,17 +1,19 @@
 package com.odenzo.ripple.models.testkit
 
+import java.net.URL
 import java.nio.file.Path
 import java.util
+import scala.io.{BufferedSource, Source}
 
 import cats.implicits._
 import io.circe.Decoder.Result
 import io.circe._
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.{Assertion, EitherValues, Matchers}
-import scribe.{Logging, Logger}
+import scribe.{Logger, Logging}
 
 import com.odenzo.ripple.models.utils.{CirceUtils, ScribeConfig}
-import com.odenzo.ripple.models.utils.caterrors.{ModelsLibError, AppException, AppJsonDecodingError}
+import com.odenzo.ripple.models.utils.caterrors.{AppException, AppJsonDecodingError, ModelsLibError}
 import com.odenzo.ripple.models.atoms.LedgerHash
 
 /**
@@ -22,6 +24,15 @@ trait CodecTesting extends AnyFunSuite with Matchers with EitherValues with Logg
   ScribeConfig.setTestLogging
 
   val dummyLedgerHash = LedgerHash(List.fill(20)("FF").mkString)
+
+  def loadJsonResource(path: String): Either[ModelsLibError, Json] = {
+    AppException.wrap(s"Getting Resource $path") {
+      val resource: URL          = getClass.getResource(path)
+      val source: BufferedSource = Source.fromURL(resource)
+      val data: String           = source.getLines().mkString("\n")
+      CirceUtils.parseAsJson(data)
+    }
+  }
 
   /**
     * Utility to parse a JSON string. Will fail test if cannot parse.
@@ -109,22 +120,9 @@ trait CodecTesting extends AnyFunSuite with Matchers with EitherValues with Logg
     ee
   }
 
-  def findFixtureFiles(dir: String, startingWith: String): Either[ModelsLibError, List[Path]] = {
-    import collection.JavaConverters._ // Trying to keep scala 12 compatability with 13 now
-    AppException.wrapPure("Finding Files") {
-      // The Fixtures are now in the resource directory so load via resource
-      // But non trivial to do in general case (from Jar and from IDE)
-      import java.nio.file.{Files, Path, Paths}
-      val url                      = this.getClass.getResource(s"/$dir")
-      val path                     = Paths.get(url.toURI)
-      val all: util.Iterator[Path] = Files.newDirectoryStream(path).iterator()
-      val list: List[Path]         = all.asScala.toList
-      // list.foreach((p: Path) => logger.info(s"[${p.getFileName()}] $p"))
-      list
-        .filterNot(p => p.getFileName.startsWith(startingWith))
-        .sortBy(_.getFileName)
-
-    }
+  def loadFixture(dir: String, file: String): Either[ModelsLibError, Json] = {
+    val json: Either[ModelsLibError, Json] = this.loadJsonResource(s"$dir/$file")
+    json
   }
 
   def shouldSkipPath(p: Path, withNameContaining: Set[String]): Boolean = {

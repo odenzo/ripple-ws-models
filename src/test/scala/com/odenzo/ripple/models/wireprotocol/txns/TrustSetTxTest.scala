@@ -31,16 +31,4 @@ class TrustSetTxTest extends CodecTesting {
     obj.asJson
     logger.debug(s"$obj")
   }
-
-  test("Funky Checker") {
-    import cats.data.StateT
-//
-//    implicit val decodeFoo: Decoder[Foo] = Decoder.fromState(
-//      for {
-//        a    <- Decoder.state.decodeField[Int]("a")
-//        b    <- Decoder.state.decodeField[String]("b")
-//        rest <- StateT.inspectF((_: ACursor).as[Json]) // Gives the remaining Json
-//      } yield Foo(a, b, rest)
-//    )
-  }
 }

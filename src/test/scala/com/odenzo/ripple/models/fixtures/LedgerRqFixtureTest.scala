@@ -16,18 +16,19 @@ class LedgerRqFixtureTest extends CodecTesting {
 
   test("Loading") {
 
-    val complete = for {
-      files <- findFixtureFiles("ledger_rs", "ledger_rs_").map(_.sortBy(_.getFileName))
-      _ = logger.warn(s"Processing ${files.length} fixture files")
-      decoded <- files.traverse(processOneFile)
+    val path  = "/ledger_rs"
+    val files = List("ledger_rs_21134415.json", "ledger_rs_21134416.json")
+    val completed = for {
+      decoded <- files.traverse(n => processOneFile(s"$path/$n"))
     } yield decoded
-    testCompleted(complete)
+    testCompleted(completed)
   }
 
-  def processOneFile(f: Path): Either[ModelsLibError, LedgerRs] = {
+  def processOneFile(resourcePath: String): Either[ModelsLibError, LedgerRs] = {
     for {
-      json       <- CirceUtils.parseAsJson(f.toFile).flatMap(json2jsonobject)
-      ledgerJson <- findObjectField("result", json)
+      data       <- loadJsonResource(resourcePath)
+      jobj       <- json2jsonobject(data)
+      ledgerJson <- findField("result", jobj)
       decoded    <- decode[LedgerRs](ledgerJson.asJson)
       // _ = logger.debug(s"DEcoderd ${pprint.apply(decoded)}")
     } yield decoded
