@@ -60,6 +60,12 @@ object RipplePublicKey {
   implicit val codec: Codec[RipplePublicKey] = deriveUnwrappedCodec[RipplePublicKey]
 }
 
+case class RipplePublicKeyHex(v: String)
+
+object RipplePublicKeyHex {
+  implicit val codec: Codec[RipplePublicKeyHex] = deriveUnwrappedCodec[RipplePublicKeyHex]
+}
+
 /**
   *Represents a master seed. This is Base58 and starts with "s"
   * @param v  seed, aka secret  "sn9tYCjBpqXgHKwJeMT1LC4fdC17d",
@@ -141,11 +147,11 @@ case class AccountKeys(
     master_seed: RippleSeed,
     master_seed_hex: RippleSeedHex,
     public_key: RipplePublicKey,
-    public_key_hex: String
+    public_key_hex: RipplePublicKeyHex
 ) {
 
   def address: AccountAddr = account_id
-  def signingPubKey        = SigningPublicKey(public_key_hex)
+  def signingPubKey        = SigningPublicKey(public_key_hex.v)
 
 }
 

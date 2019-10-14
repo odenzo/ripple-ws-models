@@ -47,7 +47,7 @@ trait CodecTesting extends AnyFunSuite with Matchers with EitherValues with Logg
   }
 
   def parseAsJObj(s: String): Either[ModelsLibError, JsonObject] = {
-    CirceUtils.json2jsonobject(parse(s))
+    CirceUtils.json2object(parse(s))
   }
 
   /** Parses Json to object and pack to json, returns  last two */

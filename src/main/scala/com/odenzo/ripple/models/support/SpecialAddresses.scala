@@ -34,7 +34,7 @@ object GenesisAccount {
     masterSeed,
     RippleSeedHex("DEDCE9CE67B451D852FD4E846FCDE31C"),
     RipplePublicKey(Base58Checksum("aBQG8RQAzjs1eTKFEAQXr2gS4utcDiEC9wmi7pfUPTi27VCahwgw")),
-    public_key_hex = "0330E7FC9D56BB25D6893BA3F317AE5BCF33B3291BD63DB32654A313222F7FD020"
+    RipplePublicKeyHex("0330E7FC9D56BB25D6893BA3F317AE5BCF33B3291BD63DB32654A313222F7FD020")
   )
 
   val fkp: FullKeyPair          = FullKeyPair(accountKeys, None)

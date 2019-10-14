@@ -3,7 +3,7 @@ package com.odenzo.ripple.models.utils
 import cats.implicits._
 import scribe.Level.Warn
 import scribe.filter._
-import scribe.{Priority, Logger, Level}
+import scribe.{Level, Logger, Priority}
 
 /**
   * Scribe has run-time configuration.
@@ -88,13 +88,6 @@ trait ScribeConfig extends Logger {
   lazy val setTestLogging: Unit = {
     if (!inCI) {
       setAll(Level.Debug)
-      //      scribe.debug(s"DEBUG is on")
-      //      scribe.info("INFO is on")
-      //      scribe.warn("WARN is on")
-      //      scribe.error("ERROR is on")
-      //      scribe.warn("Should be setting packages of interest here.")
-
-      // This don't cut out by class or method.
       val packagesToMute: List[String] = List(
         "com.odenzo.ripple.bincodec.reference",
         "com.odenzo.ripple.bincodec.codecs.STObjectCodec"

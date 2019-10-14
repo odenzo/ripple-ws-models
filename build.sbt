@@ -6,7 +6,7 @@ ThisBuild / name         := "ripple-ws-models"
 
 transitiveClassifiers := Seq("sources")
 
-lazy val supportedScalaVersions = List("2.13.0", "2.12.9")
+lazy val supportedScalaVersions = List("2.13.1", "2.12.10")
 ThisBuild / scalaVersion := supportedScalaVersions.head
 
 Test / fork              := true
@@ -46,16 +46,16 @@ lazy val commonSettings = Seq(
   )
 )
 
-val circeVersion             = "0.12.1"
+val circeVersion             = "0.12.2"
 val circeGenericExtraVersion = "0.12.2"
 val catsVersion              = "2.0.0"
 val catsEffectVersion        = "2.0.0"
 val spireVersion             = "0.17.0-M1"
 val scribeVersion            = "2.7.10"
 val scalaTestVersion         = "3.0.8"
-val scalaCheckVersion        = "1.14.1"
+val scalaCheckVersion        = "1.14.2"
 val enumeratumVersion        = "1.5.13"
-val enumeratumCirceVersion   = "1.5.21"
+val enumeratumCirceVersion   = "1.5.22"
 val monocleVersion           = "2.0.0" // 1.5.0-cats based on cats 1.0.x
 
 val libs = Seq(
@@ -71,7 +71,7 @@ val lib_circe =
     "io.circe" %% "circe-generic"        % circeVersion,
     "io.circe" %% "circe-parser"         % circeVersion,
     "io.circe" %% "circe-generic-extras" % circeGenericExtraVersion,
-    "io.circe" %% "circe-optics"         % "0.12.0" % Test,
+    "io.circe" %% "circe-optics"         % "0.12.0",
     "io.circe" %% "circe-literal"        % circeVersion % Test,
     //"io.circe"     %% "circe-derivation"     % circeVersion,
     "com.beachape" %% "enumeratum"       % enumeratumVersion,
@@ -91,7 +91,7 @@ val lib_spire = Seq(
 )
 
 val lib_cats = Seq(
-  "org.typelevel" %% "cats-core"   % catsVersion, // Cats is pulled in via Circe for now
+  "org.typelevel" %% "cats-core"   % catsVersion,
   "org.typelevel" %% "cats-effect" % catsEffectVersion
 )
 

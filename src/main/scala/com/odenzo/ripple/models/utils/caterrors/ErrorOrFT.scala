@@ -1,10 +1,11 @@
 package com.odenzo.ripple.models.utils.caterrors
 
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future, ExecutionContext}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.control.NonFatal
-import scala.util.{Success, Failure, Try}
+import scala.util.{Failure, Success, Try}
 
+import cats.MonadError
 import cats.data._
 import cats.implicits._
 import scribe.Logging
@@ -34,6 +35,7 @@ object CatsTransformers extends Logging {
   /** Useful Cats EitherT when not using the standard OError error type */
   type FutureEither[A, B] = EitherT[Future, A, B]
 
+  val monadError = MonadError[ErrorOr, ModelsLibError]
 }
 
 trait CatsTransformerOps {

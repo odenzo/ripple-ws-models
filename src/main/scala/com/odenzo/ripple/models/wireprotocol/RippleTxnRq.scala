@@ -52,10 +52,10 @@ object RippleTxnRq {
   * NOTE THIS IS USED TO RQ/RS not for the ledger things which are slightly different
  **/
 @Lenses("_") case class CommonTxnRs(
-    sequence: TxnSequence,     // capitalize field name
-    hash: RippleHash,          // The hash of the trasnaction
+    sequence: TxnSequence, // capitalize field name
+    hash: TxnHash,         // The hash of the trasnaction
     fee: Drops = Drops.stdFee, // Rq / Rs
-    accountTxnID: Option[TxnHash],
+    accountTxnID: Option[TxnHash],      // Hash of previous txn SENT by this account
     signingPubKey: SigningPublicKey,    // Will be ""  if Multisigning
     txnSignature: Option[TxnSignature], // None if multisigning
     signers: Option[Signers],           // None if not multisigning

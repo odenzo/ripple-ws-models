@@ -31,7 +31,11 @@ case class LedgerTxCommon(
     validated: Option[Boolean]
 ) {
 
-  def transactionResult: Option[TxnStatusCode] = this.metaData.map(_.transactionResult)
+  def transactionResult: Option[TxnStatusCode] = {
+    // Sigh, standardize on meta or metadata internally and then to a rewrite of incoming json
+    val aliasedMeta: Option[Meta] = this.metaData.orElse(this.meta)
+    aliasedMeta.map(_.transactionResult)
+  }
 }
 
 object LedgerTxCommon {

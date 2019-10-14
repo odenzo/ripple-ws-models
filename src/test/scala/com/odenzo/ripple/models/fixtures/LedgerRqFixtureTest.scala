@@ -27,7 +27,7 @@ class LedgerRqFixtureTest extends CodecTesting {
   def processOneFile(resourcePath: String): Either[ModelsLibError, LedgerRs] = {
     for {
       data       <- loadJsonResource(resourcePath)
-      jobj       <- json2jsonobject(data)
+      jobj       <- json2object(data)
       ledgerJson <- findField("result", jobj)
       decoded    <- decode[LedgerRs](ledgerJson.asJson)
       // _ = logger.debug(s"DEcoderd ${pprint.apply(decoded)}")

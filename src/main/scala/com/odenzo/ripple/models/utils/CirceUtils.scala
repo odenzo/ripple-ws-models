@@ -6,7 +6,9 @@ import cats._
 import cats.implicits._
 import io.circe._
 import io.circe.jawn.JawnParser
+import io.circe.optics.JsonPath
 import io.circe.syntax._
+import monocle.Optional
 import scribe.Logging
 
 import com.odenzo.ripple.models.utils.caterrors.CatsTransformers.ErrorOr
@@ -115,12 +117,30 @@ trait CirceUtils extends Logging {
 
   /** Finds top level field in the supplied json object */
   def findField(name: String, json: JsonObject): Either[ModelsLibError, Json] = {
-    Either.fromOption(json(name), ModelsLibError(s"Field $name not found ", json.asJson))
+    findField(name, json.asJson)
   }
 
   def findObjectField(name: String, json: JsonObject): Either[ModelsLibError, JsonObject] = {
-    findField(name, json).flatMap(json2jsonobject)
+    findFieldAsObject(name, json.asJson)
   }
+
+  def lensGetOpt[T](lens: Optional[Json, T])(applyTo: Json): Either[ModelsLibError, T] = {
+    lens.getOption(applyTo).toRight(ModelsLibError(s"Path Failed ${lens.toString}", applyTo))
+  }
+
+  def hasField(name: String, json: Json): Boolean = {
+    findField(name, json).isRight
+  }
+
+  def findField(name: String, json: Json): Either[ModelsLibError, Json] = {
+    JsonPath.root.at(name).getOption(json).flatten.toRight(ModelsLibError(s"Field $name not found ", json.asJson))
+  }
+
+  def findFieldAsString(name: String, json: Json): Either[ModelsLibError, String] =
+    findField(name, json).flatMap(json2string)
+
+  def findFieldAsObject(name: String, json: Json): Either[ModelsLibError, JsonObject] =
+    findField(name, json).flatMap(json2object)
 
   def findStringField(name: String, jobj: JsonObject): Either[ModelsLibError, String] = {
     findField(name, jobj).flatMap(json2string)
@@ -134,7 +154,7 @@ trait CirceUtils extends Logging {
     Either.fromOption(json.asString, ModelsLibError("Expected JSON String", json))
   }
 
-  def json2jsonobject(json: Json): Either[ModelsLibError, JsonObject] = {
+  def json2object(json: Json): Either[ModelsLibError, JsonObject] = {
     json.asObject match {
       case None     => ModelsLibError(" JSON to Object wasn't an object", json).asLeft
       case Some(jo) => jo.asRight
