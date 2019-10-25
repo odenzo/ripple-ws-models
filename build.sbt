@@ -46,7 +46,7 @@ lazy val commonSettings = Seq(
   )
 )
 
-val circeVersion             = "0.12.2"
+val circeVersion             = "0.12.3"
 val circeGenericExtraVersion = "0.12.2"
 val catsVersion              = "2.0.0"
 val catsEffectVersion        = "2.0.0"
@@ -56,7 +56,7 @@ val scalaTestVersion         = "3.0.8"
 val scalaCheckVersion        = "1.14.2"
 val enumeratumVersion        = "1.5.13"
 val enumeratumCirceVersion   = "1.5.22"
-val monocleVersion           = "2.0.0" // 1.5.0-cats based on cats 1.0.x
+val monocleVersion           = "2.0.0"
 
 val libs = Seq(
   "com.lihaoyi"    %% "pprint"     % "0.5.5",
@@ -75,7 +75,8 @@ val lib_circe =
     "io.circe" %% "circe-literal"        % circeVersion % Test,
     //"io.circe"     %% "circe-derivation"     % circeVersion,
     "com.beachape" %% "enumeratum"       % enumeratumVersion,
-    "com.beachape" %% "enumeratum-circe" % enumeratumCirceVersion
+    "com.beachape" %% "enumeratum-circe" % enumeratumCirceVersion,
+    "io.circe"     %% "circe-golden"     % "0.1.0" % Test
   )
 
 val lib_monocle = Seq(

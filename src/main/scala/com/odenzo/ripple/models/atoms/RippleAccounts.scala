@@ -68,12 +68,11 @@ object AccountAlias {
 /**
   * Use for dt:string addressing of an account mapped to a single ripple address (e.g. a gateway account)
   * Can be used for anything though
-  * @param tag
   */
 case class DestinationTag(tag: UInt32)
 
 object DestinationTag {
-  def apply(dt: Long): DestinationTag       = DestinationTag(UInt32(dt))
+  def fromLong(dt: Long): DestinationTag    = DestinationTag(UInt32(dt))
   implicit val codec: Codec[DestinationTag] = deriveUnwrappedCodec[DestinationTag]
 }
 
