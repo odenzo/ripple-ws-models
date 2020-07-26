@@ -6,7 +6,7 @@ ThisBuild / name         := "ripple-ws-models"
 
 transitiveClassifiers := Seq("sources")
 
-lazy val supportedScalaVersions = List("2.13.1", "2.12.10")
+lazy val supportedScalaVersions = List("2.13.3")
 ThisBuild / scalaVersion := supportedScalaVersions.head
 
 Test / fork              := true
@@ -46,20 +46,21 @@ lazy val commonSettings = Seq(
   )
 )
 
-val circeVersion             = "0.12.3"
-val circeGenericExtraVersion = "0.12.2"
-val catsVersion              = "2.0.0"
-val catsEffectVersion        = "2.0.0"
-val spireVersion             = "0.17.0-M1"
-val scribeVersion            = "2.7.10"
-val scalaTestVersion         = "3.0.8"
-val scalaCheckVersion        = "1.14.2"
+val circeVersion             = "0.13.0"
+val circeGenericExtraVersion = "0.13.0"
+val catsVersion              = "2.1.1"
+val catsEffectVersion        = "2.1.4"
+val spireVersion             = "0.17.0-RC1"
+val scribeVersion            = "2.7.12"
+val scalaTestVersion         = "3.2.0"
+val scalaCheckVersion        = "1.14.3"
 val enumeratumVersion        = "1.5.13"
-val enumeratumCirceVersion   = "1.5.22"
-val monocleVersion           = "2.0.0"
+val enumeratumCirceVersion   = "1.6.1"
+val monocleVersion           = "2.0.5"
+val pprintVersion            = "0.5.9"
 
 val libs = Seq(
-  "com.lihaoyi"    %% "pprint"     % "0.5.5",
+  "com.lihaoyi"    %% "pprint"     % pprintVersion,
   "org.scalatest"  %% "scalatest"  % scalaTestVersion % Test,
   "org.scalacheck" %% "scalacheck" % scalaCheckVersion % Test
 )
@@ -71,12 +72,12 @@ val lib_circe =
     "io.circe" %% "circe-generic"        % circeVersion,
     "io.circe" %% "circe-parser"         % circeVersion,
     "io.circe" %% "circe-generic-extras" % circeGenericExtraVersion,
-    "io.circe" %% "circe-optics"         % "0.12.0",
+    "io.circe" %% "circe-optics"         % circeVersion,
     "io.circe" %% "circe-literal"        % circeVersion % Test,
     //"io.circe"     %% "circe-derivation"     % circeVersion,
     "com.beachape" %% "enumeratum"       % enumeratumVersion,
     "com.beachape" %% "enumeratum-circe" % enumeratumCirceVersion,
-    "io.circe"     %% "circe-golden"     % "0.1.0" % Test
+    "io.circe"     %% "circe-golden"     % "0.2.1" % Test
   )
 
 val lib_monocle = Seq(
